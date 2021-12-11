@@ -1,4 +1,4 @@
-####[Stack using two queues ](https://practice.geeksforgeeks.org/problems/stack-using-two-queues/1)
+#### [Stack using two queues ](https://practice.geeksforgeeks.org/problems/stack-using-two-queues/1)
 
 Implement a Stack using two queues q1 and q2.
 
@@ -44,7 +44,7 @@ public:
 
 ---
 
-####[Queue using two Stacks ](https://practice.geeksforgeeks.org/problems/queue-using-two-stacks/1)
+#### [Queue using two Stacks ](https://practice.geeksforgeeks.org/problems/queue-using-two-stacks/1)
 
 Implement a Queue using 2 stacks s1 and s2 .
 A Query Q is of 2 Types
@@ -92,7 +92,7 @@ public:
 
 ---
 
-####[Infix to postfix]()
+#### [Infix to postfix]()
 
 ```sh
 a+b*(c+d)+e*f
@@ -141,7 +141,8 @@ string convertInfixToPostfix(string infix) {
     return postfix;
 }
 ```
-####[Evaluate a simple expression only containing multiplication and addition(sum)]()
+
+#### [Evaluate a simple expression only containing multiplication and addition(sum)]()
 
 ```cpp
 int evaluate(string expr)
@@ -180,8 +181,10 @@ vector<string> tokenize(string str, char ch)
     return res;
 }
 ```
+
 ---
-####[Simplify a Unix Path]()
+
+#### [Simplify a Unix Path]()
 
 ```sh
 {"/home/","/home"},
@@ -229,4 +232,5 @@ void removeTrailingSpacesAndSlashes(string& str) {
     str = str.substr(0, i + 1);
 }
 ```
+
 ---

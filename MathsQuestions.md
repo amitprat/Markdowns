@@ -1,4 +1,4 @@
-####[Find Prime numbers in a range](https://practice.geeksforgeeks.org/problems/find-prime-numbers-in-a-range4718/1)
+#### [Find Prime numbers in a range](https://practice.geeksforgeeks.org/problems/find-prime-numbers-in-a-range4718/1)
 
 Given two integers M and N, generate all primes between M and N.
 
@@ -43,7 +43,8 @@ bool isPrime(int num) {
 ```
 
 ---
-####[Check if a number is perfect square]()
+
+#### [Check if a number is perfect square]()
 
 ```cpp
 int checkIfPerfectSquare(int n)
@@ -59,7 +60,9 @@ int checkIfPerfectSquare(int n)
     return 0;
 }
 ```
+
 ---
+
 #### [Count trailing zeros in factorial]()
 
 ```sh
@@ -68,7 +71,7 @@ How many zeroes will be contained in 100! then.
 Explain with logic.
 ```
 
-***We can get 0 at end only with 2 and 5. Out of 2 and 5, we only need to count 5 because that is always lower than multiples of 2.***
+**_We can get 0 at end only with 2 and 5. Out of 2 and 5, we only need to count 5 because that is always lower than multiples of 2._**
 
 ```cpp
 int countTrailingZerosOfFactorial(int n)
@@ -81,4 +84,5 @@ int countTrailingZerosOfFactorial(int n)
     return count;
 }
 ```
+
 ---

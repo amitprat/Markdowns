@@ -1,6 +1,6 @@
-####[Print Even Odd Numbers Using 2 Threads]()
+#### [Print Even Odd Numbers Using 2 Threads]()
 
-#####[Print using seperate methods for different thread]()
+##### [Print using seperate methods for different thread]()
 
 ```cpp
 class PrintEvenOdd {
@@ -39,7 +39,7 @@ public:
 };
 ```
 
-#####[Print using single method with passed predicate]()
+##### [Print using single method with passed predicate]()
 
 ```cpp
 class PrintEvenOddPredicate {
@@ -72,7 +72,7 @@ public:
 
 ---
 
-####[Print 0,1 and 2 using 3 threads with single method and predicate]()
+#### [Print 0,1 and 2 using 3 threads with single method and predicate]()
 
 ```cpp
 class Print012WithPredicate {
@@ -112,7 +112,7 @@ public:
 
 ---
 
-####[Print multiple array elements in order using multiple threads]()
+#### [Print multiple array elements in order using multiple threads]()
 
 ```cpp
 class AccessArrayElementsInOrder {
@@ -169,7 +169,7 @@ public:
 
 ---
 
-####[Bounded queues using multiple threads]()
+#### [Bounded queues using multiple threads]()
 
 ```cpp
 template <class T>

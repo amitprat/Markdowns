@@ -1,4 +1,4 @@
-####[Minimum Cost Path](https://practice.geeksforgeeks.org/problems/minimum-cost-path3833/1)
+#### [Minimum Cost Path](https://practice.geeksforgeeks.org/problems/minimum-cost-path3833/1)
 
 Given a square grid of size N, each cell of which contains integer cost which represents a cost to traverse through that cell, we need to find a path from top left cell to bottom right cell by which the total cost incurred is minimum.
 From the cell (i,j) we can go (i,j-1), (i, j+1), (i-1, j), (i+1, j).
@@ -69,7 +69,8 @@ int minimumCostPath(vector<vector<int>>& grid)
 ```
 
 ---
-####[Minimum Spanning Tree](https://practice.geeksforgeeks.org/problems/minimum-spanning-tree/1)
+
+#### [Minimum Spanning Tree](https://practice.geeksforgeeks.org/problems/minimum-spanning-tree/1)
 
 Given a weighted, undirected and connected graph of V vertices and E edges. The task is to find the sum of weights of the edges of the Minimum Spanning Tree.
 
@@ -82,10 +83,10 @@ int spanningTree(int V, vector<vector<int>> adj[])
             edges.push_back({i,u[0],u[1]});
         }
     }
-    
+
     int res = krushkals(V, edges);
     //int res = prims(V, edges);
-    
+
     return res;
 }
 ```
@@ -97,22 +98,22 @@ int krushkals(int V, vector<Edge>& edges) {
     UnionFind uf(V);
     priority_queue<Edge, vector<Edge>, compare> pq;
     for(auto e : edges) pq.push(e);
-    
+
     vector<Edge> result;
     while(result.size() != V-1) {
         auto f = pq.top(); pq.pop();
         if(uf.isCycle(f)) continue;
-        
+
         uf.insert(f);
         result.push_back(f);
     }
-    
+
     //for(auto e : result) cout<<e.to_string()<<endl;
     //cout<<endl;
-    
+
     int wt = 0;
     for(auto e : result) wt += e.w;
-    
+
     return wt;
 }
 ```
@@ -123,7 +124,7 @@ int krushkals(int V, vector<Edge>& edges) {
 int prims(int V, vector<Edge>& edges) {
     unordered_map<int, vector<Edge>> adjGraph;
     for(auto e: edges) adjGraph[e.u].push_back({e});
-    
+
     vector<int> cost(V, INT_MAX);
     vector<bool> visited(V, false);
     vector<pair<int,int>> parent(V, {-1,0});
@@ -139,12 +140,12 @@ int prims(int V, vector<Edge>& edges) {
 
         if(visited[u]) continue;
         visited[u] = true;
-        
+
         for(auto nb : adjGraph[u]) {
             int v = nb.v;
             int w = nb.w;
             if(visited[v]) continue;
-            
+
             if(w < cost[v]) {
                 cost[v] = w;
                 pq.push({cost[v], v});
@@ -152,19 +153,21 @@ int prims(int V, vector<Edge>& edges) {
             }
         }
     }
-    
+
     int wt = 0;
     for(int i=1;i<V;i++) {
         auto p =parent[i];
         //cout<<p.first<<"->"<<i<<" = "<<p.second<<endl;
         wt += p.second;
     }
-    
+
     return wt;
 }
 ```
-----
-####[Bellman Ford]()
+
+---
+
+#### [Bellman Ford]()
 
 ```cpp
 vector<int> bellman(Graph g, int s) {
@@ -198,4 +201,68 @@ bool canRelax(Graph::Edge e, vector<int> dst) {
     return dst[e.v] > dst[e.u] + e.w;
 }
 ```
-----
+
+---
+
+#### [Dijkastra Shortest Path](https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-using-priority_queue-stl/)
+
+Given a graph and a source vertex in graph, find shortest paths from source to all vertices in the given graph.
+
+**_In adjacency list representation of graph_**
+
+```cpp
+vector<int> shortestDistanceFromSrcToAllVertices(Graph g, int src) {
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    vector<int> dist(g.size(), INT_MAX);
+    dist[src] = 0;
+    pq.push({dist[src], src});
+
+    while(!pq.empty()) {
+        auto f = pq.top(); pq.pop();
+        int u = f.second;
+        if(dist[u] == INT_MAX) continue;
+
+        for(auto edge : g.adjList[src]) {
+            int v = edge.v;
+            int w = edge.w;
+
+            if(dist[v] > dist[u] + w) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+
+    for(int i=0;i.size();i++) {
+        cout<<"Distance from "<<src<<" to i = "<<dist[i]<<endl;
+    }
+
+    return dist;
+}
+```
+
+**_In matrix representation of graph_**
+
+```cpp
+vector<int> dijkastra(int graph[][V], int s) {
+    vector<int> distance(V, INT_MAX);
+    vector<bool> visited(V, false);
+    distance[s] = 0;
+
+    for (int i = 0; i < V - 1; i++) {
+        int u = minCostVertex(distance, visited);
+        visited[u] = true;
+
+        for (int v = 0; v < V; v++) {
+            if (visited[v]) continue;
+            if (distance[u] == INT_MAX || !graph[u][v]) continue;
+
+            distance[v] = min(distance[v], distance[u] + graph[u][v]);
+        }
+    }
+
+    return distance;
+}
+```
+
+---

@@ -1,9 +1,10 @@
-####[Next Permutation](https://practice.geeksforgeeks.org/problems/next-permutation5226/1)
+#### [Next Permutation](https://practice.geeksforgeeks.org/problems/next-permutation5226/1)
 
 Implement the next permutation, which rearranges the list of numbers into Lexicographically next greater permutation of list of numbers. If such arrangement is not possible, it must be rearranged to the lowest possible order i.e. sorted in an ascending order. You are given an list of numbers arr[ ] of size N.
 
 ```cpp
-vector<int> nextPermutation(int N, vector<int> arr){
+vector<int> nextPermutation (int N, vector<int> arr)
+{
     int l = N-2;
     while(l >= 0 && arr[l]>=arr[l+1]) l--;
     if(l < 0) {
@@ -56,7 +57,6 @@ int trappingWater(vector<int> arr) {
         leftMaxBoundary[i] = max(i > 0 ? leftMaxBoundary[i-1]: INT_MIN, arr[i]);
     }
 
-    mx = INT_MIN;
     for (int i = arr.size() - 1; i >= 0; i--) {
         rightMaxBoundary[i] = max(i < arr.size()-1 ? rightMaxBoundary[i+1] : INT_MIN, arr[i]);
     }

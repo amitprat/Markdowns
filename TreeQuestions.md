@@ -1,13 +1,13 @@
-####[Delete a node from BST](https://practice.geeksforgeeks.org/problems/delete-a-node-from-bst/1)
+#### [Delete a node from BST](https://practice.geeksforgeeks.org/problems/delete-a-node-from-bst/1)
 
-Given a Binary Search Tree and a node value X. Delete the node with the given value X from the BST. If no node with value x exists, then do not make any change. 
+Given a Binary Search Tree and a node value X. Delete the node with the given value X from the BST. If no node with value x exists, then do not make any change.
 
 ```cpp
 Node *minNode(Node *root) {
     while(root->left) {
         root = root->left;
     }
-    
+
     return root;
 }
 
@@ -21,7 +21,7 @@ Node *deleteNode(Node *root, int X) {
         } else {
             auto suc = minNode(root->right);
             root->data = suc->data;
-            
+
             root->right = deleteNode(root->right, suc->data);
         }
     } else if(X < root->data) {
@@ -29,15 +29,16 @@ Node *deleteNode(Node *root, int X) {
     } else {
         root->right = deleteNode(root->right, X);
     }
-    
+
     return root;
 }
 ```
+
 ---
 
-####[Longest consecutive sequence in Binary tree](https://practice.geeksforgeeks.org/problems/longest-consecutive-sequence-in-binary-tree/1)
+#### [Longest consecutive sequence in Binary tree](https://practice.geeksforgeeks.org/problems/longest-consecutive-sequence-in-binary-tree/1)
 
-Given a Binary Tree find the length of the longest path which comprises of connected nodes with consecutive values in increasing order. 
+Given a Binary Tree find the length of the longest path which comprises of connected nodes with consecutive values in increasing order.
 
 **NOTE** : This only considers the paths starting from root.
 
@@ -62,7 +63,7 @@ void findLongest(Node *root, int prev, int curLongest, int& longest) {
 }
 ```
 
-####[Maximum Path Sum Between 2 Leaf Nodes](https://practice.geeksforgeeks.org/problems/maximum-path-sum/1)
+#### [Maximum Path Sum Between 2 Leaf Nodes](https://practice.geeksforgeeks.org/problems/maximum-path-sum/1)
 
 Given a binary tree in which each node element contains a number. Find the maximum possible path sum from one leaf node to another leaf node.
 
@@ -72,15 +73,15 @@ Note: Here Leaf node is a node which is connected to exactly one different node.
 int maxPathSum(Node* root)
 {
     if(!root) return 0;
-    
+
     int mxSum = INT_MIN;
     int res = maxPathSum(root, mxSum);
-    
+
     // we need to consider this because mx has't been updated yet
     if(!root->left || !root->right) {
         mxSum = max(mxSum, res);
     }
-    
+
     return mxSum;
 }
 
@@ -89,18 +90,19 @@ int maxPathSum(Node *root, int& sum) {
 
     int ls = maxPathSum(root->left, sum);
     int rs = maxPathSum(root->right, sum);
-    
+
     if(root->left && root->right) {
         sum = max(sum, root->data + ls + rs);
         return root->data + max(ls, rs);
     }
-    
+
     return root->data + (ls ? ls : rs);
 }
 ```
+
 ---
 
-####[Check if tree is red-black balanced]()
+#### [Check if tree is red-black balanced]()
 
 ```cpp
 bool isRedBlackBalanced(Node *root) {
@@ -126,7 +128,7 @@ bool isRedBlackBalanced(Node *root, int& mnH, int& mxH) {
 }
 ```
 
-####[Construct Tree from Preorder and Inorder traversal]()
+#### [Construct Tree from Preorder and Inorder traversal]()
 
 ```cpp
 	static void test(vector<int>& preorder, vector<int>& inorder) {
@@ -155,9 +157,13 @@ bool isRedBlackBalanced(Node *root, int& mnH, int& mxH) {
 		return root;
 	}
 ```
+
 ---
-####[Kth smallest/largest element in a bst]()
+
+#### [Kth smallest/largest element in a bst]()
+
 **Finding kth smallest/largest element using recursion**
+
 ```cpp
 int getKthSmallest(Tree<int>::Node* root, int& k) {
     if (root == nullptr) return INT_MIN;
@@ -170,6 +176,7 @@ int getKthSmallest(Tree<int>::Node* root, int& k) {
 ```
 
 **Finding kth smallest/largest element using recursion with tree having size**
+
 ```cpp
 int getKthSmallestOrder(Tree<int>::Node* root, int k) {
     if (root == nullptr) return INT_MIN;
@@ -186,6 +193,7 @@ int size(Tree<int>::Node* root) {
 ```
 
 **Finding kth smallest/largest element iteratively**
+
 ```cpp
 int getKthSmallestIter(Tree<int>::Node* root, int k) {
     stack< Tree<int>::Node*> st;
@@ -202,9 +210,10 @@ int getKthSmallestIter(Tree<int>::Node* root, int k) {
     return -1;
 }
 ```
+
 ---
 
-####[Closest value in binary search tree(BST)](https://www.careercup.com/question?id=12697664)
+#### [Closest value in binary search tree(BST)](https://www.careercup.com/question?id=12697664)
 
 Given (i) a non-empty binary search tree with double values (e.g. 3.5) in each node and (ii) a key value K.
 Write a method to find the closest value to K.
@@ -225,4 +234,5 @@ double kClosest(ITNode* node, double val) {
     else return right;
 }
 ```
+
 ---

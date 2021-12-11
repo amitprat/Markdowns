@@ -1,4 +1,4 @@
-####[N Queeens Problem]()
+#### [N Queeens Problem]()
 
 ```cpp
 int getNumWays() {
@@ -15,6 +15,7 @@ bool getNumWays(int row, vector<int> columns, vector<vector<int>>& result) {
         result.push_back(columns);
         return true;
     }
+
     for (int col = 0; col < N; col++) {
         if (isValid(row, col)) {
             columns[row] = col;
@@ -43,3 +44,5 @@ bool isValid(int row, int col) {
     return true;
 }
 ```
+
+---

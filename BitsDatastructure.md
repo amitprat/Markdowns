@@ -1,4 +1,4 @@
-# Implement Bitset datastructure
+####[Implement Bitset datastructure]()
 
 _Given an input stream of boolean values, design a data structure that can support following modules in optimal time-
 i) setTrue(index)
@@ -38,7 +38,6 @@ void setAllFalse() {
 
 
 bool get(int i) {
-
     if(lastUpdatedAt[i] < lastSetTrue && lastUpdatedAt[i] < lastSetFalse) {
         return lastSetTrue > lastSetFalse;
     }
@@ -85,7 +84,9 @@ bool getIndex(index) {
 }
 ```
 
-####[Reverse Bits](https://practice.geeksforgeeks.org/problems/reverse-bits3556/1#)
+---
+
+#### [Reverse Bits](https://practice.geeksforgeeks.org/problems/reverse-bits3556/1#)
 
 Given a 32 bit number X, reverse its binary form and print the answer in decimal.
 
@@ -166,7 +167,8 @@ int toggleBits(int N , int L , int R) {
 ```
 
 ---
-####[Find Position of right most set bit](https://practice.geeksforgeeks.org/problems/find-first-set-bit-1587115620/1)
+
+#### [Find Position of right most set bit](https://practice.geeksforgeeks.org/problems/find-first-set-bit-1587115620/1)
 
 ```cpp
 unsigned int getFirstSetBit(int n)
@@ -174,9 +176,10 @@ unsigned int getFirstSetBit(int n)
     return log2(n&~(n-1)) + 1;
 }
 ```
+
 ---
 
-####[Rightmost different bit in 2 numbers](https://practice.geeksforgeeks.org/problems/rightmost-different-bit-1587115621/1)
+#### [Rightmost different bit in 2 numbers](https://practice.geeksforgeeks.org/problems/rightmost-different-bit-1587115621/1)
 
 ```cpp
 int posOfRightMostDiffBit(int m, int n)
@@ -186,8 +189,5 @@ int posOfRightMostDiffBit(int m, int n)
     return log2(c)+1; // get its position
 }
 ```
+
 ---
-
-
-
-

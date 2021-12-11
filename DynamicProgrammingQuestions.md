@@ -1,4 +1,4 @@
-####[Edit Distance ](https://practice.geeksforgeeks.org/problems/edit-distance3702/1)
+#### [Edit Distance ](https://practice.geeksforgeeks.org/problems/edit-distance3702/1)
 
 ```sh
 Given two strings s and t. Return the minimum number of operations required to convert s to t.
@@ -16,11 +16,11 @@ int editDistance(string s, string t) {
 
     for(int i=0;i<=n;i++) {
         for(int j=0;j<=m;j++) {
-            if(i == 0 && j == 0) table[i][j] = 0;
-            else if(i == 0) table[i][j] = j;
-            else if(j == 0) table[i][j] = i;
+            if (i == 0 && j == 0) table[i][j] = 0;
+            else if (i == 0) table[i][j] = j; // need to delete j characters
+            else if (j == 0) table[i][j] = i; // need to insert i characters
             else {
-                if(s[i-1] == t[j-1]) table[i][j] = table[i-1][j-1];
+                if (s[i-1] == t[j-1]) table[i][j] = table[i-1][j-1];
                 else table[i][j] = 1+min(table[i-1][j-1],min(table[i-1][j],table[i][j-1]));
             }
         }
@@ -32,7 +32,7 @@ int editDistance(string s, string t) {
 
 ---
 
-####[Coin Change](https://practice.geeksforgeeks.org/problems/coin-change2448/1)
+#### [Coin Change](https://practice.geeksforgeeks.org/problems/coin-change2448/1)
 
 Given a value N, find the number of ways to make change for N cents, if we have infinite supply of each of S = { S1, S2, .. , SM } valued coins.
 
@@ -60,7 +60,7 @@ long long int countRec(int S[], int m, int n) {
 }
 ```
 
-####[Minimum sum partition ](https://practice.geeksforgeeks.org/problems/minimum-sum-partition3317/1)
+#### [Minimum sum partition ](https://practice.geeksforgeeks.org/problems/minimum-sum-partition3317/1)
 
 Given an integer array arr of size N, the task is to divide it into two sets S1 and S2 such that the absolute difference between their sums is minimum and find the minimum difference.
 
@@ -73,6 +73,7 @@ Subset2 = {11}, sum of Subset2 = 11
 ```
 
 **Dynamic Programming Approach**
+
 ```cpp
 int minDifference(int arr[], int n)  {
     int sum = std::accumulate(arr, arr+n, 0);
@@ -102,6 +103,7 @@ int minDifference(int arr[], int n)  {
 ```
 
 **Recursion Approach**
+
 ```cpp
 int minDifferenceRec(int arr[], int n)  {
     int diff = INT_MAX;
@@ -125,12 +127,25 @@ void minDifference(int arr[], int index, int n, int curSum, int totalSum,int& di
 }
 ```
 
+```cpp
+int findMinSumDiffRecursion(vector<int>& arr, int index, int n, int curSum, int totalSum)
+{
+    if (index == n) return abs(totalSum - 2*curSum);
+    if (index >= n) return INT_MAX;
+
+    return min(findMinSumDiffRecursion(arr, index + 1, n, curSum, totalSum),
+               findMinSumDiffRecursion(arr, index + 1, n, curSum + arr[index], totalSum));
+}
+```
+
 ---
-####[Maximum sum increasing subsequence ](https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1)
+
+#### [Maximum sum increasing subsequence ](https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1)
 
 Given an array arr of N positive integers, the task is to find the maximum sum increasing subsequence of the given array.
 
-***Maximum Sum Increasing Subsequence Using Recursion**
+**Maximum Sum Increasing Subsequence Using Recursion**
+
 ```cpp
 int maxSumSubsequence(int arr[], int n, int next=INT_MAX) {
     if(n == 0) return 0;
@@ -147,6 +162,7 @@ int maxSumSubsequence(int arr[], int n, int next=INT_MAX) {
 ```
 
 **Maximum sum increasing subsequence Using DP**
+
 ```cpp
 int maxSumIncreasingSubsequence(int arr[], int n) {
     int dp[n+1];
@@ -164,9 +180,10 @@ int maxSumIncreasingSubsequence(int arr[], int n) {
     return *max_element(dp, dp+n+1);
 }
 ```
+
 ---
 
-####[Longest Increasing Subsequence ](https://practice.geeksforgeeks.org/problems/longest-increasing-subsequence-1587115620/1)
+#### [Longest Increasing Subsequence ](https://practice.geeksforgeeks.org/problems/longest-increasing-subsequence-1587115620/1)
 
 Given an array of integers, find the length of the longest (strictly) increasing subsequence from the given array.
 
@@ -177,7 +194,7 @@ int longestIncreasingSubsequence(int arr[], int n, int next=INT_MAX) {
     int cnt = 0;
     if(arr[n-1] < next)
         cnt = 1 + longestIncreasingSubsequence(arr, n-1, arr[n-1]);
-    
+
     cnt = max(cnt, longestIncreasingSubsequence(arr, n-1, next));
 
     return cnt;
@@ -188,21 +205,22 @@ int longestIncreasingSubsequence(int arr[], int n, int next=INT_MAX) {
 int lisDP(int a[], int n) {
     vector<int> memo(n+1);
     memo[0] = 0;
-    
+
     for(int i=1;i<=n;i++) {
         memo[i] = 1;
         for(int j=i-1;j>0;j--) {
-            if(a[i-1] > a[j-1]) 
+            if(a[i-1] > a[j-1])
                 memo[i] = max(memo[i], 1+ memo[j]);
         }
     }
-    
+
     return *max_element(memo.begin(), memo.end());
 }
 ```
+
 ---
 
-####[Longest Common Substring ](https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1)
+#### [Longest Common Substring ](https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1)
 
 Given two strings. The task is to find the length of the longest common substring.
 
@@ -215,9 +233,9 @@ int longestCommonSubstr (string S1, string S2, int n, int m)
 int longestCommonSubstrRec(string S1, string S2, int n, int m, int len)
 {
     if(n == 0 || m == 0) return len;
-    
+
     if(S1[n-1] == S2[m-1]) return longestCommonSubstrRec(S1,S2,n-1,m-1,len+1);
-    
+
     return max(longestCommonSubstrRec(S1,S2,n-1,m,0),
                 longestCommonSubstrRec(S1,S2,n,m-1,0));
 }
@@ -230,14 +248,13 @@ int longestCommonSubstrDP (string S1, string S2, int n, int m)
             if(i == 0 || j == 0) table[i][j] = 0;
             else if(S1[i-1] != S2[j-1]) table[i][j] = 0;
             else table[i][j] = 1 + table[i-1][j-1];
-            
+
             longest = max(longest, table[i][j]);
         }
     }
-    
+
     return longest;
 }
 ```
+
 ---
-
-

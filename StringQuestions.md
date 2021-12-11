@@ -1,4 +1,4 @@
-####[Implement strstr](https://practice.geeksforgeeks.org/problems/implement-strstr/1)
+#### [Implement strstr](https://practice.geeksforgeeks.org/problems/implement-strstr/1)
 
 Your task is to implement the function strstr. The function takes two strings as arguments (s,x) and locates the occurrence of the string x in the string s. The function returns and integer denoting the first occurrence of the string x in s (0 based indexing).
 
@@ -60,7 +60,7 @@ int kmp(string& s, string& p) {
 
 ---
 
-####[Base 62 encoding](https://practice.geeksforgeeks.org/problems/design-a-tiny-url-or-url-shortener2031/1)
+#### [Base 62 encoding](https://practice.geeksforgeeks.org/problems/design-a-tiny-url-or-url-shortener2031/1)
 
 ```cpp
 string idToShortURL(long long int n) {
@@ -128,7 +128,7 @@ vector<string> genIp(string &s) {
 
 ---
 
-####[Rat in Maze](https://practice.geeksforgeeks.org/problems/rat-in-a-maze-problem/1)
+#### [Rat in Maze](https://practice.geeksforgeeks.org/problems/rat-in-a-maze-problem/1)
 
 Consider a rat placed at (0, 0) in a square matrix of order N \* N. It has to reach the destination at (N - 1, N - 1). Find all possible paths that the rat can take to reach from source to destination. The directions in which the rat can move are 'U'(up), 'D'(down), 'L' (left), 'R' (right). Value 0 at a cell in the matrix represents that it is blocked and rat cannot move to it while value 1 at a cell in the matrix represents that rat can be travel through it.
 Note: In a path, no cell can be visited more than one time.
@@ -173,7 +173,7 @@ void findPath(vector<vector<int>> &matrix, int r, int c, int n,
 
 ---
 
-####[Shortest Common Supersequence ](https://practice.geeksforgeeks.org/problems/shortest-common-supersequence0322/1#)
+#### [Shortest Common Supersequence ](https://practice.geeksforgeeks.org/problems/shortest-common-supersequence0322/1#)
 
 Given two strings X and Y of lengths m and n respectively, find the length of the smallest string which has both, X and Y as its sub-sequences.
 Note: X and Y can have both uppercase and lowercase letters.
@@ -197,7 +197,7 @@ int shortestCommonSupersequence(string X, string Y, int m, int n)
 
 ---
 
-####[Longest Distinct/Unique characters in string ](https://practice.geeksforgeeks.org/problems/longest-distinct-characters-in-string5848/1)
+#### [Longest Distinct/Unique characters in string ](https://practice.geeksforgeeks.org/problems/longest-distinct-characters-in-string5848/1)
 
 Given a string S, find length of the longest substring with all distinct characters.
 
@@ -228,7 +228,7 @@ int longestSubstrDistinctChars (string str)
 
 ---
 
-####[Rearrange Characters to form string such that no 2 characters are adjacent](https://practice.geeksforgeeks.org/contest/coding-try-outs-amazon/problems#)
+#### [Rearrange Characters to form string such that no 2 characters are adjacent](https://practice.geeksforgeeks.org/contest/coding-try-outs-amazon/problems#)
 
 ```cpp
 bool canRearrange(string s)
@@ -266,9 +266,11 @@ bool canRearrange(string s)
     return canForm;
 }
 ```
+
 ---
 
-####[Anagram Substring Search]()
+#### [Anagram Substring Search]()
+
 ```cpp
 bool anagramSubstringSearch(string txt, string pat) {
     vector<int> txtCnt(256, 0);
@@ -288,15 +290,19 @@ bool anagramSubstringSearch(string txt, string pat) {
             patFound = true;
             cout << "Found at index = from " << (i - m + 1) << " to " << i << endl;
         }
-        txtCnt[txt[i-m+1]]--;
-    } 
-    
+        if(i >= m-1) {
+            if(txtCnt[txt[i-m+1]] <= pat[txt[i-m+1]]) curCnt--;
+            txtCnt[txt[i-m+1]]--;
+        }
+    }
+
     return patFound;
 }
 ```
+
 ---
 
-####[Check if strings can be chained together to form a string]()
+#### [Check if strings can be chained together to form a string]()
 
 ```sh
 { "for", "geek", "rig", "kaf" }
@@ -368,23 +374,25 @@ Graph transpose(Graph g) {
     return gr;
 }
 ```
+
 ---
 
-####[Check if word is valid](https://www.careercup.com/question?id=4774716350922752)
+#### [Check if word is valid](https://www.careercup.com/question?id=4774716350922752)
 
 In a language, there are only 4 characters h,i,r,e. and we have to write a function which takes a string as input and returns whether the given input string is a �valid word� or not.
 
 Definition of valid word :
+
 1. A given word is a valid word if it is of the form h^n i^n r^n e^n where n >=1. (eg: hhiirree)
 2. Valid words has concatenation property i.e. if w1 and w2 are valid words w1w2 is also a valid word.
-
 
 Let's make it an "ordered" alphabet array
 by letting (compile time fixed or get from somewhere at runtime):
 alpha[]={ your ordered list of characters in your alphabet }
 M be size of your ordered alphabet (i.e., size of alphabet array above)
 
-***Idea***
+**_Idea_**
+
 ```sh
 for(t=0,i = 0,count=0; i < str.length ; i++)
     if( str[i] == alpha[t % M] ) count++;
@@ -411,8 +419,10 @@ bool isValid(string str, vector<char> dict)
     return cnt >= 1 && j == m - 1;
 }
 ```
+
 ---
-####[Compress string]()
+
+#### [Compress string]()
 
 ```cpp
 string compress(string str) {
@@ -428,7 +438,7 @@ string compress(string str) {
             }
             prev = ch;
             cnt = 0;
-        } 
+        }
         cnt++;
     }
     if (cnt > 0) {
@@ -439,8 +449,10 @@ string compress(string str) {
     return str.substr(0, i);
 }
 ```
+
 ---
-####[Convert one string to another string only using adjacent swaps]()
+
+#### [Convert one string to another string only using adjacent swaps]()
 
 Given a string S1, convert it to another string S2 (Anagram) by swapping only adjacent elements. Print all the intermediate strings formed.
 
@@ -492,8 +504,10 @@ int countRequiredSwapsToConvertS1ToS2(string &s1, string s2)
     return cnt;
 }
 ```
+
 ---
-####[Convert string a palindrome by adding some characters in front](https://www.careercup.com/question?id=6218545979457536)
+
+#### [Convert string a palindrome by adding some characters in front](https://www.careercup.com/question?id=6218545979457536)
 
 Given a string S, you are allowed to convert it to a palindrome by adding 0 or more characters in front of it.
 Find the length of the shortest palindrome that you can create from S by applying the above transformation.
@@ -562,18 +576,19 @@ vector<int> getLps(string str)
     return lps;
 }
 ```
+
 ---
 
-####[Count strings of a,b and c with size n made only of 1 b and 2 c](https://www.geeksforgeeks.org/count-strings-can-formed-using-b-c-given-constraints/)
+#### [Count strings of a,b and c with size n made only of 1 b and 2 c](https://www.geeksforgeeks.org/count-strings-can-formed-using-b-c-given-constraints/)
 
 Given a length n, count the number of strings of length n that can be made using ‘a’, ‘b’ and ‘c’ with at-most one ‘b’ and two ‘c’s allowed.
 
 ```sh
-Input : n = 3 
-Output : 19 
+Input : n = 3
+Output : 19
 Below strings follow given constraints:
 aaa aab aac aba abc aca acb acc baa
-bac bca bcc caa cab cac cba cbc cca ccb 
+bac bca bcc caa cab cac cba cbc cca ccb
 
 Input  : n = 4
 Output : 39
@@ -608,4 +623,5 @@ static int countDP(int b, int c, int n) {
     return dp[n][b][c];
 }
 ```
+
 ---

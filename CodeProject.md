@@ -1,9 +1,9 @@
-#### If [a1,a2,a3...,an,b1,b2...bn] is given input change this to [a1,b1,a2,b2.....an,bn] , solution should be in-place
+####[If [a1,a2,a3...,an,b1,b2...bn] is given input change this to [a1,b1,a2,b2.....an,bn] , solution should be in-place]()
 
-First swap elements in the middle pair
+_First swap elements in the middle pair
 Next swap elements in the middle two pairs
 Next swap elements in the middle three pairs
-iterate n-1 steps.
+iterate n-1 steps._
 
 Ex: with n = 4.
 a1 a2 a3 a4 b1 b2 b3 b4
@@ -24,7 +24,7 @@ int interleave(int arr[], int len) {
 
 ---
 
-##### [Given an int array without repeated elements and a target, count the total number of subset that can be generated from the array such that min (subset) + max (subset) < target](https://careercup.com/question?id=5091778836299776)
+####[Given an int array without repeated elements and a target, count the total number of subset that can be generated from the array such that min (subset) + max (subset) < target](https://careercup.com/question?id=5091778836299776)
 
 ```java
 public int countSubSet(int[] nums, int target){
@@ -32,7 +32,7 @@ public int countSubSet(int[] nums, int target){
 }
 ```
 
-Sort the array, then use two pointers to count subsets.
+_Sort the array, then use two pointers to count subsets._
 
 ```java
 public static int countSubSet(int[] nums, int target){
@@ -64,7 +64,7 @@ public static int countSubSet(int[] nums, int target){
 
 ---
 
-#### Find subsets
+####[Find subsets]()
 
 _// For a given vector of integers and integer K, find the number of non-empty subsets S such that min(S) + max(S) <= K
 // For example, for K = 8 and vector [2, 4, 5, 7], the solution is 5 ([2], [4], [2, 4], [2, 4, 5], [2, 5])
@@ -72,13 +72,15 @@ The time complexity should be O(n2). Approach and code was asked_
 
 Can be solved using 2 Pointers technique. Complexity - O(n logn) for sorting. If the data is sorted then O(n)
 
-```java
-    sort(V.begin(), V.end());
-    int p1 = 0,p2 = V.size()-1;
+```cpp
+int findSubsets(vector<int>& arr) {
+    sort(arr.begin(), arr.end());
+    int p1 = 0, p2 = arr.size()-1;
     int ans = 0;
+
     while(p1<=p2)
     {
-        if(V[p1] + V[p2] > k)
+        if(arr[p1] + arr[p2] > k)
         {
             p2--;
         }
@@ -88,11 +90,14 @@ Can be solved using 2 Pointers technique. Complexity - O(n logn) for sorting. If
             p1++;
         }
     }
+
+    return ans;
+}
 ```
 
 ---
 
-#### Dictionary with access to last element
+####[Dictionary with access to last element]()
 
 _Write a new data structure, "Dictionary with Last"
 Methods:
@@ -102,6 +107,7 @@ delete(key) - removes the element
 last() - returns the last key that was added or read.
 In case a key was removed, last will return the previous key in order._
 
+```sh
 Use a HashMap and a Doubly Linked List, where Hashmap would have a pointer to the list Node such as Map<Key, ListNode> and List would have ListNode(Value, Left, Right)
 and the head of the list would be the most recent element added or read.
 
@@ -120,11 +126,13 @@ Other solution
 
 Self-Balancing Binary Tree: Red-Black Tree I think is the best choice because it gives you the best worst case (log).
 Other options might be: AVL tree and Hash Tables... but, depends on what you want to do with this structure.
+```
 
 ---
 
-#### Given a array of integers , find 3 indexes i,j,k such that, i<j<k and a[i] < a[j] < a[k]. Best possible is a O(n) algorithm.
+####[Given a array of integers , find 3 indexes i,j,k such that, i<j<k and a[i] < a[j] < a[k]. Best possible is a O(n) algorithm.]()
 
+```sh
 a[i]<a[j]<a[k] s.t i<j<k
 From the original array build two arrays.
 i) LMin[i] contains index of the min element seen so far from the left including a[i].
@@ -133,6 +141,7 @@ consider the following array:
 a =4,7,5,1,3,8,9,6,2
 LMin=0,0,0,3,3,3,3,3,3
 RMax=6,6,6,6,6,6,6,7,8
+```
 
 ```cpp
 void print(vector<int>& arr) {
@@ -149,7 +158,7 @@ void print(vector<int>& arr) {
 
 ---
 
-#### Find min number of jumps it will take to reach to the top in snake and ladder game using recursive function
+#### [Find min number of jumps it will take to reach to the top in snake and ladder game using recursive function]()
 
 ```cpp
 int minJumpsTest() {
@@ -205,7 +214,7 @@ int minJumpsBFS(int n, unordered_map<int> jumps)
 
 ---
 
-#### Given an array of n integers, find the lexicographically smallest subsequence of length k.
+#### [Given an array of n integers, find the lexicographically smallest subsequence of length k.]()
 
 I feel this question can be solved by stack. once we found previous element in the stack is larger than current element, than pop out
 
@@ -225,7 +234,7 @@ void smallestSubsequence(vector<int> nums, int index, string& smallest, string c
 }
 ```
 
-Another approach using stack
+_Another approach using stack._
 
 ```cpp
 void smallestSubsequence(vector<int> nums, int k) {
@@ -254,11 +263,11 @@ void smallestSubsequence(vector<int> nums, int k) {
 
 ---
 
-#####[Find if string is K-Palindrome or not | Set 1](https://www.geeksforgeeks.org/find-if-string-is-k-palindrome-or-not/)
+#### [Find if string is K-Palindrome or not | Set 1](https://www.geeksforgeeks.org/find-if-string-is-k-palindrome-or-not/)
 
 Given a string, find out if the string is K-Palindrome or not. A k-palindrome string transforms into a palindrome on removing at most k characters from it.
 
-```json
+```sh
 Examples :
 
 Input : String - abcdecba, k = 1
@@ -751,7 +760,7 @@ string smallestWindow (string str, string pat)
 
 ---
 
-####[Reverse a Linked List in groups of given size. ](https://practice.geeksforgeeks.org/problems/reverse-a-linked-list-in-groups-of-given-size/1)
+#### [Reverse a Linked List in groups of given size. ](https://practice.geeksforgeeks.org/problems/reverse-a-linked-list-in-groups-of-given-size/1)
 
 Given a linked list of size N. The task is to reverse every k nodes (where k is an input to the function) in the linked list. If the number of nodes is not a multiple of k then left-out nodes, in the end, should be considered as a group and must be reversed (See Example 2 for clarification).
 
@@ -1665,7 +1674,7 @@ Node *removeDuplicates(Node *head)
 
 ---
 
-####[Merge Sort for Linked List ](https://practice.geeksforgeeks.org/problems/sort-a-linked-list/1#)
+#### [Merge Sort for Linked List ](https://practice.geeksforgeeks.org/problems/sort-a-linked-list/1#)
 
 Given Pointer/Reference to the head of the linked list, the task is to Sort the given linked list using Merge Sort.
 Note: If the length of linked list is odd, then the extra node should go in the first list while splitting.
@@ -1731,7 +1740,7 @@ int setBits(int N) {
 
 ---
 
-####[Power of 2 ](https://practice.geeksforgeeks.org/problems/power-of-2-1587115620/1)
+#### [Power of 2 ](https://practice.geeksforgeeks.org/problems/power-of-2-1587115620/1)
 
 ```cpp
 bool isPowerofTwo(long long n){
@@ -1742,7 +1751,7 @@ bool isPowerofTwo(long long n){
 
 ---
 
-####[Calculate Power](https://www.careercup.com/question?id=5733237978562560)
+#### [Calculate Power](https://www.careercup.com/question?id=5733237978562560)
 
 Write program to calculate power(x,n) in log(n) time
 
@@ -1751,7 +1760,7 @@ bool pow(int x, int y){
     if(y == 0) return 1;
 
     int p = pow(x, y/2);
-    
+
     return (y&1) ? p*p*x : p*p;
 }
 ```
@@ -1890,7 +1899,7 @@ int knapSackDP(int W, int wt[], int val[], int n)
 
 ---
 
-####[Sum of Middle Elements of two sorted arrays ](https://practice.geeksforgeeks.org/problems/sum-of-middle-elements-of-two-sorted-arrays2305/1)
+#### [Sum of Middle Elements of two sorted arrays ](https://practice.geeksforgeeks.org/problems/sum-of-middle-elements-of-two-sorted-arrays2305/1)
 
 Given 2 sorted arrays Ar1 and Ar2 of size N each. Merge the given arrays and find the sum of the two middle elements of the merged array.
 
@@ -1931,7 +1940,7 @@ int findMidSum1(int arr1[], int arr2[], int n) {
 
 ---
 
-####[Word Boggle ](https://practice.geeksforgeeks.org/problems/word-boggle4143/1)
+#### [Word Boggle ](https://practice.geeksforgeeks.org/problems/word-boggle4143/1)
 
 Given a dictionary of distinct words and an M x N board where every cell has one character. Find all possible words from the dictionary that can be formed by a sequence of adjacent characters on the board. We can move to any of 8 adjacent characters
 
@@ -2054,7 +2063,7 @@ bool canPair(vector<int> nums, int k) {
 
 ---
 
-####[Max Sum without Adjacents ](https://practice.geeksforgeeks.org/problems/max-sum-without-adjacents2430/1)
+#### [Max Sum without Adjacents ](https://practice.geeksforgeeks.org/problems/max-sum-without-adjacents2430/1)
 
 Given an array Arr of size N containing positive integers. Find the maximum sum of a subsequence such that no two numbers in the sequence should be adjacent in the array.
 
@@ -2083,7 +2092,7 @@ int findMaxSumRec(int *arr, int n) {
 
 ---
 
-####[Return two prime numbers ](https://practice.geeksforgeeks.org/problems/return-two-prime-numbers2509/1)
+#### [Return two prime numbers ](https://practice.geeksforgeeks.org/problems/return-two-prime-numbers2509/1)
 
 Given an even number N (greater than 2), return two prime numbers whose sum will be equal to given number. There are several combinations possible. Print only the pair whose minimum value is the smallest among all the minimum values of pairs.
 
@@ -2146,7 +2155,7 @@ vector<int> primeDivision(int N){
 
 ---
 
-####[Find Nth root of M ](https://practice.geeksforgeeks.org/problems/find-nth-root-of-m5843/1)
+#### [Find Nth root of M ](https://practice.geeksforgeeks.org/problems/find-nth-root-of-m5843/1)
 
 You are given 2 numbers (n , m); the task is to find n√m (nth root of m).
 
@@ -2316,7 +2325,7 @@ class MedianOfStream
 
 ---
 
-####[Largest prime factor ](https://practice.geeksforgeeks.org/problems/largest-prime-factor2601/1)
+#### [Largest prime factor ](https://practice.geeksforgeeks.org/problems/largest-prime-factor2601/1)
 
 Given a number N, the task is to find the largest prime factor of that number.
 
