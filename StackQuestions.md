@@ -234,3 +234,35 @@ void removeTrailingSpacesAndSlashes(string& str) {
 ```
 
 ---
+
+#### [Identity redundant parenthesis](https://www.careercup.com/question?id=6276805505843200)
+
+Find if the given expression contains redundant parantheses. ex :if expr = a+(b*c) , print false, if expr = a+((b*c)), print true.
+
+We maintain a stack. We traverse the expression, and we push either a bracket, or a value. If the top of stack contains a value, we don't push another value,
+just leave it as is. If we encounter a right bracket, we expect a value on top to pop. We then pop the value and pop a bracket. If we don't get a value on top
+when we encounter a right bracket, then we have redundant brackets.
+
+```cpp
+bool isValid(string str) {
+    stack<char> st;
+
+    for(auto ch : str) {
+        if(ch == '(') {
+            st.push(ch);
+        } else if(ch == ')') {
+            if(st.empty() || st.top() == '(') return false;
+            st.top();
+
+            if(st.empty() || st.top() != '(') return false;
+            st.top();
+        } else {
+            if(st.empty() || st.top() == '(') st.push(ch);
+        }
+    }
+
+    return true;
+}
+```
+
+---

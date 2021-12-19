@@ -120,3 +120,106 @@ ITNode *convertBSTToSortedList(ITNode *root) {
     return next;
 }
 ```
+
+---
+
+#### [Pairwise swap elements of a linked list ](https://practice.geeksforgeeks.org/problems/pairwise-swap-elements-of-a-linked-list-by-swapping-data/1)
+
+Given a singly linked list of size N. The task is to swap elements in the linked list pairwise.
+For example, if the input list is 1 2 3 4, the resulting list after swaps will be 2 1 4 3.
+Note: You need to swap the nodes, not only the data. If only data is swapped then driver will print -1.
+
+```cpp
+Node* pairWiseSwap(struct Node* head)
+{
+    Node *prev = nullptr;
+    Node *newHead = head;
+    while(head && head->next) {
+        // store next and nextnext pointers
+        auto nextnext = head->next->next;
+        auto next = head->next;
+
+        // reverse link (1->2 to 2->1)
+        head->next = nullptr;
+        next->next = head;
+
+        // connect reversed links to nextnext link
+        head->next = nextnext;
+
+        // correct head if required (its always need for n >= 2)
+        if(!prev) newHead = next;
+        else prev->next = next;
+
+        // move to next iteration
+        prev = head;
+        head = nextnext;
+    }
+
+    return newHead;
+}
+```
+
+---
+
+#### [Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
+
+Given the root of a binary tree, flatten the tree into a "linked list":
+
+The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and the left child pointer is always null.
+The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+
+```sh
+Input: root = [1,2,5,3,4,null,6]
+Output: [1,null,2,null,3,null,4,null,5,null,6]
+```
+
+```cpp
+void flattenBinaryTree(TreeNode* root) {
+    TreeNode* prev = NULL;
+    flattenBinaryTree(root, prev);
+}
+
+void flattenBinaryTree(TreeNode* root, TreeNode* &prev)
+{
+    if(!root) return;
+
+    TreeNode* left = root->left;
+    TreeNode* right = root->right;
+
+    if(prev) {
+        prev->right = root;
+        prev->left = nullptr;
+    }
+    prev = root;
+
+    flattenBinaryTree(left, curr);
+    flattenBinaryTree(right, curr);
+}
+```
+
+**_Flatten binary tree second method_**
+
+```cpp
+TreeNode* flattenInternal(TreeNode* node) {
+    if (!node) return node;
+
+    TreeNode* left = flattenInternal(node->left);
+    TreeNode* right = flattenInternal(node->right);
+
+    node->left = nullptr;
+    node->right = left;
+
+    getRightMostNode(node)->right = right;
+
+    return node;
+}
+
+TreeNode* getRightMostNode(TreeNode* node) {
+    while (node->right) {
+        node = node->right;
+    }
+    return node;
+}
+```
+
+---

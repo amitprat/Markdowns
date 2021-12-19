@@ -867,3 +867,150 @@ unordered_map<int, int> findOverNth(int arr[], int n, int k)
 ```
 
 ---
+
+#### [Find max repeating element in sorted array](https://www.careercup.com/question?id=5104572540387328)
+
+Given a sorted array of integers, write a function that will return the number with the biggest number of repetitions.
+(Asked to refine the solution to be more efficient)
+
+**_Using linear search_**
+
+```cpp
+int findMaximumRepeatingElement(int* a, int n)
+{
+    int count = 1, maxcount = 1, maxelement = a[0];
+    int element = a[0];
+    int i = 1;
+    while (i < n)
+    {
+        if (a[i] == element)
+        {
+            count++;
+            if (count > maxcount)
+            {
+                maxcount = count;
+                maxelement = a[i];
+            }
+        }
+        else
+        {
+            element = a[i];
+            count = 1;
+
+        }
+        i++;
+    }
+    return maxelement;
+}
+```
+
+**_Using binary search_**
+
+```cpp
+pair<int, int> maxRepeatingElementBinarySearch(int arr[], int n)
+{
+    int s = 0;
+    int mxElem = INT_MIN;
+    int mxCnt = 0;
+
+    while (s < n)
+    {
+        int e = maxRepeatingElementBinarySearch(arr, s, n - 1, arr[s]);
+        if (e - s + 1 > mxCnt)
+        {
+            mxCnt = e - s + 1;
+            mxElem = arr[s];
+        }
+        s = e + 1;
+    }
+
+    return { mxElem, mxCnt };
+}
+
+int maxRepeatingElementBinarySearch(int arr[], int s, int e, int k)
+{
+    if (s == e) return arr[s] == k ? s : -1;
+    if (s > e) return -1;
+
+    int m = (s + e + 1) / 2; // use upper mid
+    if (k < arr[m]) return maxRepeatingElementBinarySearch(arr, s, m - 1, k);
+    return maxRepeatingElementBinarySearch(arr, m, e, k);
+}
+```
+
+---
+
+#### [Get maximum possible number by performing atmost k swaps]()
+
+```sh
+for example:
+input: 7899, k = 2
+maximum possible number: 9987
+explanation: 7899 -> 7989 -> 9987
+```
+
+\*\*\*Using backup to generate all possible permutation of numbers in vector and see which makes the largest number
+
+```cpp
+static int getMaximumNum(int num) {
+    auto numVector = getNumVector(num);
+    int mx = INT_MIN;
+    getMaximum(numVector, 0, numVector.size(), mx, 2);
+
+    return mx;
+}
+
+static void getMaximum(vector<int>& nums, int s, int n, int& mx, int k) {
+    if (s == n || k == 0) {
+        int cur = getNumFromVector(nums);
+        mx = max(mx, cur);
+        return;
+    }
+
+    for (int i = s; i < n; i++) {
+        swap(nums[i], nums[s]);
+        getMaximum(nums, s + 1, n, mx, k - (i != s));
+        swap(nums[i], nums[s]);
+    }
+}
+
+static vector<int> getNumVector(int num) {
+    vector<int> res;
+    while (num) {
+        res.push_back(num % 10);
+        num /= 10;
+    }
+    reverse(res.begin(), res.end());
+
+    return res;
+}
+
+static int getNumFromVector(vector<int> nums) {
+    int res = 0;
+    for (auto num : nums) {
+        res = res * 10 + num;
+    }
+
+    return res;
+}
+```
+
+---
+
+#### [Largest number from concatenation of array elements](https://www.careercup.com/question?id=7781671)
+
+Given an integer array, sort the integer array such that the concatenated integer of the result array is max. e.g. [4, 94, 9, 14, 1] will be sorted to
+[9,94,4,14,1] where the result integer is 9944141
+
+```cpp
+void largestConcatenation() {
+    vector<int> arr = { 4, 94, 9, 14, 1 };
+    sort(arr.begin(), arr.end(), [](const auto& f, const auto& s) {
+        return stoi(to_string(f) + to_string(s)) > stoi(to_string(s) + to_string(f));
+        });
+
+    cout << to_string(arr) << endl;
+}
+```
+
+---

@@ -46,3 +46,51 @@ bool isValid(int row, int col) {
 ```
 
 ---
+
+#### [Graph coloring - Can a graph be colored using m colors]()
+
+```sh
+Input:
+vector<vector<int>> graph = {
+    { 0, 1, 1, 1 },
+    { 1, 0, 1, 0 },
+    { 1, 1, 0, 1 },
+    { 1, 0, 1, 0 },
+};
+
+int m = 3;
+
+Result: Yes
+```
+
+```cpp
+using Graph = vector<vector<int>>;
+bool canBeColored(Graph graph, int m) {
+    int n = graph.size();
+    vector<int> colors(n, -1);
+
+    return canBeColored(graph, 0, n, colors, m);
+}
+
+bool canBeColored(Graph graph, int u, int n, vector<int>& colors, int m) {
+    if(u == n) return true;
+
+    for(int c=1;c<=m;c++) {
+        if(isSafe(graph, u, n, colors, c)) {
+            colors[u] = c;
+            if(canBeColored(graph, u+1, n, colors, m)) return true;
+            colors[u] = -1;
+        }
+    }
+    return false;
+}
+
+bool isSafe(Graph g, int u, int n, vector<int>& colors, int c) {
+    for(int v=0;v<n;v++) {
+        if(g[u][v] && colors[v] == c) return false;
+    }
+    return true;
+}
+```
+
+---

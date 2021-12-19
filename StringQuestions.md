@@ -603,6 +603,38 @@ static int count(int b, int c, int n) {
 }
 ```
 
+**_Print strings_**
+
+```cpp
+static int count(int b, int c, int n, string word) {
+    if (b < 0 || c < 0) return 0;
+    if (n == 0) {
+        cout<<word<<endl;
+        return 1;
+    }
+
+    return count(b, c, n - 1, word + "a") + count(b - 1, c, n - 1, word + "b") + count(b, c - 1, n - 1, word + "c");
+}
+```
+
+**_O(n) time solution_**
+
+```cpp
+int findStrings(int n, int b, int c)
+{
+    vector<int> A(n + 1, 0);
+    A[0] = 1, A[1] = 2, A[2] = 4;
+
+    for (int i = 3; i <= n; i++) {
+        A[i] = A[i - 1] + A[i - 2] + A[i - 3];
+    }
+
+    return A[n] + n * A[n - 1];
+}
+```
+
+**_Using DP based solution_**
+
 ```cpp
 static int countDP(int b, int c, int n) {
     vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(b + 1, vector<int>(c + 1)));
@@ -624,4 +656,350 @@ static int countDP(int b, int c, int n) {
 }
 ```
 
+---
+
+#### [Generate all possible strings are replacing question mark with 0 and 1](https://www.careercup.com/question?id=5192571630387200)
+
+Given a string (for example: "a?bc?def?g"), write a program to generate all the possible strings by replacing ? with 0 and 1.
+Example:
+Input : a?b?c?
+Output: a0b0c0, a0b0c1, a0b1c0, a0b1c1, a1b0c0, a1b0c1, a1b1c0, a1b1c1.
+
+```cpp
+vector<string> generateUsingBitSet(string str)
+{
+    vector<string> result;
+    int qMarks = 0;
+    for (auto ch : str) {
+        if (ch == '?') qMarks++;
+    }
+    int limit = pow(2, qMarks);
+
+    for (int i = 0; i < limit; i++) {
+        string cur;
+
+        // check for set bits in 'i' for each '?'
+        int pos = qMarks - 1;
+        for (auto ch : str) {
+            if (ch == '?') {
+                if (i & (1 << pos)) cur += '1';
+                else cur += '0';
+                pos--;
+            }
+            else {
+                cur += ch;
+            }
+        }
+        result.push_back(cur);
+    }
+
+    return result;
+}
+```
+
+```cpp
+vector<string> generateRec(string str)
+{
+    vector<string> result;
+
+    generateRec(str, 0, "", result);
+
+    return result;
+}
+
+void generateRec(string str, int index, string cur, vector<string>& result)
+{
+    if (index == str.length()) {
+        result.push_back(cur);
+        return;
+    }
+
+    if (str[index] == '?')
+    {
+        generateRec(str, index + 1, cur + "0", result);
+        generateRec(str, index + 1, cur + "1", result);
+    }
+    else {
+        generateRec(str, index + 1, cur + str[index], result);
+    }
+}
+```
+
+---
+
+#### [Generate all substring or generate powerset from given string]()
+
+```sh
+Example:
+substring for abc: c b bc a ac ab abc
+```
+
+**_Using recursion_**
+
+```cpp
+void generateAllSubstrings(string prefix, string str)
+{
+    if (str.empty()) {
+        if (!prefix.empty()) cout << prefix << " ";
+        return;
+    }
+
+    generateAllSubstrings(prefix, str.substr(1));
+    generateAllSubstrings(prefix + str[0], str.substr(1));
+}
+```
+
+**_Using powerset method_**
+
+```cpp
+void generateAllSubstrings(string str)
+{
+    int n = str.length();
+    int sz = pow(2, n);
+
+    for (int i = 0; i < sz; i++) {
+        string cur;
+        for (int j = 0; j < n; j++) {
+            if (i & (1 << j)) cur += str[j];
+        }
+        cout << cur << " ";
+    }
+}
+```
+
+---
+
+#### [Generate all permutatios of given string]()
+
+```sh
+Example:
+Permutations of abc:
+abc acb bac bca cba cab
+```
+
+**_Using recursion and backtracking method_**
+
+```cpp
+void generateAllPermutations(string str, int index = 0)
+{
+    if (index == str.length()) {
+        cout << str << " ";
+        return;
+    }
+
+    for (int i = index; i < str.length(); i++) {
+        swap(str[i], str[index]);
+        generateAllPermutations(str, index + 1);
+        swap(str[i], str[index]);
+    }
+}
+```
+
+---
+
+#### [Check if string is periodic, if yes then return the period]()
+
+Find whether string S is periodic.
+Periodic indicates S = nP.
+e.g.
+S = "ababab", then n = 3, and P = "ab"
+S = "xxxxxx", then n = 1, and P = "x"
+S = "aabbaaabba", then n = 2, and P = "aabba"
+follow up:
+Given string S, find out the P (repetitive pattern) of S.
+
+```cpp
+void test() {
+    vector<string> strs = { "waterwater", "ababab", "xxxxxx", "aabbaaabba", "abcd", "dbcasdssddbcasds" };
+    GetPeriod obj;
+
+    for (auto str : strs) {
+        auto res = obj.isPeriod(str);
+        cout << "Is string='" << str << "' periodic: " << res << endl;
+
+        if (res) {
+            auto p = obj.getPeriod(str);
+            cout << "Period = " << p.first << ", " << p.second << endl;
+        }
+    }
+}
+
+bool isPeriod(string s) {
+    string tmp = s + s;
+    tmp = tmp.substr(1, tmp.length() - 2);
+    return (tmp.find(s) != string::npos);
+}
+
+pair<string, int> getPeriod(string s) {
+    int n = s.length();
+    for (int len = 1; len <= n / 2; len++) {
+        if (n % len == 0 && isRepeat(s, len, n)) {
+            return { s.substr(0,len), n / len };
+        }
+    }
+    return { "", -1 };
+}
+
+bool isRepeat(string s, int periodLen, int totalLen) {
+    for (auto i = 0; i < periodLen; i++) {
+        for (int j = periodLen + i; j < totalLen; j += periodLen) {
+            if (s[i] != s[j]) return false;
+        }
+    }
+    return true;
+}
+```
+
+---
+
+#### [Print I18N](https://www.careercup.com/question?id=5733696185303040)
+
+i18n (where 18 stands for the number of letters between the first i and the last n in the word “internationalization,”) Wiki it.
+Generate all such possible i18n strings for any given string. for eg. "careercup"=>"c7p","ca6p","c6up","car5p","ca5up","care4p","car4up","caree3p","care3up"..
+till the count is 0 which means its the complete string again.
+
+```cpp
+void print(string str) {
+    int n = str.length();
+    for(int i=n-2;i>=1;n--) {
+        int rem = n-i;
+        for(int k=1;k<rem;k++) {
+            string first = str.substr(0, k);
+            string middle = to_string(i);
+            string last = str.substr(n-(rem-k), rem-k);
+
+            cout<<first<<middle<<last<<endl;
+        }
+    }
+}
+```
+
+---
+
+#### [Check if string is interleaved]()
+
+```sh
+c='axybczd' is interleaved by a='abcd' and b='xyz', res(using DP)? true
+c='axybczd' is interleaved by a='abcd' and b='xyz', res(using recursion)? true
+```
+
+**_Using recursion_**
+
+```cpp
+bool isInterleaved(string a, int l, string b, int m, string c, int n) {
+    if(l == 0 && m == 0 && n == 0) return true;
+    if(l < 0 || m < 0 || n <= 0) return false;
+
+    return (l > 0 && a[l-1] == c[n-1] && isInterleaved(a, l-1, b, m, c, n-1)) ||
+           (m > 0 && b[m-1] == c[n-1] && isInterleaved(a, l, b, m-1, c, n-1));
+}
+```
+
+**_Using dynamic programming_**
+
+```cpp
+bool isInterleaved(string a, string b, string c) {
+    int n = a.length();
+    int m = b.length();
+
+    vector<vector<int>> table(n+1, vector<int>(m+1, false));
+
+    for(int i=0;i<=n;i++) {
+        for(int j=0;j<=m;j++) {
+            if(i == 0 && j == 0) table[i][j] = true;
+            else if(i == 0) table[i][j] = (c[i+j-1] == b[j-1] && table[i][j-1]);
+            else if(j == 0) table[i][j] = (c[i+j-1] == a[i-1] && table[i-1][j]);
+            else if(c[i+j-1] == a[i-1] || c[i+j-1] == b[j-1]) table[i][j] = table[i-1][j] || table[i][j-1];
+        }
+    }
+
+    return table[n][m];
+}
+```
+
+---
+#### [Is string K-Palindrome](https://www.careercup.com/question?id=6287528252407808)
+
+A k-palindrome is a string which transforms into a palindrome on removing at most k characters.
+
+Given a string S, and an interger K, print "YES" if S is a k-palindrome; otherwise print "NO".
+Constraints:
+S has at most 20,000 characters.
+0<=k<=30
+
+```sh
+Sample Test Case#1:
+Input - abxa 1
+Output - YES
+Sample Test Case#2:
+Input - abdxa 1
+Output - No
+```
+
+***Using Modified LCS***
+```cpp
+bool isKPalindromeStringOriginal(string str, int k) {
+    int n = str.length();
+    vector<vector<int>> table(n + 1, vector<int>(n + 1));
+    string revstr = str;
+    reverse(revstr.begin(), revstr.end());
+
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            if (i == 0 && j == 0) table[i][j] = 0;
+            else if (i == 0) table[i][j] = j; // insert
+            else if (j == 0) table[i][j] = i; // delete
+            else {
+                if (str[i - 1] == revstr[j - 1]) {
+                    // char match
+                    table[i][j] = table[i - 1][j - 1];
+                }
+                else {
+                    // count difference, minimum of insert and delete
+                    table[i][j] = 1 + min(table[i - 1][j], table[i][j - 1]);
+                }
+            }
+        }
+    }
+
+    int minDist = table[n][n];
+    cout << format("Minimum distance={} and k={} for string={}", minDist, k, str) << endl;
+
+    return minDist <= 2 * k;
+}
+```
+
+***K-Palindrome string optimized***
+```cpp
+bool isKPalindromeStringOptimized(string str, int k) {
+    int n = str.length();
+    vector<vector<int>> table(n + 1, vector<int>(n + 1, INT_MAX));
+    string revstr = str;
+    reverse(revstr.begin(), revstr.end());
+
+    for (int i = 0; i <= n; i++) {
+        int from = max(0, i - k);
+        int to = min(n, i + k);
+        for (int j = from; j <= to; j++) {
+            if (i == 0 && j == 0) table[i][j] = 0;
+            else if (i == 0) table[i][j] = j; // insert
+            else if (j == 0) table[i][j] = i; // delete
+            else {
+                if (str[i - 1] == revstr[j - 1]) {// char match
+                    table[i][j] = table[i - 1][j - 1];
+                }
+                else {
+                    // count difference, minimum of insert and delete
+                    table[i][j] = 1 + min(table[i - 1][j], table[i][j - 1]);
+                }
+            }
+        }
+    }
+
+    int minDist = table[n][n];
+    cout << format("Minimum distance={} and k={} for string={}", minDist, k, str) << endl;
+
+    return minDist <= 2 * k;
+}
+```
 ---

@@ -131,31 +131,31 @@ bool isRedBlackBalanced(Node *root, int& mnH, int& mxH) {
 #### [Construct Tree from Preorder and Inorder traversal]()
 
 ```cpp
-	static void test(vector<int>& preorder, vector<int>& inorder) {
-		unordered_map<int, int> map;
-		for (int i = 0; i < inorder.size(); i++) {
-			map[inorder[i]] = i;
-		}
+    static void test(vector<int>& preorder, vector<int>& inorder) {
+        unordered_map<int, int> map;
+        for (int i = 0; i < inorder.size(); i++) {
+            map[inorder[i]] = i;
+        }
 
-		ITNode* cur = constructTree(preorder, inorder, 0, inorder.size() - 1, map);
-		cout << to_string(cur) << endl;
-	}
+        ITNode* cur = constructTree(preorder, inorder, 0, inorder.size() - 1, map);
+        cout << to_string(cur) << endl;
+    }
 
-	ITNode* constructTree(vector<int>& preorder, vector<int>& inorder, int l, int r, unordered_map<int, int>& map)
-	{
-		if (l > r) return nullptr;
+    ITNode* constructTree(vector<int>& preorder, vector<int>& inorder, int l, int r, unordered_map<int, int>& map)
+    {
+        if (l > r) return nullptr;
 
-		static int index = 0;
-		ITNode* root = new ITNode(preorder[index++]);
-		if (l == r) return root;
+        static int index = 0;
+        ITNode* root = new ITNode(preorder[index++]);
+        if (l == r) return root;
 
-		int pos = map[root->val];
+        int pos = map[root->val];
 
-		root->left = constructTree(preorder, inorder, l, pos - 1, map);
-		root->right = constructTree(preorder, inorder, pos + 1, r, map);
+        root->left = constructTree(preorder, inorder, l, pos - 1, map);
+        root->right = constructTree(preorder, inorder, pos + 1, r, map);
 
-		return root;
-	}
+        return root;
+    }
 ```
 
 ---
@@ -232,6 +232,234 @@ double kClosest(ITNode* node, double val) {
     if (curDiff <= leftDiff && curDiff <= rightDiff) return node->val;
     else if (leftDiff <= curDiff && leftDiff <= rightDiff) return left;
     else return right;
+}
+```
+
+---
+
+#### [Find pairs with given sum in BST]()
+
+Given a BST and a value x. Find two nodes in the tree whose sum is equal x. Additional space: O(height of the tree). It is not allowed to modify the tree
+
+**_Using Set Method_**
+
+```cpp
+vector<pair<int, int>> findPairUsingSet(Node* root, int target) {
+    unordered_set<int> set;
+    vector<pair<int, int>> res;
+
+    findPairUsingSet(root, target, set, res);
+
+    return res;
+}
+void findPairUsingSet(Node* root, int target, unordered_set<int>& set, vector<pair<int, int>>& res) {
+    if (root) {
+        findPairUsingSet(root->left, target, set, res);
+        if (set.find(target - root->val) != set.end()) {
+            res.push_back({ target - root->val, root->val });
+        }
+        set.insert(root->val);
+        findPairUsingSet(root->right, target, set, res);
+    }
+}
+```
+
+**_Convert BST to DLL and search using 2 pointers_**
+
+```cpp
+vector<pair<int, int>> findPairUsingDLL(Node* root, int target) {
+    auto res = convertToDLL(root);
+    vector<pair<int, int>> result;
+    while (res.first != res.second && res.first->val < res.second->val) {
+        auto cur = res.first->val + res.second->val;
+        if (cur == target) {
+            result.push_back({ res.first->val , res.second->val });
+            res.first = res.first->right;
+            res.second = res.second->left;
+        }
+        else if (cur < target) res.first = res.first->right;
+        else res.second = res.second->left;
+    }
+    return result;
+}
+
+    pair<Node*, Node*> convertToDLL(Node* root) {
+    Node* prev = nullptr;
+    Node* first = nullptr, * last = nullptr;
+    convertToDLL(root, prev, first, last);
+
+    return { first, last };
+}
+
+void convertToDLL(Node* root, Node*& prev, Node*& first, Node*& last) {
+    if (root) {
+        convertToDLL(root->left, prev, first, last);
+
+        Node* dllNode = new Node(root->val);
+        if (prev == nullptr) first = dllNode;
+        else {
+            dllNode->left = prev;
+            prev->right = dllNode;
+        }
+        prev = last = dllNode;
+
+        convertToDLL(root->right, prev, first, last);
+    }
+}
+```
+
+**_Using 2 stacks to iterate using 2 pointers_**
+
+```cpp
+vector<pair<int, int>> findPairsUsingStack(Node* root, int target) {
+    stack<Node *> leftSt, rightSt;
+    Node* leftNode = root, * rightNode = root;
+
+    vector<pair<int, int>> result;
+    while (true) {
+        while (leftNode) { leftSt.push(leftNode); leftNode = leftNode->left; }
+        while (rightNode) { rightSt.push(rightNode); rightNode = rightNode->right; }
+        if (leftSt.empty() || rightSt.empty()) break;
+
+        leftNode = leftSt.top(); leftSt.pop();
+        rightNode = rightSt.top(); rightSt.pop();
+
+        if (leftNode->val > rightNode->val || leftNode == rightNode) break;
+
+        int sum = leftNode->val + rightNode->val;
+        if (sum == target) {
+            result.push_back({ leftNode->val , rightNode->val });
+            leftNode = leftNode->right;
+            rightNode = rightNode->left;
+        }
+        else if (sum < target) {
+            leftNode = leftNode->right;
+            rightSt.push(rightNode);
+            rightNode = nullptr;
+        }
+        else {
+            rightNode = rightNode->left;
+            leftSt.push(leftNode);
+            leftNode = nullptr;
+        }
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Huffman Encoding Decoding]()
+
+Huffman coding is a lossless data compression algorithm. The idea is to assign variable-length codes to input characters, lengths of the assigned codes are based on the frequencies of corresponding characters. The most frequent character gets the smallest code and the least frequent character gets the largest code.
+The variable-length codes assigned to input characters are Prefix Codes, means the codes (bit sequences) are assigned in such a way that the code assigned to one character is not the prefix of code assigned to any other character. This is how Huffman Coding makes sure that there is no ambiguity when decoding the generated bitstream.
+Let us understand prefix codes with a counter example. Let there be four characters a, b, c and d, and their corresponding variable length codes be 00, 01, 0 and 1. This coding leads to ambiguity because code assigned to c is the prefix of codes assigned to a and b. If the compressed bit stream is 0001, the de-compressed output may be “cccd” or “ccb” or “acd” or “ab”.
+See this for applications of Huffman Coding.
+There are mainly two major parts in Huffman Coding
+
+Build a Huffman Tree from input characters.
+Traverse the Huffman Tree and assign codes to characters.
+
+**_Data structure_**
+
+```cpp
+struct TreeNode {
+    char ch;
+    TreeNode *left, *right;
+
+    TreeNode(char ch): ch(ch) {}
+};
+```
+
+**_Encode_**
+
+```cpp
+string encode(string str, unordered_map<char, string>& codes) {
+    unordered_map<char, int> freq;
+    for(auto ch : str) freq[ch]++;
+
+    using Node = pair<int,TreeNode *>;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    for(auto e : freq) {
+        pq.push({e.second, new TreeNode(e.first)});
+    }
+
+    while(pq.size() > 1) {
+        auto left = pq.top(); pq.pop();
+        auto right = pq.top(); pq.top();
+
+        int freq = left.first + right.first;
+        TreeNode *parent = new TreeNode('$');
+        parent->left = left.second;
+        parent->right = right;
+
+        pq.push({freq, parent});
+    }
+
+    auto root = pq.top(); pq.pop();
+
+    traverseTree(root, "", codes);
+
+    string encoded;
+    for(auto ch : str) {
+        encoded += codes[ch];
+    }
+
+    return encoded;
+}
+
+void traverseTree(TreeNode *root, string cur, unordered_map<char, string>& codes) {
+    if(!root) return;
+    if(isLeaf(root)) {
+        codes[root->ch] = cur;
+        return;
+    }
+
+    traverseTree(root->left, cur + "0", codes);
+    traverseTree(root->right, cur + "1", codes);
+}
+```
+
+**_Decode_**
+
+```cpp
+string decode(TreeNode *root, string encodedStr) {
+    string result;
+
+    TreeNode *cur = root;
+    int pos = 0;
+    while(pos < encodedStr.length() && cur) {
+        if(isLeaf(cur)) {
+            result += cur->ch;
+            cur = root;
+        }
+
+        char ch = encodedStr[pos]++;
+        cur = (ch == '0' ? cur->left : cur->right);
+    }
+
+    return result;
+}
+```
+
+```cpp
+string decode(unordered_map<char, string> codes, string encodedStr) {
+    string result;
+
+    unordered_map<string, char> revCodeMap;
+    for (auto e : codes) revCodeMap[e.second] = e.first;
+
+    string cur;
+    for (char ch : encodedStr) {
+        cur += ch;
+        if (revCodeMap.find(cur) != revCodeMap.end()) {
+            result += revCodeMap[cur];
+            cur = "";
+        }
+    }
+
+    return result;
 }
 ```
 

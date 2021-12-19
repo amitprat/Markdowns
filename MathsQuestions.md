@@ -86,3 +86,48 @@ int countTrailingZerosOfFactorial(int n)
 ```
 
 ---
+
+#### [Largest prime factor](https://practice.geeksforgeeks.org/problems/largest-prime-factor2601/1)
+
+Given a number N, the task is to find the largest prime factor of that number.
+
+```cpp
+long long int largestPrimeFactor(int N){
+    for(int i=2;i*i<=N;) {
+        if(N%i == 0) {
+            N /= i;
+        } else {
+            i++;
+        }
+    }
+
+    return N;
+}
+```
+
+---
+
+#### [Find Nth root of M ](https://practice.geeksforgeeks.org/problems/find-nth-root-of-m5843/1)
+
+You are given 2 numbers (n , m); the task is to find n√m (nth root of m).
+
+```cpp
+int NthRoot(int n, int m)
+{
+    long long l = 1, r = m;
+    while(l<=r) {
+        long long mid = (l+r)/2;
+
+        long long x = 1;
+        for(int i=0;i<n;i++) { x *= mid; if(x>m) break; }
+
+        if(x == m) return mid;
+        else if(x < m) l = mid+1;
+        else r = mid-1;
+    }
+
+    return -1;
+}
+```
+
+---

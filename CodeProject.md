@@ -1831,6 +1831,41 @@ char FirstNonRepeating(string str){
 
 ---
 
+#### [Find First Unique Url](https://www.careercup.com/question?id=11856466)
+
+Given a very long list of URLs, find the first URL which is unique ( occurred exactly once ).
+I gave a O(n) extra space and O(2n) time solution, but he was expecting O(n) time, one traversal.
+
+```cpp
+string findFirstUniqueUrl(vector<string> urls)
+{
+    list<string> urlList;
+    unordered_map<string, list<string>::iterator> urlMap;
+
+    for (auto& url : urls) {
+        if (urlMap.find(url) != urlMap.end()) {
+            auto val = urlMap[url];
+            if (val != urlList.end()) {
+                urlList.erase(val);
+                urlMap[url] = urlList.end();
+            }
+        }
+        else {
+            urlList.push_back(url);
+            urlMap[url] = std::prev(urlList.end());
+        }
+    }
+
+    if (!urlList.empty()) {
+        return urlList.front();
+    }
+
+    return "Not Found";
+}
+```
+
+---
+
 #### [First Repeating Element ](https://practice.geeksforgeeks.org/problems/first-repeating-element4018/1#)
 
 Given an array arr[] of size n, find the first repeating element. The element should occurs more than once and the index of its first occurrence should be the smallest.
@@ -2150,275 +2185,6 @@ vector<int> primeDivision(int N){
     }
 
     return {};
-}
-```
-
----
-
-#### [Find Nth root of M ](https://practice.geeksforgeeks.org/problems/find-nth-root-of-m5843/1)
-
-You are given 2 numbers (n , m); the task is to find n√m (nth root of m).
-
-```cpp
-int NthRoot(int n, int m)
-{
-    long long l = 1, r = m;
-    while(l<=r) {
-        long long mid = (l+r)/2;
-
-        long long x = 1;
-        for(int i=0;i<n;i++) { x *= mid; if(x>m) break; }
-
-        if(x == m) return mid;
-        else if(x < m) l = mid+1;
-        else r = mid-1;
-    }
-
-    return -1;
-}
-```
-
----
-
-#### [Maximum Intervals Overlap ](https://practice.geeksforgeeks.org/problems/maximum-intervals-overlap5708/1#)
-
-Consider a big party where N guests came to it and a log register for guest’s entry and exit times was maintained. Find the minimum time at which there were maximum guests at the party. Note that entries in the register are not in any order.
-
-```cpp
-vector<int> findMaxGuests(int entry[], int exits[], int N)
-{
-    sort(entry, entry+N);
-    sort(exits, exits+N);
-
-    int i=0,j=0,mx=0,mntime=INT_MAX;
-    while(i<=N) {
-        if(i<N && entry[i] <= exits[j]) i++;
-        else {
-            if(i-j>mx) {
-                mntime = entry[i-1];
-                mx = i-j;
-            }
-            if(i == N) break;
-            j++;
-        }
-    }
-
-    return {mx,mntime};
-}
-```
-
-```cpp
-vector<int> findMaxGuests(int entry[], int exits[], int N)
-{
-    vector<pair<int,char>> v;
-    for(int i=0;i<N;i++) v.push_back({entry[i], 'S'});
-    for(int i=0;i<N;i++) v.push_back({exits[i], 'E'});
-    sort(v.begin(), v.end(),[](const auto& f, const auto& s) {
-        if(f.first != s.first) return f.first < s.first;
-        return s.second == 'S' ? false : true;
-    });
-
-    int mx = 0, curmx = 0, mn=INT_MAX;
-    for(auto e: v) {
-        if(e.second == 'S'){
-            curmx++;
-            if(curmx > mx) {
-                mn = e.first;
-                mx = curmx;
-            }
-        } else {
-            curmx--;
-        }
-    }
-
-    return {mx, mn};
-}
-```
-
----
-
-#### [Excel Sheet](https://practice.geeksforgeeks.org/problems/excel-sheet5448/1)
-
-Given a positive integer N, return its corresponding column title as it would appear in an Excel sheet.
-For N =1 we have column A, for 27 we have AA and so on.
-
-Note: The alphabets are all in uppercase.
-
-```cpp
-string ExcelColumn(int N)
-{
-    string res;
-    while(N) {
-        int rem = (N-1)%26;
-        res += ('A' + rem);
-        N = (N-1)/26;
-    }
-    reverse(res.begin(), res.end());
-
-    return res;
-}
-```
-
-```cpp
-string ExcelColumn(int N)
-{
-    string res;
-    while(N) {
-        int rem = N%26;
-
-        if(rem == 0) {
-            res += 'Z';
-            N = N/26 -1;
-        } else {
-            res += ('A' + rem -1);
-            N /= 26;
-        }
-    }
-    reverse(res.begin(), res.end());
-
-    return res;
-}
-```
-
-```cpp
-int excelToNum(string num) {
-    int res = 0;
-    for(char ch : num) {
-        res = res*26 + (ch-'A'+1);
-    }
-
-    return res;
-}
-```
-
----
-
-#### [Find median in a stream ](https://practice.geeksforgeeks.org/problems/find-median-in-a-stream-1587115620/1)
-
-Given an input stream of N integers. The task is to insert these numbers into a new stream and find the median of the stream formed by each insertion of X to the new stream.
-
-```cpp
-class MedianOfStream
-{
-    priority_queue<int,vector<int>,greater<int>> mnHeap;
-    priority_queue<int> mxHeap;
-
-    public:
-    void insertHeap(int &x)
-    {
-        mnHeap.push(x);
-        mxHeap.push(mnHeap.top()); mnHeap.pop();
-
-        if(mnHeap.size() < mxHeap.size()) {
-            mnHeap.push(mxHeap.top()); mxHeap.pop();
-        }
-    }
-
-    double getMedian()
-    {
-        if(mnHeap.size() > mxHeap.size()) return mnHeap.top();
-
-        return (mxHeap.top()+mnHeap.top())/2.0;
-    }
-};
-```
-
----
-
-#### [Largest prime factor ](https://practice.geeksforgeeks.org/problems/largest-prime-factor2601/1)
-
-Given a number N, the task is to find the largest prime factor of that number.
-
-```cpp
-long long int largestPrimeFactor(int N){
-    for(int i=2;i*i<=N;) {
-        if(N%i == 0) {
-            N /= i;
-        } else {
-            i++;
-        }
-    }
-
-    return N;
-}
-```
-
----
-
-#### [Pairwise swap elements of a linked list ](https://practice.geeksforgeeks.org/problems/pairwise-swap-elements-of-a-linked-list-by-swapping-data/1)
-
-Given a singly linked list of size N. The task is to swap elements in the linked list pairwise.
-For example, if the input list is 1 2 3 4, the resulting list after swaps will be 2 1 4 3.
-Note: You need to swap the nodes, not only the data. If only data is swapped then driver will print -1.
-
-```cpp
-Node* pairWiseSwap(struct Node* head)
-{
-    Node *prev = nullptr;
-    Node *newHead = head;
-    while(head && head->next) {
-        // store next and nextnext pointers
-        auto nextnext = head->next->next;
-        auto next = head->next;
-
-        // reverse link (1->2 to 2->1)
-        head->next = nullptr;
-        next->next = head;
-
-        // connect reversed links to nextnext link
-        head->next = nextnext;
-
-        // correct head if required (its always need for n >= 2)
-        if(!prev) newHead = next;
-        else prev->next = next;
-
-        // move to next iteration
-        prev = head;
-        head = nextnext;
-    }
-
-    return newHead;
-}
-```
-
----
-
-#### [Minimum Platforms](https://practice.geeksforgeeks.org/problems/minimum-platforms-1587115620/1)
-
-Given arrival and departure times of all trains that reach a railway station. Find the minimum number of platforms required for the railway station so that no train is kept waiting.
-Consider that all the trains arrive on the same day and leave on the same day. Arrival and departure time can never be the same for a train but we can have arrival time of one train equal to departure time of the other. At any given instance of time, same platform can not be used for both departure of a train and arrival of another train. In such cases, we need different platforms.
-
-```sh
-Input: n = 6
-arr[] = {0900, 0940, 0950, 1100, 1500, 1800}
-dep[] = {0910, 1200, 1120, 1130, 1900, 2000}
-Output: 3
-Explanation:
-Minimum 3 platforms are required to
-safely arrive and depart all trains.
-```
-
-```cpp
-int findPlatform(int arr[], int dep[], int n)
-{
-    if(n == 0) return 0;
-
-    sort(arr, arr+n);
-    sort(dep, dep+n);
-
-    int i =0, j =0;
-    int cnt = 0, mxCnt = 0;
-    while(i<n) {
-        if(arr[i]<=dep[j]) {
-            cnt++; i++;
-        } else {
-            mxCnt = max(mxCnt, cnt);
-            cnt--;
-            j++;
-        }
-    }
-
-    return mxCnt;
 }
 ```
 
