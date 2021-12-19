@@ -918,6 +918,7 @@ bool isInterleaved(string a, string b, string c) {
 ```
 
 ---
+
 #### [Is string K-Palindrome](https://www.careercup.com/question?id=6287528252407808)
 
 A k-palindrome is a string which transforms into a palindrome on removing at most k characters.
@@ -936,7 +937,8 @@ Input - abdxa 1
 Output - No
 ```
 
-***Using Modified LCS***
+**_Using Modified LCS_**
+
 ```cpp
 bool isKPalindromeStringOriginal(string str, int k) {
     int n = str.length();
@@ -969,7 +971,8 @@ bool isKPalindromeStringOriginal(string str, int k) {
 }
 ```
 
-***K-Palindrome string optimized***
+**_K-Palindrome string optimized_**
+
 ```cpp
 bool isKPalindromeStringOptimized(string str, int k) {
     int n = str.length();
@@ -1002,4 +1005,399 @@ bool isKPalindromeStringOptimized(string str, int k) {
     return minDist <= 2 * k;
 }
 ```
+
+---
+
+#### [Longest Palindromic Subsequence](https://www.geeksforgeeks.org/longest-palindromic-subsequence-dp-12/)
+
+Given a sequence, find the length of the longest palindromic subsequence in it.
+
+```sh
+Longest palindromic subsequence in 'GEEKS FOR GEEKS' is 'EE F EE'
+Longest palindromic subsequence in 'a' is 'a'
+Longest palindromic subsequence in 'aba' is 'aba'
+Longest palindromic subsequence in 'abba' is 'abba'
+Longest palindromic subsequence in 'abcba' is 'abcba'
+Longest palindromic subsequence in 'abcdasdafxcfdsg' is 'sdfxfds'
+Longest palindromic subsequence in 'iafn asdaad sdf' is 'f daad f'
+```
+
+**_Using Recursion_**
+
+```cpp
+int longestPalindromicSubsequence(string& str, int l, int r) {
+    if(l > r) return 0;
+    if(l == r) return 1;
+
+    if(str[l] == str[r]) return 2 + longestPalindromicSubsequence(str, l+1, r-1);
+    return max(longestPalindromicSubsequence(str, l+1,r), longestPalindromicSubsequence(str, l, r-1));
+}
+```
+
+```cpp
+string longestPalindromicSubsequence(string& str, int l, int r) {
+    if(l > r) return "";
+    if(l == r) return string(1, str[l]);
+
+    if(str[l] == str[r]) return str[l] + longestPalindromicSubsequence(str, l+1, r-1) + str[r];
+
+    auto ls = longestPalindromicSubsequence(str, l+1, r);
+    auto rs = longestPalindromicSubsequence(str, l, r-1);
+
+    return ls.length() > rs.length() ? ls : rs;
+}
+```
+
+**_Using Dynamic Programming_**
+
+```cpp
+int longestPalindromicSubsequence(string& str) {
+    int n = str.length();
+    vector<vector<int>> table(n, vector<int>(n, 0));
+    for (int i = 0; i < n; i++) table[i][i] = 1;
+
+    for (int p = 2; p <= n; p++) {
+        for (int i = 0; i <= n - p; i++) {
+            int j = i + p - 1;
+            if (i == j) table[i][j] = 1;
+            else if (str[i] == str[j]) {
+                if (i + 1 == j) table[i][j] = 2;
+                else table[i][j] = 2 + table[i + 1][j - 1];
+            }
+            else {
+                table[i][j] = max(table[i + 1][j], table[i][j - 1]);
+            }
+        }
+    }
+
+    return table[0][n - 1];
+}
+```
+
+```cpp
+string lpsStrDP(string str) {
+    int n = str.length();
+    vector<vector<int>> memo(n, vector<int>(n, 0));
+    for (int i = 0; i < n; i++) memo[i][i] = 1;
+
+    for (int p = 2; p <= n; p++) {
+        for (int i = 0; i < n - p + 1; i++) {
+            int j = i + p - 1;
+            if (str[i] == str[j]) {
+                if (p == 2) memo[i][j] = 2;
+                else memo[i][j] = 2 + memo[i + 1][j - 1];
+            }
+            else {
+                memo[i][j] = max(memo[i + 1][j], memo[i][j - 1]);
+            }
+        }
+    }
+
+    string left, right;
+    int l = 0, r = n - 1;
+    while (l <= r) {
+        if (l == r) left += str[l++];
+        else if (str[l] == str[r]) {
+            left += str[l++]; right = str[r--] + right;
+        }
+        else if (memo[l + 1][r] > memo[l][r - 1]) l++;
+        else r--;
+    }
+
+    return left + right;
+}
+```
+
+---
+
+#### [Longest Palindromic substring](https://leetcode.com/problems/longest-palindromic-substring/)
+
+Given a string s, return the longest palindromic substring in s.
+
+```sh
+Longest palindromic substring for str='forgeeksskeegfor' is 'geeksskeeg'
+Longest palindromic substring for str='abcsdc' is 'a'
+Longest palindromic substring for str='sdfacxcasvsa' is 'acxca'
+```
+
+**_Using expand around center_**
+
+```cpp
+string longestPalSubstrExpandAroundCenter(string str) {
+    string res;
+    int n = str.length();
+    for (int i = 0; i < n; i++) {
+        auto cur = expand(str, i, i, n);
+        if (cur.length() > res.length()) res = cur;
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        auto cur = expand(str, i, i + 1, n);
+        if (cur.length() > res.length()) res = cur;
+    }
+
+    return res;
+}
+
+string expand(string& str, int l, int r, int n) {
+    while (l >= 0 && r < n && str[l] == str[r]) {
+        l--; r++;
+    }
+    return str.substr(l + 1, r - l - 1);
+}
+```
+
+**_Using dynamic programming_**
+
+```cpp
+string longestPalSubstrDP(string str) {
+    string longest = "";
+    int n = str.length();
+    vector<vector<bool>> table(n, vector<bool>(n, false));
+
+    for (int i = 0; i < n; i++) {
+        if (longest.length() < 1) longest = string(1, str[i]);
+        table[i][i] = true;
+    }
+    for (int i = 0; i < n - 1; i++) {
+        if (str[i] == str[i + 1]) {
+            if (longest.length() < 2) longest = str[i] + str[i + 1];
+            table[i][i + 1] = true;
+        }
+    }
+
+    for (int p = 3; p <= n; p++) {
+        for (int i = 0; i < n - p + 1; i++) {
+            int j = i + p - 1;
+            if (str[i] == str[j] && table[i + 1][j - 1]) {
+                if (j - i + 1 > longest.length()) {
+                    longest = str.substr(i, j - i + 1);
+                }
+                table[i][j] = true;
+            }
+        }
+    }
+
+    return longest;
+}
+```
+
+---
+
+#### [Longest repeated substring](https://www.careercup.com/question?id=5931067269709824)
+
+```cpp
+string longestRepeatedSubstring(string str) {
+    if (!isPeriod(str)) return "";
+
+    return getPeriod(str);
+}
+
+bool isPeriod(string s)
+{
+    string rep = s + s;
+    string part = s.substr(1, s.length() - 2);
+
+    return rep.find(part) != string::npos;
+}
+
+string getPeriod(string s)
+{
+    int l = s.length();
+    for (int i = l / 2; i > 0; i--)
+    {
+        if (l % i == 0 && isRepeat(s, i, l)) return s.substr(0, i);
+    }
+
+    return "";
+}
+
+bool isRepeat(string s, int patLen, int totalLen)
+{
+    string period = s.substr(0, patLen);
+    int j = patLen;
+
+    while (j + patLen <= totalLen)
+    {
+        if (period != s.substr(j, patLen)) return false;
+        j += patLen;
+    }
+
+    return true;
+}
+```
+
+---
+
+#### [Longest repeated subsequence](https://www.careercup.com/question?id=5931067269709824)
+
+Given a string (1-d array) , find if there is any sub-sequence that repeats itself.
+Here, sub-sequence can be a non-contiguous pattern, with the same relative order.
+
+Eg:
+
+1. abab <------yes, ab is repeated
+2. abba <---- No, a and b follow different order
+3. acbdaghfb <-------- yes there is a followed by b at two places
+4. abcdacb <----- yes a followed by b twice
+
+**_Using recursion_**
+
+```cpp
+string getLongestRepeatedSubseqRec(string s)
+{
+    string res;
+
+    auto len = longestRepeatedSubseqRec(s, s, 0, 0, "", res);
+
+    return res;
+}
+
+int longestRepeatedSubseqRec(string s1, string s2, int i, int j, string cur, string& res)
+{
+    if(i >= s1.length() || j >= s2.length()) {
+        if(cur.length() > res.length()) res = cur;
+        return res.length();
+    }
+
+    if(i != j && s1[i] == s2[j]) return 1 + longestRepeatedSubseqRec(s1, s2, i+1, j+1, cur+s1[i], res);
+    else return max(longestRepeatedSubseqRec(s1, s2, i+1, j, cur, res), longestRepeatedSubseqRec(s1, s2, i, j+1, cur, res));
+}
+```
+
+**_Using Dynamic programming_**
+
+```cpp
+pair<bool, int> longestReaptedSubsequenceDP(string str) {
+    auto len = longestReaptedSubsequenceDP(str, str);
+
+    return {len>1, len}
+}
+
+int longestReaptedSubsequenceDP(string s1, string s2) {
+    int n = s1.length();
+    int m = s2.length();
+    vector<vector<int>> memo(n+1, vector<int>(m+1));
+
+    for(int i=0;i<=n;i++) {
+        for(int j=0;j<=m;j++) {
+            if(i == 0 || j == 0) memo[i][j] = 0;
+            else if(i != j && s1[i] == s2[j]) memo[i][j] = memo[i-1][j-1] + 1;
+            else memo[i][j] = max(memo[i-1][j], memo[i],[j-1]);
+        }
+    }
+
+    return memo[n][m];
+}
+```
+
+---
+
+#### [Longest word made of others](https://stackoverflow.com/questions/32984927/find-the-longest-word-made-of-other-words)
+
+```sh
+EXAMPLE
+Input: test, tester, testertest, testing, testingtester
+Output: testingtester
+```
+
+**_Using simple recursion_**
+
+```cpp
+string longestWordMadeFromOthersWithoutMemoization(vector<string> words) {
+    unordered_set<string> dict;
+    for (auto word : words) dict.insert(word);
+
+    sort(words.begin(), words.end(), [](const auto& f, const auto& s) {return f.size() > s.size(); });
+
+    for (auto word : words) {
+        dict.erase(word);
+        if (canBuildFromOtherWordsWithoutMemoization(word, dict)) return word;
+        dict.insert(word);
+    }
+
+    return "";
+}
+
+bool canBuildFromOtherWordsWithoutMemoization(string word, unordered_set<string> dict) {
+    if (dict.find(word) != dict.end()) return true;
+    for (int i = 1; i <= word.length(); i++) {
+        string left = word.substr(0, i);
+        if (dict.find(left) != dict.end() && canBuildFromOtherWordsWithoutMemoization(word.substr(i), dict)) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+**_Using recursion with memoization_**
+
+```cpp
+string longestWordMadeFromOthersWithMemoization(vector<string> words) {
+    unordered_set<string> dict;
+    for (auto word : words) dict.insert(word);
+
+    sort(words.begin(), words.end(), [](const auto& f, const auto& s) {return f.size() > s.size(); });
+
+    for (auto word : words) {
+        dict.erase(word);
+        if (canBuildFromOtherWordsWithMemoization(word, dict)) return word;
+        dict.insert(word);
+    }
+
+    return "";
+}
+
+bool canBuildFromOtherWordsWithMemoization(string word, unordered_set<string>& dict) {
+    if (dict.find(word) != dict.end()) return true;
+
+    for (int i = 1; i <= word.length(); i++) {
+        string left = word.substr(0, i);
+        if (dict.find(left) != dict.end() && canBuildFromOtherWordsWithMemoization(word.substr(i), dict)) {
+            dict.insert(word.substr(i)); // memoize the current result (we can reach this combined string)
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+**_Using trie_**
+
+```cpp
+string longestWordMadeFromOthersWithTrie(vector<string> words) {
+    Trie trie;
+
+    for (auto word : words) {
+        trie.insert(word);
+    }
+
+    sort(words.begin(), words.end(), [](auto f, auto s) {return f.length() > s.length(); });
+
+    for (auto word : words) {
+        trie.remove(word);
+
+        if (exists(trie, word)) return word;
+
+        trie.insert(word);
+    }
+
+    return "";
+}
+
+bool exists(Trie& trie, string word) {
+    if (word.empty()) return true;
+    for (int i = 1; i <= word.length(); i++) {
+        auto left = word.substr(0, i);
+        auto right = word.substr(i);
+
+        if (trie.contains(left) && exists(trie, right)) return true;
+    }
+
+    return false;
+}
+```
+
 ---

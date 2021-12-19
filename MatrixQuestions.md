@@ -109,7 +109,7 @@ int numIslands(vector<vector<char>>& grid) {
 
 ---
 
-####[Find longest consecutive sequence of neighhour elements in matrix](https://www.careercup.com/question?id=5147801809846272)
+#### [Find longest consecutive sequence of neighhour elements in matrix](https://www.careercup.com/question?id=5147801809846272)
 
 Given a NxN matrix which contains all distinct 1 to n^2 numbers, write code to print sequence of increasing adjacent sequential numbers.
 
@@ -165,7 +165,7 @@ vector<int> findLongestSeq(vector<vector<int>> matrix)
 
 ---
 
-####[Find longest consecutive sequence with equal characters and digits]()
+#### [Find longest consecutive sequence with equal characters and digits]()
 
 ```sh
 { "a1b2","a","1","a1","a11","a11b","ab123c","213sdvS23vSvs123cscsCR1412323t1214rcR1241" }
@@ -332,6 +332,52 @@ int kadane(vector<int> arr, int& start, int& end) {
     }
 
     return mxSum;
+}
+```
+
+---
+
+#### [Maximum Rectangle made of 1s]()
+
+Given a 2D array of 1 and 0, Find the largest rectangle (may not be square) which is made up of all 1 or 0.
+
+```cpp
+int maxRectangle(vector<vector<int>> matrix)
+{
+    int maxSize = 0;
+
+    for (int i = 0; i < matrix.size(); i++) {
+        if (i > 0) {
+            // sum the above rows
+            for (int j = 0; j < matrix[i].size(); j++) {
+                if (matrix[i][j] == 1) matrix[i][j] += matrix[i - 1][j];
+            }
+        }
+
+        int curSize = getMaxSize(matrix[i]);
+        maxSize = max(maxSize, curSize);
+    }
+
+    return maxSize;
+}
+
+int getMaxSize(vector<int> matrix) {
+    stack<int> st;
+    int i = 0;
+    int mxArea = 0;
+
+    while (i < matrix.size() || !st.empty()) {
+        if (i < matrix.size() && (st.empty() || matrix[i] >= matrix[st.top()])) {
+            st.push(i++);
+        }
+        else {
+            auto height = matrix[st.top()]; st.pop();
+            auto width = st.empty() ? i : (i - st.top() - 1);
+            mxArea = max(mxArea, height * width);
+        }
+    }
+
+    return mxArea;
 }
 ```
 

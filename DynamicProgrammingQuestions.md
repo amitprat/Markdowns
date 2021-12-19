@@ -220,6 +220,117 @@ int lisDP(int a[], int n) {
 
 ---
 
+#### [Longest Increasing Subsequence in Matrix](https://www.geeksforgeeks.org/find-the-longest-path-in-a-matrix-with-given-constraints/)
+
+```sh
+[
+   {  1,   2,   9, }
+   {  5,   3,   8, }
+   {  4,   6,   7, }
+]
+Result = (6,4)
+Longest subsequence: 6 7 8 9
+
+[
+   {  1,   2,   8, }
+   {  9,   3,   7, }
+   {  4,   5,   6, }
+]
+Result = (4,5)
+Longest subsequence: 4 5 6 7 8
+```
+
+**_Using Recursion_**
+
+```cpp
+static pair<int, int> longestSequenceRec(vector<vector<int>> mat) {
+    int start = 0, longest = 0;
+    int n = mat.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            int curLongest = longestSequenceRec(mat, i, j, n);
+            if (curLongest > longest) {
+                start = mat[i][j];
+                longest = curLongest;
+            }
+        }
+    }
+
+    return { start, longest };
+}
+
+static int longestSequenceRec(vector<vector<int>> mat, int r, int c, int n) {
+    int longest = 1;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (abs(i) != abs(j)) {
+                int nr = r + i;
+                int nc = c + j;
+
+                if (!isValid(nr, nc, n) || mat[r][c] + 1 != mat[nr][nc]) continue;
+
+                int curLongest = 1 + longestSequenceRec(mat, nr, nc, n);
+                longest = max(longest, curLongest);
+            }
+        }
+    }
+
+    return longest;
+}
+
+static bool isValid(int r, int c, int n) {
+    return !(r < 0 || c < 0 || r >= n || c >= n);
+}
+```
+
+**_Using DP_**
+
+```cpp
+static pair<int, int> longestSequenceDP(vector<vector<int>> mat) {
+    int n = mat.size();
+    vector<vector<int>> memo(n, vector<int>(n, -1));
+
+    int start = 0, longest = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (memo[i][j] == -1) {
+                int curLongest = longestSequenceDP(mat, i, j, n, memo);
+                if (curLongest > longest) {
+                    start = mat[i][j];
+                    longest = curLongest;
+                }
+            }
+        }
+    }
+
+    return { start, longest };
+}
+
+static int longestSequenceDP(vector<vector<int>> mat, int r, int c, int n, vector<vector<int>>& memo) {
+    if (memo[r][c] != -1) return memo[r][c];
+
+    int longest = 1;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (abs(i) == abs(j)) continue;
+            int nr = r + i;
+            int nc = c + j;
+
+            if (!isValid(nr, nc, n) || mat[r][c] + 1 != mat[nr][nc]) continue;
+
+            int curLongest = 1 + longestSequenceDP(mat, nr, nc, n, memo);
+            longest = max(longest, curLongest);
+        }
+    }
+
+    memo[r][c] = longest;
+
+    return memo[r][c];
+}
+```
+
+---
+
 #### [Longest Common Substring ](https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1)
 
 Given two strings. The task is to find the length of the longest common substring.
@@ -236,24 +347,92 @@ int longestCommonSubstrRec(string S1, string S2, int n, int m, int len)
 
     if(S1[n-1] == S2[m-1]) return longestCommonSubstrRec(S1,S2,n-1,m-1,len+1);
 
-    return max(longestCommonSubstrRec(S1,S2,n-1,m,0),
-                longestCommonSubstrRec(S1,S2,n,m-1,0));
+    return max(longestCommonSubstrRec(S1,S2,n-1,m,0), longestCommonSubstrRec(S1,S2,n,m-1,0));
 }
+
 int longestCommonSubstrDP (string S1, string S2, int n, int m)
 {
     vector<vector<int>> table(n+1,vector<int>(m+1));
     int longest = 0;
     for(int i=0;i<=n;i++) {
         for(int j=0;j<=m;j++) {
+            table[i][j] = 0;
             if(i == 0 || j == 0) table[i][j] = 0;
-            else if(S1[i-1] != S2[j-1]) table[i][j] = 0;
-            else table[i][j] = 1 + table[i-1][j-1];
+            else if(S1[i-1] == S2[j-1]) table[i][j] = 1 + table[i-1][j-1];
 
             longest = max(longest, table[i][j]);
         }
     }
 
     return longest;
+}
+```
+
+---
+
+#### [Longest Common Subsequence]()
+
+Longest common subsequence for str1=AGGTAB and str2=GXTXAYB is length=4
+Subsequence: GTAB
+
+```cpp
+int longestCommonSubsequenceRec(string& str1, string& str2, int n, int m) {
+    if(n == 0 || m == 0) return 0;
+    if(str1[n-1] == str2[m-1]) return 1 + longestCommonSubsequenceRec(str1, str2, n-1, m-1);
+    return max(longestCommonSubsequenceRec(str1, str2, n-1, m), longestCommonSubsequenceRec(str1, str2, n, m-1));
+}
+
+int longestCommonSubsequenceDP(string& str1, string& str2, int n, int m) {
+    vector<vector<int>> table(n+1, vector<int>(m+1));
+
+    for(int i=0;i<=n;i++) {
+        for(int j=0;j<=m;j++) {
+            if(i == 0 || j == 0) table[i][j] = 0;
+            else if(str1[i-1] == str2[j-1]) table[i][j] = 1 + table[i-1][j-1];
+            else table[i][j] = max(table[i-1][j], table[i][j-1]);
+        }
+    }
+
+    return table[n][m];
+}
+```
+
+**_Print the longets subsequence_**
+
+```cpp
+string longestCommonSubsequenceDP(string a, int n, string b, int m) {
+    vector<vector<int>> table(n + 1, vector<int>(m + 1));
+
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= m; j++) {
+            if (i == 0 || j == 0) table[i][j] = 0;
+            else if (a[i - 1] == b[j - 1]) table[i][j] = 1 + table[i - 1][j - 1];
+            else table[i][j] = max(table[i - 1][j], table[i][j - 1]);
+        }
+    }
+
+    string res;
+    int i = n, j = m;
+    while (table[i][j] > 0) {
+        if (i == 0) {
+            j--;
+        }
+        else if (j == 0) {
+            i--;
+        }
+        else if (a[i - 1] == b[j - 1]) {
+            res += a[i - 1]; i--; j--;
+        }
+        else if (table[i - 1][j] > table[i][j - 1]) {
+            i--;
+        }
+        else {
+            j--;
+        }
+    }
+    reverse(res.begin(), res.end());
+
+    return res;
 }
 ```
 

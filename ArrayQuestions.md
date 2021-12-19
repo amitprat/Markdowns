@@ -1014,3 +1014,122 @@ void largestConcatenation() {
 ```
 
 ---
+
+#### [Least number of perfect sqaures to reach N](https://www.careercup.com/question?id=5725584103571456)
+
+Given a number "n", find the least number of perfect square numbers sum needed to get "n"
+
+```sh
+n=12, return 3 (4 + 4 + 4) = (2^2 + 2^2 + 2^2) NOT (3^2 + 1 + 1 + 1)
+n = 6, return 3 (4 + 1 + 1) = (2^2 + 1^2 + 1^2)
+```
+
+```cpp
+int leastNumberOfPerfectSquares(int n) {
+    vector<int> table(n+1);
+    for(int i=0;i<=n;i++) table[i] = i;
+
+    for(int i=2;i*i<=n;i++) {
+        int p = pow(i, 2);
+        for(int j=p;j<=n;j++) {
+            table[j] = min(table[j], 1 + table[j-p]);
+        }
+    }
+
+    return table[n];
+}
+```
+
+---
+
+#### [Maximum value of array by applying operators at different places]()
+
+```sh
+Your input is a double array, and you can use *, +, -, and () parenthesis anywhere to create and output the maximum possible value.
+
+Ex:
+input is {3,4,5,1} --> output: 72
+input is {1,1,1,5} --> output: 15
+
+Follow up, if there are numbers <0
+```
+
+```cpp
+int maxValue(vector<int>& arr) {
+    int n = arr.size();
+    vector<vector<int>> memo(n, vector<int>(n, INT_MIN));
+    vector<char> operators = {'+','*','-'};
+
+    return mxValue(arr, 0, n-1, operators, memo);
+}
+
+int mxValue(vector<int>& arr, int l, int r, vector<char>& operators, vector<vector<int>>& memo) {
+    if(memo[l][r] != INT_MIN) return memo[l][r];
+    if(l == r) return arr[l];
+
+    int mxValue = INT_MIN;
+    for(int m=l;m<=r;m++) {
+        auto left = mxValue(arr, l, m, r, operators, memo);
+        auto right = mxValue(arr, m+1, r, operators, memo);
+
+        for(auto op : operators) {
+            mxValue = max(mxValue, apply(left, right, op));
+        }
+    }
+    memo[l][r] = mxValue;
+
+    return memo[l][r];
+}
+
+double apply(double left, double right, char ch) {
+    switch (ch) {
+    case '+': return left + right;
+    case '-': return left - right;
+    case '*': return left * right;
+    }
+    return 0;
+}
+```
+
+---
+
+#### [Maximum product subsequence]()
+
+Given a sequence of non-negative integers find a subsequence of length 3 having maximum product with the numbers of the subsequence
+being in ascending order.
+Example:
+Input: 6 7 8 1 2 3 9 10
+Ouput: 8 9 10
+
+```cpp
+static pair<int, vector<int>> findSubsequenceWithMaxProduct(vector<int>& arr) {
+    int mxProduct = 0;
+    vector<int> result;
+
+    for (int i = 1; i < arr.size() - 1; i++) {
+        int leftHighestLower = 0;
+        for (int j = i - 1; j >= 0; j--) {
+            if (arr[j] < arr[i] && arr[j] > leftHighestLower) {
+                leftHighestLower = arr[j];
+            }
+        }
+
+        int rightHighestHigher = 0;
+        for (int j = i + 1; j < arr.size(); j--) {
+            if (arr[j] > arr[i] && arr[j] > rightHighestHigher) {
+                rightHighestHigher = arr[j];
+            }
+        }
+
+        int curMax = leftHighestLower * arr[i] * rightHighestHigher;
+        if (curMax > mxProduct) {
+            mxProduct = curMax;
+            result = { leftHighestLower , arr[i], rightHighestHigher };
+        }
+    }
+
+    return { mxProduct, result };
+}
+```
+
+---
