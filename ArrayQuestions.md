@@ -1024,15 +1024,58 @@ n=12, return 3 (4 + 4 + 4) = (2^2 + 2^2 + 2^2) NOT (3^2 + 1 + 1 + 1)
 n = 6, return 3 (4 + 1 + 1) = (2^2 + 1^2 + 1^2)
 ```
 
+**_Using recursion_**
+
+```cpp
+int leastNumberOfPerfectSquares(int n) {
+    if(n == 0) return 0;
+
+    int p = sqrt(n);
+    int cnt = 999;
+    for(int i=p;i>=1;i--) {
+        cnt = min(cnt, 1 + leastNumberOfPerfectSquares(n-i*i));
+    }
+
+    return cnt;
+}
+```
+
+**_Using recursion with memoization_**
+
+```cpp
+int leastNumberOfPerfectSquares(int n) {
+    vector<int> memo(n+1, -1);
+
+    return leastNumberOfPerfectSquares(n, memo);
+}
+
+int leastNumberOfPerfectSquares(int n, vector<int>& memo) {
+    if(n == 0) return 0;
+    if(n < 0) return INT_MAX;
+    if(memo[n] != -1) return memo[n];
+
+    int mnVal = INT_MAX;
+    for(int i=1;i*i<=n;i++) {
+        int val = leastNumberOfPerfectSquares(n-i*i, memo);
+        if(val != INT_MAX) mnVal = min(mnVal, val+1);
+    }
+
+    memo[n] = mnVal;
+
+    return memo[n];
+}
+```
+
+**_Using Dynamic Programming_**
+
 ```cpp
 int leastNumberOfPerfectSquares(int n) {
     vector<int> table(n+1);
     for(int i=0;i<=n;i++) table[i] = i;
 
-    for(int i=2;i*i<=n;i++) {
-        int p = pow(i, 2);
-        for(int j=p;j<=n;j++) {
-            table[j] = min(table[j], 1 + table[j-p]);
+    for(int i=1;i*i<=n;i++) {
+        for(int j=i*i;j<=n;j++) {
+            table[j] = min(table[j], 1 + table[j-i*i]);
         }
     }
 
@@ -1129,6 +1172,212 @@ static pair<int, vector<int>> findSubsequenceWithMaxProduct(vector<int>& arr) {
     }
 
     return { mxProduct, result };
+}
+```
+
+---
+
+#### [Minimum length subsequence in array with sum greater than given sum](https://www.careercup.com/question?id=5653018213089280)
+
+Determine minimum sequence of adjacent values in the input parameter array that is greater than input parameter sum.
+
+Eg
+Array 2,1,1,4,3,6. and Sum is 8
+Answer is 2, because 3,6 is minimum sequence greater than 8.
+
+```cpp
+vector<int> getMinSeq(vector<int> arr, int sum)
+{
+    int s = 0, e = 0, curSum = 0;
+    int n = arr.size();
+    pair<int, int> p = { 0,-1 };
+    while (s <= e && e <= n) {
+        if (curSum < sum) curSum += arr[e++];
+        else curSum -= arr[s++];
+
+        if (curSum > sum) {
+            p = { s, e };
+        }
+
+        if (e >= n && curSum <= 0) break;
+    }
+
+    vector<int> res;
+    for (auto i = p.first; i <= p.second; i++) res.push_back(arr[i]);
+
+    return res;
+}
+```
+
+---
+
+#### [Multiply array elements except itself]()
+
+Multiply array elements except self, before [2, 3, 1, 4] , after [12, 8, 24, 6]
+
+```cpp
+vector<int> multiplyExceptSelf(vector<int> arr) {
+    int l = 1, r = 1;
+    int n = arr.size();
+    vector<int> res(n, 1);
+
+    for(int i=0;i<n;i++) {
+        res[i] *= l;
+        res[n-i-1] *= r;
+
+        l *= arr[i];
+        r *= arr[n-i-1];
+    }
+
+    return res;
+}
+```
+
+---
+
+#### [Arrange elements by distance between them]()
+
+Input: 3
+Output: [3 1 2 1 3 2]
+
+```cpp
+void permutationDistance(int n) {
+    vector<int> arr(2 * n, 0);
+    unordered_set<int> visited;
+
+    bool res = generatePermutation(arr, visited, n);
+    if (res) {
+        cout << "Permutations: ";
+        for (int i = 0; i < 2 * n; i++) cout << arr[i] << " ";
+        cout << endl;
+    }
+    else {
+        cout << "Not possible" << endl;
+    }
+}
+
+bool generatePermutation(vector<int>& arr, unordered_set<int> visited, int n)
+{
+    if (visited.size() == n) return true;
+
+    for (int i = 1; i <= n; i++) {
+        if (visited.find(i) != visited.end()) continue;
+        for (int j = 0; j < arr.size() - i - 1; j++) {
+            if (arr[j] == 0 && arr[j + i + 1] == 0) {
+                arr[j] = arr[j + i + 1] = i;
+                visited.insert(i);
+                if (generatePermutation(arr, visited, n)) return true;
+                arr[j] = arr[j + i + 1] = 0;
+                visited.erase(i);
+            }
+        }
+    }
+
+    return false;
+}
+```
+
+---
+
+#### [Number of subarrays with product less than K]()
+
+Number of subarrays in [1, 2, 3, 4] with product less than 20 are 8
+
+```cpp
+int numSubarrayProductLessThanK(vector<int>& arr, int k) {
+    int prod = 1;
+    int s = 0, e = 0;
+    int res = 0;
+    while (s <= e && e <= arr.size()) {
+        if (prod <= k) {
+            if (prod <= k) res += (e - s); // this is correct because we need to consider all subarrays
+            if (e < arr.size()) prod *= arr[e];
+            e++;
+        }
+        else {
+            prod /= arr[s++];
+        }
+    }
+
+    return res;
+}
+```
+
+---
+
+#### [Print array elements in order]()
+
+Implement iterator over sorted arrays/vectors to print array elements in order.
+
+```cpp
+class PrintArrayElementsInOrder {
+    using T = tuple<int, int, int>;
+    vector<vector<int>> input;
+    priority_queue<T, vector<T>, greater<T>> pq;
+
+public:
+    PrintArrayElementsInOrder(vector<vector<int>> input) :input(input) {
+        for (int i = 0; i < input.size(); i++) {
+            if (!input[i].empty()) pq.push({ input[i][0] , i, 0 }); // compare by first element in tuple
+        }
+    }
+
+    bool hasNext() {
+        return !pq.empty();
+    }
+
+    int next() {
+        auto item = pq.top(); pq.pop();
+        auto curVal = std::get<0>(item);
+        auto arrIdx = std::get<1>(item);
+        auto nextPos = std::get<2>(item) + 1; // next position in this array
+
+        if (nextPos < input[arrIdx].size()) { // not equalTo because that is end of array
+            pq.push({ input[arrIdx][nextPos], arrIdx, nextPos });
+        }
+
+        return curVal;
+    }
+
+public:
+    static void test() {
+        vector<vector<int>> input = { {1, 5, 7}, {2, 3, 10}, {4, 6, 9 } };
+
+        PrintArrayElementsInOrder obj(input);
+        while (obj.hasNext()) {
+            cout << obj.next() << " ";
+        }
+    }
+};
+```
+
+---
+
+#### [Can arrange numbers divisible by K](https://leetcode.com/problems/check-if-array-pairs-are-divisible-by-k/submissions/)
+
+Given an array of integers arr of even length n and an integer k.
+
+We want to divide the array into exactly n / 2 pairs such that the sum of each pair is divisible by k.
+
+Return true If you can find a way to do that or false otherwise.
+
+```cpp
+bool canArrange(vector<int>& arr, int k)
+{
+    int n = arr.size();
+    if (n & 1) return false;
+    unordered_map<int,int> count;
+    for (auto& e : arr) count[(e%k+k) % k]++; // (e%k+k)%k is required to eliminate negative numbers
+
+    for (int i = 0; i <= k / 2; i++) {
+        if(i == 0) {
+            if(count[i]&1) return false;
+            continue;
+        }
+        if (count[i] != count[k - i]) return false;
+    }
+
+    return true;
 }
 ```
 

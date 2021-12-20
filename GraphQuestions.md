@@ -94,22 +94,29 @@ int spanningTree(int V, vector<vector<int>> adj[])
 **Krushkals MST**
 
 ```cpp
+struct compare {
+    bool ()(Edge& f, Edge& s) {
+        return f.w < s.w;
+    }
+};
+
 int krushkals(int V, vector<Edge>& edges) {
     UnionFind uf(V);
     priority_queue<Edge, vector<Edge>, compare> pq;
     for(auto e : edges) pq.push(e);
 
     vector<Edge> result;
-    while(result.size() != V-1) {
+    while(result.size() < V-1) {
         auto f = pq.top(); pq.pop();
-        if(uf.isCycle(f)) continue;
+        if(uf.connected(f.u, f.v)) continue;
 
-        uf.insert(f);
+        uf.insert(f.u, f.v);
         result.push_back(f);
     }
 
-    //for(auto e : result) cout<<e.to_string()<<endl;
-    //cout<<endl;
+    cout<<"Edges in mst: "<<endl;
+    for(auto e : result) cout<<e.to_string()<<endl;
+    cout<<endl;
 
     int wt = 0;
     for(auto e : result) wt += e.w;
@@ -125,14 +132,14 @@ int prims(int V, vector<Edge>& edges) {
     unordered_map<int, vector<Edge>> adjGraph;
     for(auto e: edges) adjGraph[e.u].push_back({e});
 
-    vector<int> cost(V, INT_MAX);
+    vector<int> dist(V, INT_MAX);
     vector<bool> visited(V, false);
-    vector<pair<int,int>> parent(V, {-1,0});
+    vector<pair<int,int>> parent(V, -1);
 
-    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq; //{w,v}
     int src = 0;
-    pq.push({0, src});
-    cost[0] = 0;
+    dist[src] = 0;
+    pq.push({dist[src], src});
 
     while(!pq.empty()) {
         auto f = pq.top(); pq.pop();
@@ -146,22 +153,66 @@ int prims(int V, vector<Edge>& edges) {
             int w = nb.w;
             if(visited[v]) continue;
 
-            if(w < cost[v]) {
-                cost[v] = w;
-                pq.push({cost[v], v});
-                parent[v] = {u, w};
+            if(w < dist[v]) {
+                dist[v] = w;
+                parent[v] = u;
+                pq.push({dist[v], v});
             }
         }
     }
 
     int wt = 0;
-    for(int i=1;i<V;i++) {
-        auto p =parent[i];
-        //cout<<p.first<<"->"<<i<<" = "<<p.second<<endl;
-        wt += p.second;
+    for(int v=1;v<V;v++) {
+        wt += dist[v];
+        cout << format("({}->{},{})", parent[i], v, dist[v]);
+        if (v != V - 1) cout << "<--->";
     }
+    cout<<endl;
 
     return wt;
+}
+```
+
+**_Primts MST in Matrix Graph_**
+
+```cpp
+using Graph = vector<vector<int>>;
+int minimumSpanningTree(Graph g) {
+    int V = g.size();
+    vector<int> dist(V, INT_MAX);
+    vector<int> parent(V, -1);
+    vector<bool> visited(V, false);
+
+    for(int i=0;i<V-1;i++) {
+        auto u = findMinWtEdge(dist, visited, V);
+        visited[u] = true;
+
+        for(int v=0;v<V;v++) {
+            if(g[u][v] && !visited[v] && g[u][v] < dist[v]) {
+                dist[v] = g[u][v];
+                parent[j] = u;
+            }
+        }
+    }
+
+    int wt = 0;
+    for(int v=1;v<V;v++) {
+        wt += dist[v];
+        cout << format("({}->{},{})", parent[i], v, dist[v]);
+        if (v != V - 1) cout << "<--->";
+    }
+    cout<<endl;
+
+    return wt;
+}
+
+int findMinWtEdge(vector<int>& dist, vector<bool>& visited, int V) {
+    int res = -1;
+    for(int v=0;v<V;v++) {
+        if(visited[v]) continue;
+        if(res == -1 || dist[v] < dist[res]) res = v;
+    }
+    return res;
 }
 ```
 

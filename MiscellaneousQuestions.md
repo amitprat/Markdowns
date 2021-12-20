@@ -295,3 +295,229 @@ class FindTwoWordsThatCanBeJoinedTogetherToFormPalindrome
 ```
 
 ---
+
+#### [Maximum Profit Car Rental](https://leetcode.com/problems/maximum-profit-in-job-scheduling/)
+
+We have n jobs, where every job is scheduled to be done from startTime[i] to endTime[i], obtaining a profit of profit[i].
+
+You're given the startTime, endTime and profit arrays, return the maximum profit you can take such that there are no two jobs in the subset with overlapping time range.
+
+If you choose a job that ends at time X you will be able to start another job that starts at time X.
+
+```cpp
+int maxProfitDP(vector<pair<int, int>> arr, vector<int> price) {
+    int n = arr.size();
+    vector<tuple<int, int, int>> tuples;
+
+    for (int i = 0; i < n; i++) {
+        tuples.push_back({ arr[i].first,arr[i].second,price[i] });
+    }
+    sort(tuples.begin(), tuples.end(), [](auto f, auto s) {return get<1>(f) < get<1>(s); });
+
+    vector<int> mxProfit(n);
+    for (int i = 0; i < n; i++) {
+        int curMax = get<2>(tuples[i]);
+        for (int j = i - 1; j >= 0; j--) {
+            if (get<1>(tuples[j]) <= get<0>(tuples[i])) {
+                curMax = max(curMax, mxProfit[j] + get<2>(tuples[i]));
+            }
+        }
+        mxProfit[i] = curMax;
+    }
+
+    return *max_element(mxProfit.begin(), mxProfit.end());
+}
+```
+
+---
+
+#### [Find median of 2 sorted arrays of same size]()
+
+**_By linear counting_**
+
+```cpp
+double median(int arr1[], int arr2[], int n) {
+    int p1 = 0, p2 = 0;
+    int i = 0, j = 0;
+    for (int cnt = 0; cnt <= n; cnt++) {
+        p1 = p2;
+        if (i == n) {
+            p2 = arr2[0];
+        }
+        else if (j == n) {
+            p2 = arr1[0];
+        }
+        else if (arr1[i] <= arr2[j]) {
+            p2 = arr1[i++];
+        }
+        else {
+            p2 = arr2[j++];
+        }
+    }
+
+    return (double)(p1 + p2) / 2.0;
+}
+```
+
+**_Using binary search_**
+
+```cpp
+double median2(int arr1[], int arr2[], int n) {
+    if (n == 1) return (double)(arr1[0] + arr2[0]) / 2.0;
+
+    double m1 = median(arr1, n);
+    double m2 = median(arr2, n);
+
+    if (m1 == m2) return m1;
+    else if (m1 <= m2) return median2(arr1 + n / 2, arr2, n - n / 2);
+    else return median2(arr1, arr2 + n / 2, n - n / 2);
+}
+
+double median(int arr[], int n) {
+    if (n & 1) return arr[n / 2];
+    return (double)(arr[n / 2 - 1] + arr[n / 2]) / 2.0;
+}
+```
+
+---
+
+#### [Minimum steps required by Knight to reach target]()
+
+```cpp
+using Board = vector<vector<int>>;
+int minimumSteps(Board& board, Point& start, Point& end) {
+    int N = board.size();
+    queue<Point> q;
+    unordered_set<int> vistied;
+
+    q.push(start);
+    visited.insert(start.x * N + start.y);
+    int steps = 0;
+
+    while(!q.empty())  {
+        auto u = q.front(); q.pop();
+        if(u == end) return steps;
+
+        int sz = q.size();
+        while(sz--) {
+            auto neighbourPositions = getNeighbourPositions(u, visited, N);
+            for(auto neighbourPos : neighbourPositions) {
+                q.push(neighbourPos);
+                visited.insert(neighbourPos.x * N + neighbourPos.y);
+            }
+        }
+
+        steps++;
+    }
+
+    return steps;
+}
+
+vector<Point> knightMoves = {{1,2},{2,1},{-1,2},{2,-1},{1,-2},{2,-1},{-1,-2},{-2,-1}}};
+vector<Point> getNeighbourPositions(Point u, unordered_set<int>& visited, int N) {
+    vector<Point> result;
+    for(auto move : knightMoves) {
+        auto next = u + move;
+        if(!isSafe(next, visited, N)) continue;
+        result.push_back(next);
+    }
+
+    return result;
+}
+
+bool isSafe(Point next, unordered_set<int>& visited, int N) {
+    if(next.x < 0 || next.x >= N || next.y < 0 || next.y >= N || visited.count(next.x*N+next.y) != 0) return false;
+    return true;
+}
+```
+
+---
+
+#### [K Closest Points to given point]()
+
+5 closed points to (0, 0) in point set [(1, 2), (3, 1), (0, 2), (1, 1), (3, 4), (1, 0), (0, 1), (0, 0)] are [(0, 0), (1, 1), (1, 0), (0, 1), (0, 2)]
+
+```cpp
+int distance(Point p1, Point p2) {
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+}
+
+int partition(vector<Point>& points, int l, int r, Point origin) {
+    int i = 0;
+    int pivotDistance = distance(origin, points[r]);
+    for (int j = i; j < r; j++) {
+        if (distance(points[j], origin) <= pivotDistance) {
+            swap(points[j], points[i++]);
+        }
+    }
+    swap(points[i], points[r]);
+
+    return i;
+}
+
+int selectionAlgorithm(vector<Point>& points, int l, int r, Point source, int k) {
+    int p = partition(points, l, r, source);
+    int q = p - l + 1;
+    if (q == k) return p;
+
+    if (q < k) return selectionAlgorithm(points, p + 1, r, source, k - q);
+    return selectionAlgorithm(points, l, p - 1, source, k);
+}
+
+vector<Point> kClosest(vector<Point> points, Point source, int k) {
+    int l = 0, r = points.size() - 1;
+    auto p = selectionAlgorithm(points, l, r, source, k);
+
+    return { points.begin(), points.begin() + p + 1 };
+}
+```
+
+---
+
+#### [Generate permutations]()
+
+```cpp
+class Permutations {
+    string str;
+public:
+    Permutations(string str) : str(str) {}
+
+    bool hasNext() {
+        if (str.length() == 1) return false;
+        for (int i = str.length() - 1; i >= 1; i--) {
+            if (str[i - 1] < str[i]) return true;
+        }
+        return false;
+    }
+
+    string next() {
+        if (str.length() == 1) return str;
+
+        // find first adjancent smaller element
+        int l = str.length() - 2;
+        while (l >= 0 && str[l] >= str[l + 1]) {
+            l--;
+        }
+        if (l < 0) return "Not possible";
+
+        // find next greater element
+        int r = l + 1;
+        int j = l + 1;
+        while (j < str.length()) {
+            if (str[j] > str[l] && str[j] < str[r]) r = j;
+            j++;
+        }
+
+        // swap these two values
+        swap(str[l], str[r]);
+        //cout << l << " " << r << endl;
+
+        // sort the str after l
+        sort(str.begin() + l + 1, str.end());
+
+        return str;
+    }
+};
+```
+
+---

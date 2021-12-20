@@ -1,5 +1,38 @@
 #### [Print Even Odd Numbers Using 2 Threads]()
 
+##### [Print using lambda]()
+
+```cpp
+void printEvenOdd(int mx) {
+    mutex m;
+    condition_variable cv;
+    volatile int cnt = 0;
+
+    thread printEvenThread([&cnt, mx, &m, &cv]() {
+        while (cnt < mx) {
+            unique_lock<mutex> lock(m);
+            cv.wait(lock, [&cnt]() { return (cnt & 1) == 0; });
+
+            cout << cnt++ << " ";
+            cv.notify_one();
+        }
+    });
+
+    thread printOddThread([&cnt, mx, &m, &cv]() {
+        while (cnt < mx) {
+            unique_lock<mutex> lock(m);
+            cv.wait(lock, [&cnt]() { return (cnt & 1) == 1; });
+
+            cout << cnt++ << " ";
+            cv.notify_one();
+        }
+    });
+
+    printEvenThread.join();
+    printOddThread.join();
+}
+```
+
 ##### [Print using seperate methods for different thread]()
 
 ```cpp
@@ -50,7 +83,7 @@ class PrintEvenOddPredicate {
     void printMethod(function<bool()> predicate, int mx, string threadName) {
         while (cnt < mx) {
             unique_lock<mutex> lock(m);
-            cv.wait(lock, [this, predicate]() {return predicate(); });
+            cv.wait(lock, [this, predicate]() { return predicate(); });
 
             cout << threadName << ":" <<cnt++ << " ";
             cv.notify_all();
@@ -144,9 +177,9 @@ public:
         for (int i = 1; i <= 102; i += 3) arr2.push_back(i);
         for (int i = 2; i <= 102; i += 3) arr3.push_back(i);
 
-        auto pred1 = [this]() {return printFirst; };
-        auto pred2 = [this]() {return printSecond; };
-        auto pred3 = [this]() {return printThird; };
+        auto pred1 = [this]() { return printFirst; };
+        auto pred2 = [this]() { return printSecond; };
+        auto pred3 = [this]() { return printThird; };
 
         auto action1 = [this]() { cout << "Thread1: "<<arr1[cur1++]<<endl; total++; };
         auto action2 = [this]() { cout << "Thread2: "<<arr2[cur2++]<<endl; total++; };
