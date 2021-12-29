@@ -131,3 +131,22 @@ int NthRoot(int n, int m)
 ```
 
 ---
+
+#### [Implement Rand7 using Rand5]()
+
+```cpp
+int rand7() {
+    int val;
+    do {
+        val = 5*rand5() + rand5() - 5;
+    } while(val >= 21);
+
+    return val%7 + 1;
+}
+
+int rand5() {
+    return 1 + (rand()%5);
+}
+```
+
+---

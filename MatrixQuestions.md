@@ -382,3 +382,142 @@ int getMaxSize(vector<int> matrix) {
 ```
 
 ---
+
+#### [Find shortest path in matrix from src to dst]()
+
+Given a matrix of 0 and 1s and 0s are blocked paths. Given src and dst, find the shortest path from src
+to dst. You can only move right and down from a given point.
+
+**_Using queue_**
+
+```cpp
+vector<Point> findPath(vector<vector<int>> matrix, Point s, Point e) {
+    if (matrix[s.x][s.y] == 0) return {};
+    queue < pair<Point, vector<Point>>> q;
+    q.push({ s, {s} });
+    unordered_set<int> seen;
+    int n = matrix.size();
+    int m = matrix[0].size();
+    seen.insert(s.x * m + s.y);
+
+    while (!q.empty()) {
+        auto u = q.front(); q.pop();
+        if (u.first == e) return u.second;
+
+        auto res = u.second;
+        Point right = { u.first.x, u.first.y + 1 };
+        Point down = { u.first.x + 1,u.first.y };
+
+        if (right.y < m && matrix[right.x][right.y] && seen.find(right.x * m + right.y) == seen.end()) {
+            res.push_back(right);
+            q.push({ right, res });
+            res.pop_back();
+        }
+
+        if (down.x < n && matrix[down.x][down.y] && seen.find(down.x * m + down.y) == seen.end()) {
+            res.push_back(down);
+            q.push({ down, res });
+            res.pop_back();
+        }
+    }
+
+    return {};
+}
+```
+
+**_Using Dynamic programming_**
+
+```cpp
+vector<Point> findPathUsingDP(vector<vector<int>> matrix, Point s, Point e) {
+    int n = matrix.size();
+    if (n == 0) return {};
+
+    int m = matrix[0].size();
+    vector<vector<int>> dist(n, vector<int>(m));
+
+    for (int i = s.x; i <= e.x; i++) {
+        for (int j = s.y; j <= e.y; j++) {
+            if (matrix[i][j] == 0) { dist[i][j] = INT_MAX; continue; }
+
+            if (i == s.x && j == s.y) dist[i][j] = 0;
+            else if (i == s.x) dist[i][j] = dist[i][j - 1] == INT_MAX ? INT_MAX : 1 + dist[i][j - 1];
+            else if (j == s.y) dist[i][j] = dist[i - 1][j] == INT_MAX ? INT_MAX : 1 + dist[i - 1][j];
+            else {
+                int curMin = min(dist[i - 1][j], dist[i][j - 1]);
+                dist[i][j] = curMin == INT_MAX ? INT_MAX : 1 + curMin;
+            }
+        }
+    }
+
+    vector<Point> result;
+    int i = e.x, j = e.y;
+    while (i >= s.x && j >= s.y && dist[i][j] != INT_MAX) {
+        result.push_back({ i,j });
+        if (i == s.x && j == s.y) break;
+        if (i == s.x) j--;
+        else if (j == s.y) i--;
+        else if (dist[i - 1][j] < dist[i][j] && matrix[i - 1][j]) i--;
+        else j--;
+    }
+    if (i != s.x || j != s.y) return {};
+
+    reverse(result.begin(), result.end());
+
+    return result;
+}
+```
+
+---
+
+#### [Print matrix diagonally]()
+
+Give a N*N matrix, print it out diagonally.
+Follow up, if it is a M*N matrix, how to print it out.
+
+```sh
+Example:
+1 2 3
+4 5 6
+7 8 9
+print:
+1
+2 4
+3 5 7
+6 8
+9
+```
+
+```cpp
+void printDiagonally(vector<vector<int>>& arr) {
+    int n = arr.size();
+    for(int d=0;d<=2*(n-1);d++) {
+        for(int i=0;i<=d;i++) {
+            if(i<n && (d-i)<n) {
+                cout<<arr[i][d-i]<<" ";
+            }
+        }
+        cout<<endl;
+    }
+}
+```
+
+```cpp
+void printDiagonally(vector<vector<int>>& arr) {
+    int n = arr.size();
+    Point start = { 0,0 };
+
+    do {
+        auto tmp = start;
+        while (tmp.x < n && tmp.y >= 0) { // we move down and left
+            cout << arr[tmp.x][tmp.y] << " ";
+            tmp.x++; tmp.y--;
+        }
+        cout << endl;
+
+        if (start.y == n - 1) start.x++; // we move to right or down
+        else start.y++;
+    } while (start.x < n);
+}
+```
+
+---

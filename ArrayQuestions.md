@@ -1316,7 +1316,7 @@ class PrintArrayElementsInOrder {
     priority_queue<T, vector<T>, greater<T>> pq;
 
 public:
-    PrintArrayElementsInOrder(vector<vector<int>> input) :input(input) {
+    PrintArrayElementsInOrder(vector<vector<int>> input) : input(input) {
         for (int i = 0; i < input.size(); i++) {
             if (!input[i].empty()) pq.push({ input[i][0] , i, 0 }); // compare by first element in tuple
         }
@@ -1378,6 +1378,176 @@ bool canArrange(vector<int>& arr, int k)
     }
 
     return true;
+}
+```
+
+---
+
+#### [Find the number which occurs only once and all the other number occurs exactly 3 times]()
+
+Number occursing only once in [2, 1, 4, 5, 1, 4, 2, 2, 4, 1] is 5
+Number occursing only once in [1, 2, 3, 1, 3, 3, 1] is 2
+Number occursing only once in [1, 1, 1, 2, 2, 2, 3] is 3
+Number occursing only once in [7, 1, 2, 3, 2, 3, 2, 1, 1, 4, 3, 7, 7] is 4
+
+**_Using bitwise add mod 3_**
+
+```cpp
+static int numberOccurringOnlyOnceUsingBitwiseAddMod3(int arr[], int n)
+{
+    int bitsize = 0;
+    for (int i = 0; i < n; i++) {
+        bitsize = max(bitsize, (int)log2(arr[i]) + 1);
+    }
+    auto res = addBitwiseMod3(arr, n, bitsize);
+
+    return res;
+}
+
+static int addBitwiseMod3(int arr[], int n, int bitsize) {
+    if (bitsize == 0) return 0;
+    int cur = addBitwiseMod3(arr, n, bitsize - 1);
+
+    int s = 0;
+    for (int j = 0; j < n; j++) {
+        int v = (arr[j] >> bitsize - 1) & 1;
+        s = (s + v) % 3;
+    }
+    cur = s * pow(2, bitsize - 1) + cur;
+
+    return cur;
+}
+```
+
+**_Using XORing and ANDing_**
+
+```cpp
+int numberOccurringOnlyOnceUsingBitwiseOper(int arr[], int n)
+{
+    int ones = 0;
+    int twos = 0;
+    for (int i = 0; i < n; i++)
+    {
+        int x = arr[i];
+        twos |= ones & x;
+        ones ^= x;
+        int not_threes = ~(ones & twos);
+        ones &= not_threes;
+        twos &= not_threes;
+    }
+
+    return ones;
+}
+```
+
+---
+
+#### [Maximum possible n such that the array consists at least n values greater than or equals to n](https://www.careercup.com/question?id=5094709806497792)
+
+Given an unsorted array of integers, you need to return maximum possible n such that the array consists at least n values greater
+than or equals to n.
+Array can contain duplicate values.
+Sample input : [1, 2, 3, 4] -- output : 2
+Sample input : [900, 2, 901, 3, 1000] -- output: 3
+
+Maximum possible n=2 in array=[1, 2, 3, 4]
+Maximum possible n=3 in array=[900, 2, 901, 3, 1000]
+Maximum possible n=5 in array=[900, 950, 901, 900, 1000]
+
+```cpp
+int getMaxN(vector<int>& arr)
+{
+    int n = arr.size();
+    vector<int> cnt(n + 1, 0);
+    for (auto e : arr) {
+        if (e < 0) continue;
+        if (e >= n) cnt[n]++;
+        else cnt[e]++;
+    }
+
+    int right = 0;
+    for (int i = n; i >= 1; i--) {
+        right += cnt[i];
+        if (right >= i) return i;
+    }
+
+    return 0;
+}
+```
+
+---
+
+#### [Reverse array in group of size k]()
+
+```cpp
+void reverseInGroupsOfSizeK(vector<int>& arr, int k) {
+    int len = arr.size();
+    for(int i=0;i<len;i+=k) {
+        reverse(arr, i, min(i+k-1, len-1));
+    }
+}
+
+void reverse(vector<int>& arr, int l, int r) {
+    while(l<r) {swap(arr[l++], arr[r--]);}
+}
+```
+
+---
+
+#### [Longest subarray of positive numbers in an array]()
+
+```cpp
+static void printLongestPositiveSequence() {
+    vector<int> arr = { 1,2,-3,2,3,4,-6,1,2,3,4,5,-8,5,6 };
+
+    int startIndex = -1;
+    int mxStartIndex = -1;
+    int mxLength = 0;
+    int currentCnt = 0;
+    for (int i = 0; i < arr.size(); i++) {
+        if (arr[i] > 0) {
+            if (!currentCnt) startIndex = i;
+            currentCnt++;
+        }
+        else {
+            if (currentCnt > mxLength) {
+                mxLength = currentCnt;
+                mxStartIndex = startIndex;
+            }
+            currentCnt = 0;
+        }
+    }
+
+    cout << "Sequence: ";
+    for (int i = mxStartIndex; i < mxStartIndex + mxLength; i++) cout << arr[i] << " ";
+    cout << endl;
+}
+```
+
+---
+
+#### [Longest contiguous subsequence]()
+
+```cpp
+static void printLargestSubset() {
+    vector<int> arr = { 1, 6, 10, 4, 7, 9, 5 };
+    unordered_map<int, int> map;
+    int beg, end;
+    int mxBeg = 0, mxEnd = 0;
+    for (auto e : arr) {
+        beg = end = e;
+        if (map.find(beg - 1) != map.end()) beg = map[beg - 1];
+        if (map.find(end + 1) != map.end()) end = map[end + 1];
+        map[beg] = end;
+        map[end] = beg;
+        if (end - beg > mxEnd - mxBeg) {
+            mxBeg = beg;
+            mxEnd = end;
+        }
+    }
+
+    for (int i = mxBeg; i <= mxEnd; i++) cout << i << " ";
+    cout << endl;
 }
 ```
 

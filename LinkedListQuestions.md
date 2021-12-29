@@ -223,3 +223,67 @@ TreeNode* getRightMostNode(TreeNode* node) {
 ```
 
 ---
+
+#### [Cancel out list](https://careercup.com/question?id=5717797377146880)
+
+Given some resources in the form of linked list you have to canceled out all the resources whose sum up to 0(Zero) and return the remaining list.
+
+```sh
+E.g-->> 6 -6 8 4 -12 9 8 -8
+
+the above example lists which gets canceled :
+6 -6
+8 4 -12
+8 -8
+o/p : 9
+case 3 : 4 6 -10 8 9 10 -19 10 -18 20 25
+O/P : 20 25
+```
+
+```cpp
+static void cancelOutList() {
+    LinkedListNode<int>* node = new LinkedListNode<int>(6);
+    node->next = new LinkedListNode<int>(-6);
+    node->next->next = new LinkedListNode<int>(8);
+    node->next->next->next = new LinkedListNode<int>(4);
+    node->next->next->next->next = new LinkedListNode<int>(-12);
+    node->next->next->next->next->next = new LinkedListNode<int>(9);
+    node->next->next->next->next->next->next = new LinkedListNode<int>(8);
+    node->next->next->next->next->next->next->next = new LinkedListNode<int>(-8);
+
+    auto newHead = cancelOutList(node);
+    cout<<to_string(newHead)<<endl;
+}
+
+static void cancelOutList(LinkedListNode<int>* node) {
+    unordered_set<int> visited;
+    LinkedListNode<int>* newHead = node;
+    stack<LinkedListNode<int>*> st;
+
+    int curSum = 0;
+    visited.insert(curSum);
+
+    while (node) {
+        curSum += node->val;
+        if (visited.find(curSum) == visited.end()) {
+            visited.insert(curSum);
+            st.push(node);
+        } else {
+            int tmp = curSum - node->val;
+            do {
+                if (tmp != 0) visited.erase(tmp);
+                auto cur = st.top(); st.pop();
+                tmp -= cur->val;
+            } while (tmp != curSum);
+
+            if (st.empty()) newHead = node->next;
+            else st.top()->next = node->next;
+        }
+        node = node->next;
+    }
+
+    return newHead;
+}
+```
+
+---

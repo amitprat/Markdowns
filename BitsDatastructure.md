@@ -227,3 +227,35 @@ vector<int> findNumbers(vector<int>& arr) {
 ```
 
 ---
+
+#### [Multiply/Sum numbers without using multiplication/addition operator]()
+
+```cpp
+static int multiply(int a, int b) {
+    int sign = (a ^ b) >> 31;
+    a = abs(a);
+    b = abs(b);
+
+    int res = 0;
+    while (b) {
+        if (b & 1) res = sum(res, a);
+
+        a <<= 1;
+        b >>= 1;
+    }
+
+    return sign ? (~res + 1) : res;
+}
+
+static int sum(int a, int b) {
+    while (b) {
+        int carry = (a & b) << 1;
+        a = a ^ b;
+        b = carry;
+    }
+
+    return a;
+}
+```
+
+---

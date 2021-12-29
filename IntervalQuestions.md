@@ -144,6 +144,28 @@ static void merge(vector<Interval>& result, Interval it) {
 
 ---
 
+#### [Merge sorted intervals inplace]()
+
+```cpp
+static void mergeIntervals(vector<Interval>& intervals) {
+    if (intervals.empty()) return;
+
+    int i = 0, n = intervals.size();
+    for (int j = 1; j < n; j++) {
+        auto& prev = intervals[i];
+        auto& cur = intervals[j];
+        if (overlap(prev, cur)) prev = { min(prev.start,cur.start),max(prev.end,cur.end) };
+        else intervals[++i] = cur;
+    }
+
+    intervals.erase(intervals.begin() + i + 1, intervals.end());
+}
+
+static bool overlap(Interval& it1, Interval& it2) {
+    return it1.end >= it2.start && it2.end >= it1.start;
+}
+```
+
 #### [Total time covered by intervals]()
 
 Total time covered by intervals [{1,4}, {2,4}, {6,8}, {7,9}, {10,15}] is 11

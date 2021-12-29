@@ -1,4 +1,4 @@
-####[If [a1,a2,a3...,an,b1,b2...bn] is given input change this to [a1,b1,a2,b2.....an,bn] , solution should be in-place]()
+#### [If [a1,a2,a3...,an,b1,b2...bn] is given input change this to [a1,b1,a2,b2.....an,bn] , solution should be in-place]()
 
 _First swap elements in the middle pair
 Next swap elements in the middle two pairs
@@ -24,7 +24,7 @@ int interleave(int arr[], int len) {
 
 ---
 
-####[Given an int array without repeated elements and a target, count the total number of subset that can be generated from the array such that min (subset) + max (subset) < target](https://careercup.com/question?id=5091778836299776)
+#### [Given an int array without repeated elements and a target, count the total number of subset that can be generated from the array such that min (subset) + max (subset) < target](https://careercup.com/question?id=5091778836299776)
 
 ```java
 public int countSubSet(int[] nums, int target){
@@ -64,7 +64,7 @@ public static int countSubSet(int[] nums, int target){
 
 ---
 
-####[Find subsets]()
+#### [Find subsets]()
 
 _// For a given vector of integers and integer K, find the number of non-empty subsets S such that min(S) + max(S) <= K
 // For example, for K = 8 and vector [2, 4, 5, 7], the solution is 5 ([2], [4], [2, 4], [2, 4, 5], [2, 5])
@@ -97,7 +97,7 @@ int findSubsets(vector<int>& arr) {
 
 ---
 
-####[Dictionary with access to last element]()
+#### [Dictionary with access to last element]()
 
 _Write a new data structure, "Dictionary with Last"
 Methods:
@@ -130,7 +130,7 @@ Other options might be: AVL tree and Hash Tables... but, depends on what you wan
 
 ---
 
-####[Given a array of integers , find 3 indexes i,j,k such that, i<j<k and a[i] < a[j] < a[k]. Best possible is a O(n) algorithm.]()
+#### [Given a array of integers , find 3 indexes i,j,k such that, i<j<k and a[i] < a[j] < a[k]. Best possible is a O(n) algorithm.]()
 
 ```sh
 a[i]<a[j]<a[k] s.t i<j<k

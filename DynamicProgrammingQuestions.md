@@ -38,25 +38,31 @@ Given a value N, find the number of ways to make change for N cents, if we have 
 
 **Count number of ways to make change for given sum**
 
+**_Using dynamic programming_**
+
 ```cpp
-long long int countDP(int S[], int m, int n) {
-    vector<long long> memo(n+1, 0);
+long long countDP(int coins[], int n, int amount) {
+    vector<long long> memo(amount+1, 0);
     memo[0] = 1;
 
-    for(int i=0;i<m;i++) {
-        for(int j=S[i];j<=n;j++) {
-            memo[j] += memo[j-S[i]];
+    for(int i=0;i<n;i++) { // number of coins
+        for(int am=coins[i];am<=amount;am++) {
+            memo[am] += memo[am-coins[i]];
         }
     }
 
     return memo[n];
 }
+```
 
-long long int countRec(int S[], int m, int n) {
-    if(n == 0) return 1;
-    if(n < 0 || m <= 0) return 0;
+**_Using recursion_**
 
-    return countRec(S, m, n-S[m-1]) + countRec(S, m-1, n);
+```cpp
+long long countRec(int coins[], int n, int amount) {
+    if(amount == 0) return 1;
+    if(n <= 0 || amount < 0) return 0;
+
+    return countRec(coins, n, amount-coins[n-1]) + countRec(coins, n-1, amount);
 }
 ```
 
@@ -519,6 +525,61 @@ string longestRepeatedSubSeq(string str)
     reverse(res.begin(), res.end());
 
     return res;
+}
+```
+
+---
+
+#### [Minimum time taken to paint boards using k workers](https://www.geeksforgeeks.org/painters-partition-problem-set-2/)
+
+We have to paint n boards of length {A1, A2, .. An}. There are k painters available and each takes 1 unit time to paint 1 unit of
+board. The problem is to find the minimum time to get this job done under the constraints that any painter will only paint continuous
+sections of boards, say board {2, 3, 4} or only board {1} or nothing but not board {2, 4, 5}.
+
+**_Using recrusion_**
+
+```cpp
+int partition(vector<int>& arr, int l, int r, int k)
+{
+    if (k == 1) return accumulate(arr.begin() + l, arr.begin() + r + 1, 0);
+    if (l == r) return arr[l];
+
+    int result = INT_MAX;
+    for (int i = l; i <= r; i++) {
+        int cur = max(partition(arr, l, i, k - 1), accumulate(arr.begin() + i + 1, arr.begin() + r + 1, 0));
+        result = min(result, cur);
+    }
+
+    return result;
+}
+```
+
+**_Using dynamic programming_**
+
+```cpp
+int partitionDP(vector<int>& arr, int k)
+{
+    int n = arr.size();
+    vector<vector<int>> table(k + 1, vector<int>(n + 1, 0));
+
+    // for k=1 (with one painter)
+    for (int j = 1; j <= n; j++) table[1][j] = accumulate(arr.begin(), arr.begin() + j, 0);
+
+    // for n=1 (with only one board)
+    for (int i = 1; i <= k; i++) table[i][1] = arr[0];
+
+    for (int i = 2; i <= k; i++) {
+        for (int j = 2; j <= n; j++) {
+            int best = INT_MAX;
+            for (int p = 1; p <= j; p++) {
+                int cur = max(table[i - 1][p], accumulate(arr.begin() + p, arr.begin() + j, 0));
+                best = min(best, cur);
+            }
+            table[i][j] = best;
+        }
+    }
+
+    return table[k][n];
 }
 ```
 

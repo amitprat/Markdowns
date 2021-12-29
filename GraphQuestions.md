@@ -317,3 +317,227 @@ vector<int> dijkastra(int graph[][V], int s) {
 ```
 
 ---
+
+#### [Check if all paths from src to dst node in a directed graph are connected](https://www.careercup.com/question?id=5713002834165760)
+
+Given a Start Node and an End Node in a graph report if they are “necessarily connected”. This means that all paths from the start
+node lead to the end node. Report true all paths from start node lead to end node and false if at least one path does not lead to
+the end node. This is a directed graph which can have cycles.
+
+```cpp
+bool isNecessarilyConnected(Graph g, int s, int e, unordered_set<int>& visited, unordered_set<int> recStack)
+{
+    if (s == e) return true; // path in destination node
+
+    visited.insert(s); // optimization to not visit the visited nodes again and again
+    recStack.insert(s);
+
+    auto neighbours = getNeighbours(g, s);
+    if (neighbours.empty()) return false; // if this is leaf node, then this path doesn't need to destination node
+
+    for (auto v : neighbours) {
+        if (visited.find(v) == visited.end()) {
+            if (!isNecessarilyConnected(g, v, e, visited, recStack)) return false;
+        }
+        else if (recStack.find(v) != recStack.end()) return false; // if this graph has cycle
+    }
+
+    return true;
+}
+```
+
+---
+
+#### [Get friend suggestions for a person based on mutual friends count]()
+
+```sh
+Peoples: [A, B, C, D]
+Friend Relationship:
+A: [B]
+B: [A, C, D]
+C: [B]
+D: [B]
+
+Friend suggestions:
+Get friend suggestion for A [D:1, C:1]
+Get friend suggestion for B []
+Get friend suggestion for C [D:1,A:1]
+Get friend suggestion for D [C:1,A:1]
+```
+
+```cpp
+struct GraphNode {
+    string id;
+    unordered_map<string, GraphNode*> friends;
+
+    GraphNode(string id) : id(id) {}
+
+    void addFriend(GraphNode* other) {
+        friends[other->id] = other;
+    }
+
+    vector<GraphNode*>getFriends() {
+        vector<GraphNode*> result;
+        for (auto e : friends) result.push_back(e.second);
+
+        return result;
+    }
+};
+
+class Graph {
+    unordered_map<string, GraphNode*> peoples;
+
+public:
+    void add(string id) {
+        peoples[id] = new GraphNode(id);
+    }
+
+    void addFriend(string id1, string id2) {
+        if (peoples.find(id1) == peoples.end()) return;
+        if (peoples.find(id2) == peoples.end()) return;
+
+        auto first = peoples[id1];
+        auto second = peoples[id2];
+
+        first->addFriend(second);
+        second->addFriend(first);
+    }
+
+    vector<GraphNode*> getFriends(string id) {
+        if (peoples.find(id) == peoples.end()) return {};
+
+        return peoples[id]->getFriends();
+    }
+};
+
+static void friendSuggestionTest() {
+    Graph g;
+    g.add("A");
+    g.add("B");
+    g.add("C");
+    g.add("D");
+    g.addFriend("A", "B");
+    g.addFriend("B", "C");
+    g.addFriend("B", "D");
+
+    vector<string> persons = { "A","B","C","D" };
+    for (auto person : persons) {
+        cout << format("Get friend suggestion for {}", person) << endl;
+
+        // get its own friends and friend's friends, count freq of occurance.
+        auto friends = g.getFriends(person);
+        unordered_map<string, int> freq;
+        for (auto f : friends) {
+            auto f1 = g.getFriends(f->id);
+            for (auto e : f1) if (e->id != person) freq[e->id]++;
+        }
+
+        // Maintain a maxheap
+        priority_queue<pair<int, string>> pq;
+        for (auto e : freq) pq.push({ e.second,e.first }); // {id, count of mutual friends}
+
+        // get the friends in order of their count as common friends
+        // we can also take a variable k here to only suggest top k friends
+        while (!pq.empty()) {
+            cout << pq.top().second << ":" << pq.top().first << endl;
+            pq.pop();
+        }
+    }
+}
+```
+
+---
+
+#### [Print friendship levels](https://www.careercup.com/question?id=5675048708866048)
+
+Print the level of friendship.
+
+Given a person and list of his friends, print all his friends by level of association.
+
+The text file will be like one below
+
+A: B,C,D
+D: B,E,F
+E: C,F,G
+
+If the input is A, the out put should be:
+
+Level 1 - B,C,D
+Level 2 - E,F
+Level 3 - G
+
+```cpp
+void preprocess() {
+    ifstream is("C:\\Users\\amisi\\source\\repos\\CodeProject\\CodeProject\\careercup\\friendshipfile.txt");
+    string line;
+    while (getline(is, line)) {
+        pair<string, vector<string>> friendship = parseFriendship(line);
+        for (auto v : friendship.second) friendshipMap[friendship.first].push_back(v);
+    }
+}
+
+void printLevels(string input) {
+    queue<string> q;
+    unordered_set<string> visited;
+    for (auto& person : friendshipMap[input]) {
+        q.push(person);
+        visited.insert(person);
+    }
+
+    int level = 1;
+    while (!q.empty()) {
+        cout << "Level " << level << ": ";
+        int sz = q.size();
+        while (sz--) {
+            auto f = q.front(); q.pop();
+            cout << f << " ";
+
+            for (auto& n : friendshipMap[f]) {
+                if (visited.find(n) == visited.end()) {
+                    q.push(n);
+                    visited.insert(n);
+                }
+            }
+        }
+        level++;
+        cout << endl;
+    }
+}
+
+static pair<string, vector<string>> parseFriendship(string line)
+{
+    stringstream ss(line);
+    string part1, part2;
+    ss >> part1 >> part2;
+    part1 = trim(part1);
+    vector<string> part2Splits = split(part2, { " ","," });
+    part2Splits = trim(part2Splits);
+
+    return { part1, part2Splits };
+}
+
+static vector<string> trim(vector<string>& strs) {
+    vector<string> result;
+    for (auto& str : strs) {
+        result.push_back(trim(str));
+    }
+
+    return result;
+}
+
+static string trim(string str) {
+    int i = 0;
+    while (i < str.length() && (isspace(str[i]) || str[i] == ':')) {
+        str.erase(str.begin() + i); i++;
+    }
+
+    i = str.length() - 1;
+    while (i >= 0 && (isspace(str[i]) || str[i] == ':')) {
+        str.erase(str.begin() + i); i--;
+    }
+
+    return str;
+}
+```
+
+---

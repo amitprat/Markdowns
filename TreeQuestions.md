@@ -464,3 +464,44 @@ string decode(unordered_map<char, string> codes, string encodedStr) {
 ```
 
 ---
+
+#### [Minimum distance to leaf node from given node](https://www.careercup.com/question?id=6040159610994688)
+
+The node can be in down path or anywhere on its parent node.
+
+```cpp
+static pair<int, int> getMinimumDistanceToLeafNode(ITNode* root, ITNode* target, int& minDistance)
+{
+    if (!root) return { INT_MAX, 0 }; // {minDistanceToTargetDownwards, minDistanceToLeafNodeDownwards}
+
+    auto left = getMinimumDistanceToLeafNode(root->left, target, minDistance);
+    auto right = getMinimumDistanceToLeafNode(root->right, target, minDistance);
+
+    bool isOnLeft = false, isOnRight = false;
+    if (left.first != INT_MAX) isOnLeft = true;
+    else if (right.first != INT_MAX) isOnRight = true;
+
+    int distanceToTarget = INT_MAX;
+    if (root == target) {
+        // if the node is same as target node, then the minimum distance must be min(leftDistance, rightDistance)
+        int curMin = 1 + min(left.second, right.second);
+        minDistance = min(minDistance, curMin);
+        distanceToTarget = 1;
+    }
+    else if (isOnLeft && left.first + 1 + right.second < minDistance) {
+        // if the targetNode is on left, the minDistance is min of old min distance and (distance from current node to target node on left + 1(root) + distance on right)
+        int curMin = left.first + 1 + right.second;
+        distanceToTarget = left.first + 1;
+        minDistance = min(minDistance, curMin);
+    }
+    else if (isOnRight && right.first + 1 + left.second < minDistance) {
+        int curMin = right.first + 1 + left.second;
+        distanceToTarget = right.first + 1;
+        minDistance = min(minDistance, curMin);
+    }
+
+    return { distanceToTarget, 1 + min(left.second, right.second) };
+}
+```
+
+---

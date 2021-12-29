@@ -1401,3 +1401,141 @@ bool exists(Trie& trie, string word) {
 ```
 
 ---
+
+#### [Put Commas In String]()
+
+```cpp
+static string putCommas(string num) {
+    if (num.size() < 3) return num;
+    auto cur = putCommas(num.substr(0, num.size() - 3)); // select first (0, n-3) characters from string
+    return cur + "," + num.substr(num.size() - 3); // append the formatted output + "," + last 3 characters
+}
+```
+
+```cpp
+static string putCommas(int num) {
+    if (num == 0) return "";
+    if (num < 1000) return to_string(num);
+    auto cur = putCommas(num / 1000);
+    string formatted(5, '\0');
+    sprintf_s(const_cast<char*>(formatted.c_str()), 5, ",%03d", num % 1000);
+    return cur + formatted;
+}
+```
+
+---
+
+#### [C++ String splitter]()
+
+**_Split by space_**
+
+```cpp
+{
+    string str = "hello how are you";
+    stringstream ss(str);
+    string word;
+    while (ss >> word) { cout << word << endl; }
+}
+```
+
+**_Split by character_**
+
+```cpp
+{
+    string str = "hello, how, are, you";
+    stringstream ss(str);
+    string word;
+    char delim = ',';
+
+    while (getline(ss, word, delim)) {
+        cout << word << " ";
+    }
+    cout << endl;
+}
+```
+
+**_Split by any string_**
+
+```cpp
+static vector<string> split(string strs, vector<string> delims) {
+    vector<string> result;
+    result.push_back(strs);
+
+    for (auto& delim : delims) {
+        vector<string> newResult;
+        for (auto& cur : result) {
+            auto parts = splitStr(cur, delim);
+            newResult.insert(newResult.end(), parts.begin(), parts.end());
+        }
+        result = newResult;
+    }
+    return result;
+}
+
+static vector<string> splitStr(string str, string delim) {
+    auto start = 0;
+    auto pos = string::npos;
+    auto len = str.length();
+
+    vector<string> result;
+    do {
+        pos = str.find(delim, start);
+        auto end = (pos == string::npos) ? len : pos;
+        if (end > start) result.push_back(str.substr(start, end - start));
+        start = pos + 1;
+    } while (pos != string::npos);
+
+    return result;
+}
+```
+
+---
+
+#### [Rearrange characters such that no characters repeats twice](https://www.careercup.com/question?id=5693863291256832)
+
+Rearrange characters in a string so that no character repeats twice.
+
+```sh
+Input: aaabc
+Output: abaca
+
+Input: aa
+Output: No valid output
+
+Input: aaaabc
+Output: No valid output
+```
+
+```cpp
+static string rearrangeCharacters(string& str) {
+    int n = str.length();
+    unordered_map<char, int> freq;
+    for (auto ch : str) freq[ch]++;
+
+    priority_queue<pair<int, char>> pq;
+    for (auto& e : freq) {
+        if (e.second > (n + 1) / 2) return "Invalid Input";
+
+        pq.push({ e.second, e.first });
+    }
+
+    string result;
+    while (!pq.empty()) {
+        auto first = pq.top(); pq.pop();
+        result += first.second; first.first--;
+
+        while (!pq.empty()) {
+            auto second = pq.top(); pq.pop();
+            result += second.second; second.first--;
+
+            if (second.first > 0) pq.push(second);
+        }
+
+        if (first.first > 0) pq.push(first);
+    }
+
+    return result;
+}
+```
+
+---

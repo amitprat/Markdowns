@@ -521,3 +521,225 @@ public:
 ```
 
 ---
+
+#### [Find actual count of people with same or similar names]()
+
+[{Jonathan, John}, {Jon, Johnny}, {Johnny, John}, {Kari, Carrie}, {Carleton, Carlton}]
+{John=10, Jonathan=9, Carlton=8, Kari=3, Jon=3, Davis=2, Johnny=11, Carleton=2, Carrie=5}
+
+Name mapping after graph traversal: {Jonathan=John, Johnny=John, Kari=Carrie, Jon=John, Carleton=Carlton}
+(Result) Frequency mapping: {Carlton=10, John=33, Carrie=8, Davis=2}
+
+```cpp
+//TODO
+```
+
+---
+
+#### [Find number of ways to select N identical from a bucket](https://www.careercup.com/question?id=15072768)
+
+We define C(n) as the number of ways to take n identical objects out of a bucket, where objects may be taken 1, 2, or 3 at a time.
+
+Example: C(4)=7, because you can take 4 objects in the following 7 ways:
+1,1,1,1
+2,1,1
+1,2,1
+1,1,2
+2,2
+3,1
+1,3
+
+```cpp
+int numberOfWays(int n)
+{
+    // number of ways to select 0 objects = {} - 1
+    // number of ways to select 1 object = {1} - 1
+    // number of ways to select 2 objects = {(1,1),(2)} -2
+    // number of ways to select 3 objects = {(1,1,1),(1,2),(2,1),(3)} - 4 and so on...
+    int res[] = { 1,1,2 }; // number of ways to select 0, 1 or 2 obects at a time
+    while (n) {
+        int tmp = res[0] + res[1] + res[2];
+        res[0] = res[1];
+        res[1] = res[2];
+        res[2] = tmp;
+        n--;
+    }
+    return res[0];
+}
+```
+
+---
+
+#### [Print path in setup box](https://www.careercup.com/question?id=5127611667709952)
+
+Write code to give the character sequence given a word, For example, if the word is "CON", the function will print this:
+
+```sh
+Right//now we're at B
+Right//now we're at C
+OK//to select C
+Down
+DOwn
+Right
+Right
+OK//to select O
+Left//now at N
+OK//to select N
+```
+
+**_Tester code_**
+
+```cpp
+static void test() {
+    int colSize = 5;
+    int limit = 25;
+
+    {
+        string word = "constable";
+        string path1 = getPath1(colSize, limit, word);
+        string path2 = getPath2(colSize, limit, word);
+        assert(path1 == path2);
+        cout << path1 << endl;
+    }
+}
+```
+
+```cpp
+string getPath(string str, int rowSize)
+{
+    string res;
+    Point src = {0, 0};
+
+    for(auto ch : str) {
+        string curRes;
+        Point dst = {(ch-'a')/5, (ch-'a')%5};
+        curRes += string(abs(dst.x-src.x), (dst.x > src.x ? 'd':'u'));
+        curRes += string(abs(dst.y-src.y), (dst.y > src.y ? 'r':'l'));
+        curRes += '\n';
+
+        res += curRes;
+        src = dst;
+    }
+
+    return res;
+}
+```
+
+---
+
+#### [Generate prime factors of 2 & 3](https://www.careercup.com/question?id=4816567298686976)
+
+Given a prime set, we call "prime expressible" if a number can be factorized only using given prime numbers. Find n-th big expressible number.
+
+E.g., prime set = {2, 3}
+expressible number = {1,2,3,4,6,8, 9, 12...}
+non-expressible number = {5, 10... }
+
+The primes in the prime set are ordered in an increasing order, and can include a prime < 10^4 (don't remember the exact range), and n can also be as large as 1-10^6.
+
+```cpp
+// print 2^i*3^j increasing order
+vector<int> print23(int n) {
+    vector<int> result(n);
+    result[0] = 1;
+    int i2 = 0, i3 = 0;
+
+    for(int i=1;i<n;i++) {
+        int a2 = 2 * result[i2];
+        int a3 = 3 * result[i3];
+
+        if(a2 < a3) {
+            result[i] = a2;
+            i2++;
+        } else if(a2 > a3) {
+            result[i] = a3;
+            i3++;
+        } else {
+            result[i] = a2;
+            i2++; i3++;
+        }
+
+        return result;
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Print combinations from 2 vectors of strings]()
+
+```cpp
+void printCombinations(vector<vector<string>>& strs, int i, int n, vector<string>& res) {
+    if(i == n) {
+        cout<<to_string(res)<<endl;
+        return;
+    }
+
+    for(int j=0;j<strs[i].size();j++) {
+        res.push_back(strs[i][j]);
+        printCombinations(strs, i+1, n, res);
+        res.pop_back();
+    }
+}
+```
+
+---
+
+#### [Print Ugly Numbers](https://www.careercup.com/question?id=23823662)
+
+Given an equation in the form 2^i _ 3^j _ 5^k \* 7^l where i,j,k,l >=0 are integers.write a program to generate numbers from that equation in sorted order efficiently.
+
+for example numbers from that equation will be in the order 2,3,5,6,7,8,9.....and so on..
+
+```cpp
+static vector<int> printAllMultiples(int n)
+{
+    if (n == 0) return {};
+
+    vector<int> result(n);
+    result[0] = 1;
+    int i2 = 0, i3 = 0, i5 = 0, i7 = 0;
+    for (int i = 1; i < n; i++) {
+        int minMultiple = min(min(2 * result[i2], 3 * result[i3]), min(5 * result[i5], 7 * result[i7]));
+        result[i] = minMultiple;
+        if (minMultiple == 2 * result[i2]) i2++;
+        if (minMultiple == 3 * result[i3]) i3++;
+        if (minMultiple == 5 * result[i5]) i5++;
+        if (minMultiple == 7 * result[i7]) i7++;
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Probability of being alive on an island after k steps]()
+
+Given an Island of N\*N and K steps, calculate the probability of being alive after taking K steps from given
+start position(x,y). If a person steps outside of boundary of island, he is dead. The person can move only in 4 direction from given point.
+
+```cpp
+float probability(vector<vector<Point>>& island, int n, Point start, int steps, unordered_map<string, double>& memo) {
+    if(!isValid(start, n)) return 0.0;
+    if(steps == 0) return 1.0;
+
+    string key = getKey(start, steps);
+    if(memo.find(key) != memo.end()) return memo[key];
+
+    memo[key] = 0.25 * probability(island, n, start+{-1,0}, steps-1, memo)
+              + 0.25 * probability(island, n, start+{0,-1}, steps-1, memo)
+              + 0.25 * probability(island, n, start+{1,0}, steps-1, memo)
+              + 0.25 * probability(island, n, start+{0,1}, steps-1, memo);
+
+    return memo[key];
+}
+
+string getKey(Point pos, int steps) {
+    return "{" + pos.to_string() + "," + std::to_string(steps) + "}";
+}
+```
+
+---
