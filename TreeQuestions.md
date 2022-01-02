@@ -546,3 +546,100 @@ static Node* constructBST(vector<int>& preorder) {
 ```
 
 ---
+
+#### [Serialize/Deserialize Binary Tree]()
+
+**_Serialize Tree Using Preorder Traversal_**
+
+```cpp
+string serialize(ITNode* root) {
+    string serialized;
+    serialize(root, serialized);
+
+    if (!serialized.empty()) serialized.erase(0, 1);
+
+    return serialized;
+}
+
+void serialize(ITNode* root, string& serialized) {
+    if (!root) { serialized = serialized + "," + "#"; return; }
+
+    serialized += "," + std::to_string(root->val);
+
+    serialize(root->left, serialized);
+    serialize(root->right, serialized);
+}
+
+ITNode* deserialize(string& serialized) {
+    stringstream ss(serialized);
+    char delim = ',';
+
+    ITNode* root = deserialize(serialized, ss, delim);
+    return root;
+}
+
+ITNode* deserialize(string& serialized, stringstream& ss, char delim) {
+    string cur;
+    if (!getline(ss, cur, delim)) return nullptr;
+    if (cur == "#") return nullptr;
+
+    ITNode* node = new ITNode(stoi(cur));
+    node->left = deserialize(serialized, ss, delim);
+    node->right = deserialize(serialized, ss, delim);
+
+    return node;
+}
+```
+
+**_Serialize Tree Using Level Order Traversal_**
+
+```cpp
+string serialize(ITNode* root) {
+    string serialized;
+
+    queue<ITNode*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        auto cur = q.front(); q.pop();
+        if (cur == nullptr) serialized = serialized + "," + "#";
+        else serialized += "," + std::to_string(cur->val);
+
+        if (cur) {
+            q.push(cur->left);
+            q.push(cur->right);
+        }
+    }
+
+    if (!serialized.empty()) serialized.erase(0, 1);
+
+    return serialized;
+}
+
+ITNode* deserialize(string& serialized) {
+    stringstream ss(serialized);
+    char delim = ',';
+    int index = 0;
+
+    string cur;
+    if (!getline(ss, cur, delim) || cur == "#") return nullptr;
+
+    queue<ITNode*> q;
+    q.push(new ITNode(stoi(cur)));
+    ITNode* root = q.front();
+
+    while (!q.empty()) {
+        auto curNode = q.front(); q.pop();
+
+        if (getline(ss, cur, delim) && cur != "#") curNode->left = new ITNode(stoi(cur));
+        if (getline(ss, cur, delim) && cur != "#") curNode->right = new ITNode(stoi(cur));
+
+        if (curNode->left) q.push(curNode->left);
+        if (curNode->right) q.push(curNode->right);
+    }
+
+    return root;
+}
+```
+
+---

@@ -259,3 +259,81 @@ static int sum(int a, int b) {
 ```
 
 ---
+
+#### [Sort Unique Numbers Using BitSet]()
+
+```sh
+Given an array having 16000 unique integers, each lying within the range 1<x<20000, how do u sort it. U can load only 1000 numbers at a time in memory.
+
+use bit vector to store each integer in single bit. 625 integers are required to store 20000 numbers
+
+int arr[625] = {0};
+
+ex: to store data 2000
+arr index = 2000/32 = 62
+bit position = 2000%32 = 16
+
+now make bit position 16 of array index 62 arr[62] to 1
+
+using this bit vectors we can store data range from 1 - 20000 in 625 integers..
+
+after storing all data in bit vectors, check all bit positions of arr[0], arr[1]..... arr[625]... if any bit position is set to 1 then store back that data into array
+
+lets arr[10] bit position 15 is set to 1 then this is equivalent to data 10*32+15 = 335
+```
+
+**_Bitset implementation_**
+
+```cpp
+class Bitset {
+    int numSz;
+    int sz;
+    int *arr;
+
+public:
+    Bitset(int sz) {
+        this->numSz = (8*sizeof(int));
+        this->sz = (sz/this->numSz) + (sz%this->numSz ? 1 : 0);
+        arr = new int[this->sz];
+        memset(arr, 0, this->sz * sizeof(int));
+    }
+
+    void add(int num) {
+        int pos = num/numSz;
+        int off = num%numSz;
+
+        set(pos, off);
+    }
+
+    bool isset(int num) {
+        int pos = num/numSz;
+        int off = num%numSz;
+
+        return isset(pos, off);
+    }
+
+private:
+    void set(int pos, int off) {
+        arr[pos] |= (1 << off);
+    }
+
+    bool isset(int pos, int off) {
+        return arr[pos] & (1<<off);
+    }
+}
+```
+
+```cpp
+void sort(vector<int>& input, int range) {
+    Bitset bitset(range+1);
+
+    for(auto e : input) bitset.add(e);
+
+    input.clear();
+    for(int i=1;i<=range;i++) {
+        if(bitset.isset(i)) input.push_back(i);
+    }
+}
+```
+
+---

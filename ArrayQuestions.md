@@ -1552,3 +1552,41 @@ static void printLargestSubset() {
 ```
 
 ---
+
+#### [Find shortest subsequence containing subarray]()
+
+```cpp
+pair<int, int> findShortestSubsequence(vector<int>& arr, vector<int>& sub) {
+    unordered_map<int, int> subCnt, arrCnt;
+
+    for (auto e : sub) subCnt[e]++;
+
+    pair<int, int> result = { INT_MIN, INT_MAX };
+    int total = 0, start = 0;
+    for (int i = 0; i < arr.size(); i++) {
+        int e = arr[i];
+        arrCnt[e]++;
+
+        if (arrCnt[e] <= subCnt[e]) total++;
+
+        if (total == sub.size()) {
+            while (start <= i && arrCnt[arr[start]] > subCnt[arr[start]]) {
+                arrCnt[arr[start]]--;
+                start++;
+            }
+
+            if (result.first == INT_MIN || (result.second - result.first > i - start)) {
+                result = { start, i };
+            }
+
+            arrCnt[arr[start]]--;
+            start++;
+            total--;
+        }
+    }
+
+    return result;
+}
+```
+
+---

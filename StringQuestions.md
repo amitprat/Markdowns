@@ -1576,3 +1576,100 @@ string removeBAndAC(string str) {
 ```
 
 ---
+
+#### [Shortest subsequence](https://www.geeksforgeeks.org/shortest-common-supersequence/)
+
+Given two strings str1 and str2, the task is to find the length of the shortest string that has both str1 and str2 as subsequences.
+
+Examples :
+Input: str1 = "geek", str2 = "eke"
+Output: 5
+Explanation:
+String "geeke" has both string "geek"
+and "eke" as subsequences.
+
+Input: str1 = "AGGTAB", str2 = "GXTXAYB"
+Output: 9
+Explanation:
+String "AGXGTXAYB" has both string
+"AGGTAB" and "GXTXAYB" as subsequences.
+
+**_Using LCS method. SuperSequence = strLen1 + strLen2 - lcsLen_**
+
+```cpp
+int shotestCommonSubsequence(string& str1, string& str2) {
+    int l = lcs(str1, str2);
+
+    return str1.size() + str2.size() - l;
+}
+
+int lcs(string& s1, string& s2) {
+    int l1 = lcsUsingRec(s1, s1.length(), s2, s2.length());
+    int l2 = lcsUsingDP(s1, s2);
+    assert(l1 == l2);
+
+    return l1;
+}
+
+int lcsUsingRec(string& s1, int l1, string& s2, int l2) {
+    if (l1 == 0 || l2 == 0) return 0;
+    if (s1[l1 - 1] == s2[l2 - 1]) return 1 + lcsUsingRec(s1, l1 - 1, s2, l2 - 1);
+
+    return max(lcsUsingRec(s1, l1 - 1, s2, l2), lcsUsingRec(s1, l1, s2, l2 - 1));
+}
+
+int lcsUsingDP(string& s1, string& s2) {
+    int l1 = s1.length();
+    int l2 = s2.length();
+
+    vector<vector<int>> memo(l1 + 1, vector<int>(l2 + 1));
+
+    for (int i = 0; i <= l1; i++) {
+        for (int j = 0; j <= l2; j++) {
+            if (i == 0 || j == 0) memo[i][j] = 0;
+            else if (s1[i - 1] == s2[j - 1]) memo[i][j] = 1 + memo[i - 1][j - 1];
+            else memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
+        }
+    }
+
+    return memo[l1][l2];
+}
+```
+
+**_Using Modified version of LCS to count supersequence in it_**
+
+```cpp
+int shotestCommonSubsequence(string& s1, string& s2) {
+    int l1 = shotestCommonSubsequenceRec(s1, s1.length(), s2, s2.length());
+    int l2 = shotestCommonSubsequenceDP(s1, s2);
+
+    assert(l1 == l2);
+
+    return l1;
+}
+
+int shotestCommonSubsequenceRec(string& s1, int l1, string& s2, int l2) {
+    if (l1 == 0 || l2 == 0) return (l1 == 0) ? l2 : l1;
+
+    if (s1[l1 - 1] == s2[l2 - 1]) return 1 + shotestCommonSubsequenceRec(s1, l1 - 1, s2, l2 - 1);
+    return 1 + min(shotestCommonSubsequenceRec(s1, l1 - 1, s2, l2), shotestCommonSubsequenceRec(s1, l1, s2, l2 - 1));
+}
+
+int shotestCommonSubsequenceDP(string& s1, string& s2) {
+    int l1 = s1.length(), l2 = s2.length();
+    vector<vector<int>> memo(l1 + 1, vector<int>(l2 + 1));
+
+    for (int i = 0; i <= l1; i++) {
+        for (int j = 0; j <= l2; j++) {
+            if (i == 0) memo[i][j] = j;
+            else if (j == 0) memo[i][j] = i;
+            else if (s1[i - 1] == s2[j - 1]) memo[i][j] = 1 + memo[i - 1][j - 1];
+            else memo[i][j] = 1 + min(memo[i - 1][j], memo[i][j - 1]);
+        }
+    }
+
+    return memo[l1][l2];
+}
+```
+
+---

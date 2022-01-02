@@ -1025,3 +1025,98 @@ bool canBeScheduled(vector<int>& servers, vector<int>& tasks, vector<bool>& used
 ```
 
 ---
+
+#### [Set Row and Column To Zeros](https://www.careercup.com/question?id=4959773472587776)
+
+Given an n X n matrix, find all elements which are zero, when found set all the elements in that row and column to zero.
+
+```cpp
+void rowColToZeros(vector<vector<int>>& matrix) {
+    int n = matrix.size();
+    if(n == 0) return;
+    int m = matrix[0].size();
+
+    vector<bool> row(m, false);
+    vector<bool> col(n, false);
+
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<m;j++) {
+            if(matrix[i][j] == 0) {
+                row[j] = col[i] = true;
+            }
+        }
+    }
+
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<m;j++) {
+            if(row[j] || col[i]) matrix[i][j] = 0;
+        }
+    }
+}
+```
+
+```cpp
+void rowColToZeros(vector<vector<int>>& matrix) {
+    int n = matrix.size();
+    if(n == 0) return;
+    int m = matrix[0].size();
+
+    bool firstRowZero = false, firstColZero = false;
+
+    for(int j=0;j<m;j++) firstRowZero |= (matrix[0][j] == 0);
+    for(int i=0;i<n;i++) firstColZero |= (matrix[i][0] == 0);
+
+    for(int i=1;i<n;i++) {
+        for(int j=1;j<m;j++) {
+            if(matrix[i][j] == 0) matrix[i][0] = matrix[0][j] = 0;
+        }
+    }
+
+    for(int i=1;i<n;i++) {
+        for(int j=1;j<m;j++) {
+            if(matrix[i][0] == 0 || matrix[0][j]) matrix[i][j] = 0;
+        }
+    }
+
+    if(firstRowZero) for(int j=0;j<m;j++) matrix[0][j] = 0;
+    if(firstColZero) for(int i=0;i<n;i++) matrix[i][0] = 0;
+}
+```
+
+---
+
+#### [Snake Ladder]()
+
+```cpp
+int minimumJumps(Board& board, int s, int d, unordered_map<int,int>& jumps) {
+    queue<int> q;
+    q.push(s);
+
+    unordered_set<int> visited;
+    visited.insert(s);
+
+    int  jumps = 0;
+    while(!q.empty()) {
+        int sz = q.size();
+        while(sz--) {
+            auto f = q.front(); q.pop();
+            if(f == d) return jumps;
+
+            for(int c=1;c<=6 && f+c<=d;c++) {
+                int n = f+c;
+
+                if(jumps.find(n) != jumps.end()) n = jumps[n];
+                if(visited.count(n) > 0) continue;
+
+                q.push(n);
+                visited.insert(n);
+            }
+        }
+        jumps++;
+    }
+
+    return -1;
+}
+```
+
+---
