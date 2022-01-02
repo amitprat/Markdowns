@@ -460,21 +460,55 @@ as part of subsequence as it would be at same
 index in both.
 ```
 
+**_Check if there is a repeated subsequence of length >= 2_**
+**_Using DP_**
+
+```cpp
+bool isRepeatingSubseqDP(string s) {
+    int n = s.length();
+    vector<vector<int>> memo(n + 1, vector<int>(n + 1));
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            if (i == 0 || j == 0) { memo[i][j] = 0; continue; }
+
+            memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
+            if (i != j && s[i - 1] == s[j - 1]) memo[i][j] = max(memo[i][j], memo[i - 1][j - 1] + 1);
+        }
+    }
+    return (memo[n][n] > 1);
+}
+```
+
+**_Using Recursion_**
+
+```cpp
+bool isRepeatingSubseqRec(string s) {
+    auto len = isRepeatingSubseqRec(s, s.length(), s, s.length());
+    return len > 1;
+}
+
+int isRepeatingSubseqRec(string x, int n, string y, int m) {
+    if (n == 0 || m == 0) return 0;
+    if (n != m && x[n - 1] == y[m - 1]) return 1 + isRepeatingSubseqRec(x, n - 1, y, m - 1);
+    return max(isRepeatingSubseqRec(x, n - 1, y, m), isRepeatingSubseqRec(x, n, y, m - 1));
+}
+```
+
+**_Get the length of longest repeated subsequence_**
+**_Using DP_**
+
 ```cpp
 int findLongestRepeatingSubSeq(string str)
 {
     int n = str.length();
     int dp[n+1][n+1];
 
-    for(int i=0;i<=n;i++){
-      dp[i][0] =0;
-      dp[0][i] =0;
-    }
-
-    for (int i=1; i<=n; i++)
+    for (int i=0; i<=n; i++)
     {
-        for (int j=1; j<=n; j++)
+        for (int j=0; j<=n; j++)
         {
+            if(i == 0 || j == 0) { dp[i][j] = 0; continue;}
+
             // for repeated subsequence, we don't consider same index element
             if (str[i-1] == str[j-1] && i != j) dp[i][j] =  1 + dp[i-1][j-1];
             else dp[i][j] = max(dp[i][j-1], dp[i-1][j]);
@@ -485,7 +519,18 @@ int findLongestRepeatingSubSeq(string str)
 }
 ```
 
+**_Using Recursion_**
+
+```cpp
+int isRepeatingSubseqRec(string x, int n, string y, int m) {
+    if (n == 0 || m == 0) return 0;
+    if (n != m && x[n - 1] == y[m - 1]) return 1 + isRepeatingSubseqRec(x, n - 1, y, m - 1);
+    return max(isRepeatingSubseqRec(x, n - 1, y, m), isRepeatingSubseqRec(x, n, y, m - 1));
+}
+```
+
 **_Print the longest repeated subsequence_**
+**_Using DP_**
 
 ```cpp
 string longestRepeatedSubSeq(string str)
@@ -493,13 +538,11 @@ string longestRepeatedSubSeq(string str)
     // First part of code remains same as above.
     int n = str.length();
     int dp[n+1][n+1];
-    for (int i=0; i<=n; i++) {
-        dp[i][0] = 0;
-        dp[0][i] = 0;
-    }
 
-    for (int i=1; i<=n; i++) {
-        for (int j=1; j<=n; j++) {
+    for (int i=0; i<=n; i++) {
+        for (int j=0; j<=n; j++) {
+            if(i == 0 || j == 0) { dp[i][j] = 0; continue; }
+
             if (str[i-1] == str[j-1] && i != j) dp[i][j] =  1 + dp[i-1][j-1];
             else dp[i][j] = max(dp[i][j-1], dp[i-1][j]);
         }
@@ -525,6 +568,31 @@ string longestRepeatedSubSeq(string str)
     reverse(res.begin(), res.end());
 
     return res;
+}
+```
+
+**_Using Recursion_**
+
+```cpp
+string longestReaptingSubsequenceRec(string s) {
+    int n = s.length();
+    string res = longestReaptingSubsequenceRec(s, n, s, n, "");
+    if (res.length() <= 1) return ""; // we only consider repeated subsequence of length >= 2
+
+    return res;
+}
+
+string longestReaptingSubsequenceRec(string& s1, int n, string s2, int m, string cur) {
+    if (n == 0 || m == 0) return cur;
+
+    if (n == m || s1[n - 1] != s2[m - 1]) {
+        auto l1 = longestReaptingSubsequenceRec(s1, n - 1, s2, m, cur);
+        auto l2 = longestReaptingSubsequenceRec(s1, n, s2, m - 1, cur);
+        return (l1.length() > l2.length()) ? l1 : l2;
+    }
+    else {
+        return longestReaptingSubsequenceRec(s1, n - 1, s2, m - 1, s1[n - 1] + cur);
+    }
 }
 ```
 

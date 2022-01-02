@@ -1539,3 +1539,40 @@ static string rearrangeCharacters(string& str) {
 ```
 
 ---
+
+#### [Remove B and AC]()
+
+```cpp
+string removeBAndAC(string str) {
+    int i = 0;
+    for(int j=0;j<str.length();j++) {
+        if(str[j] == 'b') continue;
+
+        if(i>0 && str[i-1] == 'a' && str[j] == 'c') i--;
+        else str[i++] = str[j];
+    }
+
+    str.erase(str.begin()+i, str.end());
+    return str;
+}
+```
+
+```cpp
+string removeBAndAC(string str) {
+    stack<char> st;
+    for(auto ch : str) {
+        if(ch == 'b') continue;
+
+        if(ch == 'c' && !st.empty() && st.top() == 'a') st.pop();
+        else st.push(ch);
+    }
+
+    string res;
+    while(!st.empty()) { res += st.top(); st.pop(); }
+    reverse(res.begin(), res.end());
+
+    return res;
+}
+```
+
+---

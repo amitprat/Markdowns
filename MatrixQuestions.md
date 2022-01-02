@@ -521,3 +521,49 @@ void printDiagonally(vector<vector<int>>& arr) {
 ```
 
 ---
+
+#### [Rotate Matrix By 90 Degree]()
+
+**_Rotate NXN matrix inplace_**
+
+```cpp
+void rotate(vector<vector<int>>& matrix) {
+    int n = matrix.size();
+    for(int level=0;level<n/2;level++) {
+        rotate(matrix, level, n);
+    }
+}
+
+void rotate(vector<vector<int>>& matrix, int level, int n) {
+    for(int j=level;j<n-level-1;j++) {
+        int tmp = matrix[level][j];
+        matrix[level][j] = matrix[n-j-1][level];
+        matrix[n-j-1][level] = matrix[n-level-1][n-j-1];
+        matrix[n-level-1][n-j-1] = matrix[j][n-level-1];
+        matrix[n-level-1][j] = tmp;
+    }
+}
+```
+
+**_Rotate NXM matrix inplace_**
+
+```cpp
+void rotate(vector<vector<int>>& matrix) {
+    int n = matrix.size();
+    if(n == 0) return;
+    int m = matrix[0].size();
+
+    vector<vector<int>> result;
+    for(int c=m-1;c>=0;c--) {
+        vector<int> newRow;
+        for(int r=0;r<n;r++) {
+            newRow.push_back(matrix[r][c]);
+        }
+        result.push_back(newRow);
+    }
+
+    print(result);
+}
+```
+
+---

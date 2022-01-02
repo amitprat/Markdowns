@@ -743,3 +743,285 @@ string getKey(Point pos, int steps) {
 ```
 
 ---
+
+#### [Rearrange positive and negative numbers in original order]()
+
+Give you an array which has n integers,it has both positive and negative integers.Now you need sort this array in a special way.
+After that,the negative integers should in the front,and the positive integers should in the back.Also the relative position should not be changed.
+eg. -1 1 3 -2 2 ans: -1 -2 1 3 2.
+o(n)time complexity and o(1) space complexity is perfect.
+
+```sh
+This can be done in O(nlogn) using divide and conquer scheme. Before starting the algorithm, please see the following observation:
+
+Observation: given an array A, say [1, -2, ..., 4], with n elements, we can get the inverse of A, denoted as A’ (4, …, -2, 1), in \theta(n) time with O(1) space complexity.
+
+The basic idea of the algorithm is as follows:
+1. We recursively ‘sort’ two smaller arrays of size n/2 (here ‘sort’ is defined in the question)
+2. Then we spend \theta(n) time merging the two sorted smaller arrays with O(1) space complexity.
+How to merge?
+Suppose the two sorted smaller array is A and B. A1 denotes the negative part of A, and A2 denotes positive part of A. Similarly, B1 denotes the negative part of B, and B2 denotes positive part of B.
+2.1. Compute the inverse of A2 (i.e., A2’) in \theta(|A2|) time; compute the inverse of B1 (i.e., B1’) in \theta(|B1|) time. [See observation; the total time is \theta(n) and space is O(1)]
+Thus the array AB (i.e., A1A2B1B2) becomes A1A2’B1’B2.
+2.2. Compute the inverse of A2’B1’ (i.e., B1A2) in \theta(|A2|) time. [See observation; the total time is \theta(n) and space is O(1)]
+Thus the array A1A2’B1’B2 becomes A1B1A2B2. We are done.
+
+Time complexity analysis:
+T(n) = 2T(n/2) + \theta(n) = O(nlogn)
+```
+
+**_Rearrange using extra space_**
+
+```cpp
+void rearrange(vector<int>& arr) {
+    int n = arr.size();
+    vector<int> tmp(n);
+
+    int k = 0;
+    for(int i=0;i<n;i++) {
+        if(arr[i] < 0) arr[k++] = arr[i];
+    }
+
+    for(int i=0;i<n;i++) {
+        if(arr[i] >= 0) arr[k++] = arr[i];
+    }
+
+    arr = tmp;
+}
+```
+
+**_Rearrange numbers using Insertion Sort_**
+
+```cpp
+void rearrangeNumbers(vector<int>& arr) {
+    for(int i=0;i<arr.size();i++) {
+        auto key = arr[i];
+        if(key > 0) continue;
+
+        for(int j=i-1;j>=0 && arr[j] > 0;j--) {
+            arr[j+1] = ar[j];
+        }
+        arr[j] = key;
+    }
+}
+```
+
+**_Rearrange using merge sort_**
+
+```cpp
+void rearrangeNumbers(vector<int>& arr) {
+    vector<int> tmp(arr.size());
+    rearrangeNumbers(arr, 0, arr.size()-1, tmp);
+}
+
+void rearrangeNumbers(vector<int>& arr, int l, int r, vector<int>& tmp) {
+    if(l >= r) return;
+
+    int m = (l+r)/2;
+    rearrangeNumbers(arr, l, m, tmp);
+    rearrangeNumbers(arr, m+1, r, tmp);
+
+    merge(arr, l, m, r, tmp);
+}
+
+void merge(vector<int>& arr, int l, int m, int r, vector<int>& tmp) {
+    int i=l, j=m+1, k=l;
+    while(i<=m && arr[i] < 0) arr[k++] = arr[i++];
+    while(j<=r && arr[j] < 0) arr[k++] = arr[j++];
+
+    while(i<=m) arr[k++] = arr[i++];
+    while(j<=r) arr[k++] = arr[j++];
+
+    i = l;
+    while(i<=r) arr[i++] = tmp[i++];
+}
+```
+
+**_Rearrange using optimized merge sort_**
+
+```cpp
+void rearrangeNumbers(vector<int>& arr) {
+    rearrangeNumbers(arr, 0, arr.size()-1);
+}
+
+void rearrangeNumbers(vector<int>& arr, int l, int r) {
+    if(l >= r) return;
+
+    int m = (l+r)/2;
+    rearrangeNumbers(arr, l, m);
+    rearrangeNumbers(arr, m+1, r);
+
+    merge(arr, l, m, r);
+}
+
+void merge(vector<int>& arr, int l, int m, int r) {
+    int i=l, j=m+1;
+    while(i<=m && arr[i]<0) i++;
+    while(j<=r && arr[j]<0) j++;
+
+    reverse(arr, i, m);
+    reverse(arr, j, r);
+    reverse(arr, i, j-1);
+}
+
+void reverse(vector<int>& arr, int l, int r) {
+    while(l<r) { swap(arr[l++], arr[r--]); }
+}
+```
+
+---
+
+#### [Rearrange positive/negative numbers alternatively]()
+
+```sh
+{ -1,-1,-3,-4,-5 }   -> [-1, -1, -3, -4, -5]
+{ 1,1,3,4,5 }        -> [1, 1, 3, 4, 5]
+{ -1,-1,-3,-4,-5,6 } -> [6, -1, -1, -3, -4, -5]
+{ 1,1,3,4,5,-6 }     -> [1, -6, 1, 3, 4, 5]
+{ -1,6,9,-4,-10,-9,8,8,4 } -> [6, -1, 9, -4, 8, -10, 8, -9, 4]
+```
+
+```cpp
+void rearrangePositiveNegativeNumbersAlternatively(vector<int>& arr) {
+    int n = arr.size();
+    for(int i=0;i<n;i++) {
+        if((i&1) && (arr[i] > 0)) {
+            auto k = findNextNeg(arr, i+1, n);
+            if(k == -1) break;
+            rotate(arr, i, k);
+        } else if(!(i&1) && (arr[i] < 0)) {
+            auto k = findNegPos(arr, i+1, n);
+            if(k == -1) break;
+            rotate(arr, i, k);
+        }
+    }
+}
+
+int findNextNeg(vector<int>& arr, int s, int n) {
+    while(s < n && arr[s] > 0) s++;
+    if(s == n) return -1;
+
+    return s;
+}
+
+int findNextPos(vector<int>& arr, int s, int n) {
+    while(s < n && arr[s] < 0) s++;
+    if(s == n) return -1;
+
+    return s;
+}
+
+void rotate(vector<int>& arr, int l, int r) {
+    reverse(arr, l, r-1);
+    reverse(arr, l, r);
+}
+```
+
+---
+
+#### [621. Task Scheduler](<https://leetcode.com/problems/task-scheduler/discuss/104504/C%2B%2B-8lines-O(n)>)
+
+Given a characters array tasks, representing the tasks a CPU needs to do, where each letter represents a different task. Tasks could be done in any order. Each task is done in one unit of time. For each unit of time, the CPU could complete either one task or just be idle.
+
+However, there is a non-negative integer n that represents the cooldown period between two same tasks (the same letter in the array), that is that there must be at least n units of time between any two same tasks.
+
+Return the least number of units of times that the CPU will take to finish all the given tasks.
+
+```sh
+Example 1:
+
+Input: tasks = ["A","A","A","B","B","B"], n = 2
+Output: 8
+Explanation:
+A -> B -> idle -> A -> B -> idle -> A -> B
+There is at least 2 units of time between any two same tasks.
+```
+
+```cpp
+class Solution {
+public:
+    int leastInterval(vector<char>& tasks, int n) {
+        unordered_map<char,int>mp;
+        int count = 0;
+        for(auto e : tasks)
+        {
+            mp[e]++;
+            count = max(count, mp[e]);
+        }
+
+        int ans = (count-1)*(n+1);
+        for(auto e : mp) if(e.second == count) ans++;
+        return max((int)tasks.size(), ans);
+    }
+};
+```
+
+---
+
+#### [Check if all given tasks can be scheduled on servers](https://www.careercup.com/question?id=6282171643854848)
+
+There are at most eight servers in a data center. Each server has got a capacity/memory limit. There can be at most 8 tasks that need to be scheduled on those servers. Each task requires certain capacity/memory to run, and each server can handle multiple tasks as long as the capacity limit is not hit. Write a program to see if all of the given tasks can be scheduled or not on the servers?
+
+Ex:
+Servers capacity limits: 8, 16, 8, 32
+Tasks capacity needs: 18, 4, 8, 4, 6, 6, 8, 8
+For this example, the program should say 'true'.
+
+Ex2:
+Server capacity limits: 1, 3
+Task capacity needs: 4
+For this example, program should return false.
+
+```cpp
+bool canBeScheduled(vector<int>& servers, vector<int>& tasks) {
+    return canBeScheduled(servers, tasks, 0);
+}
+
+bool canBeScheduled(vector<int>& servers, vector<int>& tasks, int taskIndex) {
+    if(taskIndex == tasks.size()) return true;
+
+    for(auto& server : servers) {
+        if(server >= tasks[taskIndex]) {
+            server -= tasks[taskIndex];
+            if(canBeScheduled(servers, tasks, taskIndex+1)) return true;
+            server += tasks[taskIndex];
+        }
+    }
+
+    return false;
+}
+```
+
+**_Another Solution_**
+
+```cpp
+bool canBeScheduled(vector<int>& servers, vector<int>& tasks) {
+    vector<bool> used(tasks.size(), false)
+    return canBeScheduled(servers, tasks, used);
+}
+
+bool canBeScheduled(vector<int>& servers, vector<int>& tasks, vector<bool>& used) {
+    bool allUsed = false;
+    for(auto u : used) allUsed &= u;
+    if(allUsed) return true;
+
+    for(int i=0;i<tasks.size();i++) {
+        if(!used[i]) {
+            for(auto& server : servers) {
+                if(server >= tasks[i]) {
+                    used[i] = true;
+                    server -= tasks[i];
+
+                    if(canBeScheduled(servers, tasks, used)) return true;
+
+                    used[i] = false;
+                    server += tasks[i];
+                }
+            }
+        }
+    }
+    return false;
+}
+```
+
+---

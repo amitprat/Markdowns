@@ -505,3 +505,44 @@ static pair<int, int> getMinimumDistanceToLeafNode(ITNode* root, ITNode* target,
 ```
 
 ---
+
+#### [Construct Binary Search Tree from given Preorder traversal](https://www.careercup.com/question?id=14419694)
+
+Given preorder traversal array of a BST, recontruct the BST.
+
+This can be solved in O(n) only. The approach am using is, keep a separate stack of node pointers. Push on the 1st node. Keep on traversing the preorder traversal
+
+1. if the value of stack top is more than the current node value, then make the current node left pointer of stack top.
+2. if the value of stack top is less that current node value, keep popping from the stack till value of stack top is more than current node. Then make current node the right child of last popped element.
+   Push the current node on stack in both the cases.
+
+It may seem like an O(n^2) algo, but we are pushing and popping every element on stack only once so this is O(n) time and space.
+
+```cpp
+static Node* constructBST(vector<int>& preorder) {
+    if (preorder.empty()) return nullptr;
+    Node* root = new Node(preorder[0]);
+
+    stack<Node*> st;
+    st.push(root);
+
+    for (int i = 1; i < preorder.size(); i++) {
+        auto newNode = new Node(preorder[i]);
+        if (newNode->val < st.top()->val) {
+            st.top()->left = newNode;
+        }
+        else {
+            Node* prev = nullptr;
+            while (!st.empty() && st.top()->val < newNode->val) {
+                prev = st.top(); st.pop();
+            }
+            prev->right = newNode;
+        }
+        st.push(newNode);
+    }
+
+    return root;
+}
+```
+
+---

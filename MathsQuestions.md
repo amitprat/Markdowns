@@ -150,3 +150,95 @@ int rand5() {
 ```
 
 ---
+
+#### [Print all positive numbers that can be expressed as sum pair of sum of cuberoots](https://www.careercup.com/question?id=5647694703886336)
+
+Write a function that would print all positive numbers smaller than n that can be expressed as the sum of two cubes in two different ways. Bonus: calculate the complexity of that function.
+
+For example, 1729 is one such number because 1729 = 1^3 + 12^3 = 9^3 + 10^3.
+
+**_print all positive numbers smaller than n={} that can be expressed as the sum of two cubes_**
+
+```cpp
+void printAllPositiveNumbersSmallestThanNExpressedAsPairSum(int n) {
+    for (int i = 1; i < n; i++) {
+        auto res = calculateCubePairSum(i);
+        if (res.empty()) continue;
+
+        for (auto e : res)
+            cout << format("[{}^3 + {}^3] = {}", e.first, e.second, i) << endl;
+    }
+}
+```
+
+**_Get cuberoot sum for a number_**
+
+```cpp
+void printCuberoots() {
+    for (auto num : nums) {
+        cout << format("Print all combinations of cuberoot to make the target number = {}", num) << endl;
+        obj.calculateAllCubeRootSum(num);
+        cout << endl;
+
+        cout << "Cuberoot pair sum" << endl;
+        auto res = obj.calculateCubePairSum(num);
+        for (auto e : res)
+            cout << format("[{}^3 + {}^3] = {}", e.first, e.second, num) << endl;
+        cout << endl;
+    }
+}
+```
+
+**_Calculate all cubeRoot sum_**
+
+```cpp
+void calculateAllCubeRootSum(int n)
+{
+    int m = cbrt(n);
+    vector<int> cuberoots;
+    for(int i=0;i<=m;i++) cuberoots.push_back(pow(i,3));
+
+    vector<string> result;
+    calculateAllCubeRootSum(cuberoots, m, n, result);
+}
+
+void calculateAllCubeRootSum(vector<int> cubeRoots, int m, int n, vector<string> result)
+{
+    if(n == 0) {
+        cout<<to_string(result)<<endl;
+        return;
+    }
+
+    if(m < 0 || n < 0) return;
+
+    calculateAllCubeRootSum(cubeRoots, m-1, n, result);
+    result.push_back(format("{}^3",(int)cbrt(cubeRoots[m-1])));
+    calculateAllCubeRootSum(cubeRoots, m-1, n-cubeRoots[m-1], result);
+}
+```
+
+**_Calculate pair cubeRoot sum_**
+
+```cpp
+vector<pair<int,int>> calculateCubePairSum(int n) {
+    int m = cbrt(n);
+    vector<int> cubeRoots;
+
+    for(int i=0;i<=m;i++) cubeRoots.push_back(pow(i,3));
+
+    vector<pair<int,int>> result;
+    int i=0, j=m;
+    while(i < j) {
+        if(cubeRoots[i] + cubeRoots[j] < n) i++;
+        else if(cubeRoots[i] + cubeRoots[j] > n) j--;
+        else {
+            result.push_back({cbrt(cubeRoots[i]), cbrt(cubeRoots[j])})
+            i++, j--;
+        }
+    }
+
+    return result;
+}
+```
+
+---
