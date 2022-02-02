@@ -266,3 +266,346 @@ bool isValid(string str) {
 ```
 
 ---
+
+#### [Simplify Linux Path]()
+
+```cpp
+class SimplifyPath {
+public:
+    static void test() {
+        SimplifyPath obj;
+
+        vector<pair<string, string>> tests = {
+            {"/home/","/home"},
+            {"/a/./b/../../c/","/c"},
+            {"/../","/"},
+            {"/home//foo/","/home/foo"}
+        };
+
+        for (auto& test : tests) {
+            auto res = obj.simplifyPath(test.first);
+            cout << format("Original path='{}', path after simplifying it='{}'", test.first, res) << endl;
+            assert(test.second == res);
+        }
+    }
+
+    string simplifyPath(string& path) {
+        removeTrailingSpacesAndSlashes(path);
+
+        stack<string> st;
+        for (int start = 0, end = 0; end <= path.length(); end++) {
+            string cur;
+            if (end == path.length()) {
+                cur = path.substr(start);
+            }
+            else if (path[end] == '/') {
+                cur = path.substr(start, end - start);
+                start = end + 1;
+            }
+
+            if (cur.empty()) continue;
+            if (cur == ".") continue;
+            if (cur == "..") { if (!st.empty()) st.pop(); }
+            else st.push(cur);
+        }
+
+        string result;
+        while (!st.empty()) {
+            auto cur = st.top(); st.pop();
+            if (result.empty()) result = cur;
+            else result = cur + "/" + result;
+        }
+        result = "/" + result;
+
+        return result;
+    }
+
+    void removeTrailingSpacesAndSlashes(string& str) {
+        int i = str.length() - 1;
+        while (str[i] == '/' || str[i] == ' ') i--;
+        str = str.substr(0, i + 1);
+    }
+};
+```
+
+---
+
+#### [Implement K stacks in a single array]()
+
+**_Using fixed size for each stack_**
+
+```cpp
+FixedSizeKStack(int k, int totalCap) {
+    this->k = k;
+    this->totalCap = totalCap;
+    this->arr = new int[totalCap];
+    this->top = new int[k];
+    this->mxLimitPerStack = totalCap / k; // this could cause some unused space if total size isn't multiple of k
+
+    for (int i = 0; i < k; i++) {
+        top[i] = (i * mxLimitPerStack - 1); // initialize each stack top as their start pos - 1 (empty marker)
+    }
+}
+
+void push(int stNum, int elem) {
+    if (isFull(stNum)) throw exception(format("Stack {} is full, not inserting elem {}", stNum, elem).c_str());
+
+    top[stNum]++; // increase start position and insert element at that pos
+    arr[top[stNum]] = elem;
+}
+
+int pop(int stNum) {
+    if (isEmpty(stNum)) throw exception(format("Stack {} is empty, not popping elem", stNum).c_str());
+
+    // decrease the start position and return element at current index
+    int index = top[stNum]--;
+    return arr[index];
+}
+
+bool isFull(int stNum) {
+    int mxEndIndex = min((stNum + 1) * mxLimitPerStack, totalCap);
+    if (top[stNum] + 1 >= mxEndIndex) return true;
+
+    return false;
+}
+
+bool isEmpty(int stNum) {
+    return top[stNum] == stNum * mxLimitPerStack - 1;
+}
+```
+
+**_Using Dynamic Stack size_**
+
+```cpp
+
+// Initialization
+struct Node {
+    int val;
+    int prevIndex;
+};
+
+class KStack {
+	Node** nodes = nullptr;
+	vector<int> indices;
+	int curIndex;
+	int cap;
+};
+
+KStack(int k, int cap) {
+    this->indices = vector<int>(k, -1);
+    this->nodes = new Node * [cap];
+    this->cap = cap;
+    this->curIndex = 0;
+}
+
+void push(int stNum, int val) {
+    if (isFull()) throw exception("Stack is full");
+
+    nodes[curIndex] = new Node{ val, indices[stNum] }; // insert previous pos for this stack and current val
+    indices[stNum] = curIndex; // set the top of the stack
+
+    curIndex++; // increase the overall index
+}
+
+int pop(int stNum) {
+    if (isEmpty(stNum)) throw exception("Empty stack");
+
+    int removedElemIndex = indices[stNum];
+    Node* res = nodes[removedElemIndex]; // get the element at the top
+    indices[stNum] = res->prevIndex; // store the previous top
+
+    // clear up the last position
+    if (removedElemIndex != curIndex) {
+        swap(nodes[removedElemIndex], nodes[curIndex]);
+
+        // we don't store what is the stNum of element stored at last overall index(curIndex)
+        // so, we have to iterate through entire indices to find the stack num
+        for (int i = 0; i < indices.size(); i++) {
+            if (indices[i] == curIndex) {
+                indices[i] = removedElemIndex; // update this index
+                break;
+            }
+        }
+
+        curIndex--;
+    }
+
+    return res->val;
+}
+
+bool isEmpty() {
+    return curIndex == 0;
+}
+
+bool isFull() {
+    return curIndex == cap;
+}
+
+bool isEmpty(int stNum) {
+    return isEmpty() || indices[stNum] == -1;
+}
+```
+
+---
+
+#### [Stack with access to middle element](https://www.geeksforgeeks.org/design-a-stack-with-find-middle-operation/)
+
+```cpp
+template <class T>
+class SpecialStackWithAccessToMiddleElementWithSTLStack {
+    list<T>elements;
+    list<T>::iterator middle = elements.end();
+
+public:
+    void push(int elem) {
+        elements.push_back(elem);
+        if (elements.size() == 1) middle = elements.begin();
+        else if (elements.size() % 2 == 1) middle++;
+    }
+
+    T pop() {
+        if (elements.empty()) throw exception("stack is empty");
+
+        auto last = elements.back();
+        elements.pop_back();
+
+        if (elements.empty()) middle = elements.end();
+        else if (elements.size() % 2 == 0) middle--;
+
+        return last;
+    }
+
+    T top() {
+        if (elements.empty()) throw exception("stack is empty");
+
+        return elements.back();
+    }
+
+    T getMid() {
+        if (middle == elements.end()) throw exception("No middle element");
+
+        return *middle;
+    }
+
+    bool empty() {
+        return elements.empty();
+    }
+
+    int size() {
+        return elements.size();
+    }
+
+    void deleteMid() {
+        if (middle == elements.end()) throw exception("No middle element");
+        auto middlePrev = middle; middlePrev--;
+        elements.erase(middle); // middle becomes invalid after erase
+
+        middle = middlePrev; // update middle with middle prev
+        if (elements.empty()) middle = elements.end();
+        if (elements.size() % 2 == 1) middle++;
+    }
+};
+```
+
+```cpp
+template <class T>
+class SpecialStackWithAccessToMiddleElementWithCustomLinkedList
+{
+    class LinkedList {
+        LinkedListNode<T>* head = nullptr;
+        LinkedListNode<T>* middle = nullptr;
+
+    public:
+        int size = 0;
+
+        void push_back(T elem) {
+            if (head == nullptr) head = middle = new LinkedListNode<T>(elem);
+            else {
+                head->next = new LinkedListNode<T>(elem);
+                head->next->prev = head;
+                head = head->next;
+
+                if (size % 2 == 0) middle = middle->next;
+            }
+            size++;
+        }
+
+        T back() {
+            if (head == nullptr) throw exception("List is empty");
+            return head->val;
+        }
+
+        T pop_back() {
+            if (head == nullptr) throw exception("List is empty");
+            auto last = head->val;
+            head = head->prev;
+
+            size--;
+
+            if (head == nullptr) middle = nullptr;
+            else if (size % 2 == 0) middle = middle->prev;
+
+            return last;
+        }
+
+        T getMid() {
+            if (middle == nullptr) throw exception("Invalid middle pointer");
+
+            return middle->val;
+        }
+
+        void deleteMid() {
+            if (middle == nullptr) throw exception("Invalid middle pointer");
+
+            auto oldMiddle = middle;
+            if (middle->prev) {
+                middle->prev->next = middle->next;
+                middle->next->prev = middle->prev;
+                middle = middle->prev;
+            }
+            else middle = middle->next;
+            delete oldMiddle;
+
+            size--;
+
+            if (middle && (size % 2 == 1)) middle = middle->next;
+        }
+
+        bool empty() {
+            return size == 0;
+        }
+    };
+
+    LinkedList elements;
+public:
+    void push(T elem) {
+        elements.push_back(elem);
+    }
+
+    T top() {
+        return elements.back();
+    }
+
+    T pop() {
+        return elements.pop_back();
+    }
+
+    T getMid() {
+        return elements.getMid();;
+    }
+
+    void deleteMid() {
+        elements.deleteMid();
+    }
+
+    bool empty() {
+        return elements.empty();
+    }
+
+    int size() {
+        return elements.size;
+    }
+};
+```
+
+---

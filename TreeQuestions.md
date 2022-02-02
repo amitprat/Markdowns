@@ -131,31 +131,31 @@ bool isRedBlackBalanced(Node *root, int& mnH, int& mxH) {
 #### [Construct Tree from Preorder and Inorder traversal]()
 
 ```cpp
-    static void test(vector<int>& preorder, vector<int>& inorder) {
-        unordered_map<int, int> map;
-        for (int i = 0; i < inorder.size(); i++) {
-            map[inorder[i]] = i;
-        }
-
-        ITNode* cur = constructTree(preorder, inorder, 0, inorder.size() - 1, map);
-        cout << to_string(cur) << endl;
+static void test(vector<int>& preorder, vector<int>& inorder) {
+    unordered_map<int, int> map;
+    for (int i = 0; i < inorder.size(); i++) {
+        map[inorder[i]] = i;
     }
 
-    ITNode* constructTree(vector<int>& preorder, vector<int>& inorder, int l, int r, unordered_map<int, int>& map)
-    {
-        if (l > r) return nullptr;
+    ITNode* cur = constructTree(preorder, inorder, 0, inorder.size() - 1, map);
+    cout << to_string(cur) << endl;
+}
 
-        static int index = 0;
-        ITNode* root = new ITNode(preorder[index++]);
-        if (l == r) return root;
+ITNode* constructTree(vector<int>& preorder, vector<int>& inorder, int l, int r, unordered_map<int, int>& map)
+{
+    if (l > r) return nullptr;
 
-        int pos = map[root->val];
+    static int index = 0;
+    ITNode* root = new ITNode(preorder[index++]);
+    if (l == r) return root;
 
-        root->left = constructTree(preorder, inorder, l, pos - 1, map);
-        root->right = constructTree(preorder, inorder, pos + 1, r, map);
+    int pos = map[root->val];
 
-        return root;
-    }
+    root->left = constructTree(preorder, inorder, l, pos - 1, map);
+    root->right = constructTree(preorder, inorder, pos + 1, r, map);
+
+    return root;
+}
 ```
 
 ---
@@ -552,40 +552,87 @@ static Node* constructBST(vector<int>& preorder) {
 **_Serialize Tree Using Preorder Traversal_**
 
 ```cpp
-string serialize(ITNode* root) {
-    string serialized;
-    serialize(root, serialized);
+string serialize(ITNode* node)
+{
+    if (!node) return "#";
 
-    if (!serialized.empty()) serialized.erase(0, 1);
+    string result = std::to_string(node->val);
+    result += " " + serialize(node->left);
+    result += " " + serialize(node->right);
 
-    return serialized;
+    return result;
+}
+```
+
+```cpp
+ITNode* deserialize(string serialized)
+{
+    vector<string> items;
+    string word;
+    stringstream ss(serialized);
+    while (ss >> word) items.push_back(word);
+
+    int index = 0;
+    return deserialize(items, index, "#");
 }
 
-void serialize(ITNode* root, string& serialized) {
-    if (!root) { serialized = serialized + "," + "#"; return; }
+ITNode* deserialize(vector<string>& items, int& index, string marker)
+{
+    if (index >= items.size()) return nullptr;
+    if (items[index] == marker) {
+        index++;  return nullptr;
+    }
 
-    serialized += "," + std::to_string(root->val);
+    ITNode* root = new ITNode(stoi(items[index++]));
+    root->left = deserialize(items, index, marker);
+    root->right = deserialize(items, index, marker);
 
-    serialize(root->left, serialized);
-    serialize(root->right, serialized);
+    return root;
+}
+```
+
+```cpp
+ITNode* deserialize2(string serialized)
+{
+    stringstream ss(serialized);
+
+    int index = 0;
+    return deserialize2(ss, "#");
 }
 
-ITNode* deserialize(string& serialized) {
+ITNode* deserialize2(stringstream& ss, string marker)
+{
+    string word;
+    if (!(ss >> word)) return nullptr;
+    if (word == marker) return nullptr;
+
+    ITNode* root = new ITNode(stoi(word));
+
+    root->left = deserialize2(ss, marker);
+    root->right = deserialize2(ss, marker);
+
+    return root;
+}
+```
+
+```cpp
+ITNode* deserialize3(string& serialized) {
     stringstream ss(serialized);
     char delim = ',';
 
-    ITNode* root = deserialize(serialized, ss, delim);
+    string marker = "#";
+    ITNode* root = deserialize3(ss, delim, marker);
     return root;
 }
 
-ITNode* deserialize(string& serialized, stringstream& ss, char delim) {
+ITNode* deserialize3(stringstream& ss, char delim, string& marker) {
     string cur;
     if (!getline(ss, cur, delim)) return nullptr;
-    if (cur == "#") return nullptr;
+    if (cur == marker) return nullptr;
 
     ITNode* node = new ITNode(stoi(cur));
-    node->left = deserialize(serialized, ss, delim);
-    node->right = deserialize(serialized, ss, delim);
+    node->left = deserialize3(ss, delim, marker);
+    node->right = deserialize3(ss, delim, marker);
 
     return node;
 }
@@ -638,6 +685,552 @@ ITNode* deserialize(string& serialized) {
         if (curNode->right) q.push(curNode->right);
     }
 
+    return root;
+}
+```
+
+---
+
+#### [Serialize/Deserialize Binary Search Tree]()
+
+```cpp
+string serialize(ITNode* node)
+{
+    if (!node) return "";
+
+    string result = std::to_string(node->val);
+    string left = serialize(node->left);
+    if (!left.empty()) result += " " + left;
+
+    string right = serialize(node->right);
+    if (!right.empty()) result += " " + right;
+
+    return result;
+}
+```
+
+```cpp
+ITNode* deserialize(string serialized)
+{
+    stringstream ss(serialized);
+    int val;
+    vector<int> items;
+    while (ss >> val) { items.push_back(val); }
+    int index = 0;
+    return deserialize(items, index, INT_MIN, INT_MAX);
+}
+
+ITNode* deserialize(vector<int> items, int& index, int mn, int mx)
+{
+    if (index >= items.size()) return nullptr;
+    if (items[index] <= mn || items[index] >= mx) return nullptr;
+
+    ITNode* root = new ITNode(items[index++]);
+    root->left = deserialize(items, index, mn, root->val);
+    root->right = deserialize(items, index, root->val, mx);
+
+    return root;
+}
+```
+
+```cpp
+ITNode* deserialize2(string serialized)
+{
+    stringstream ss(serialized);
+    int val;
+    if (!(ss >> val)) return nullptr;
+
+    return deserialize2(ss, val, INT_MIN, INT_MAX);
+}
+
+ITNode* deserialize2(stringstream& ss, int& val, int mn, int mx)
+{
+    if (val < mn || val > mx) return nullptr;
+
+    ITNode* root = new ITNode(val);
+    if (!(ss >> val)) return root;
+
+    root->left = deserialize2(ss, val, mn, root->val);
+    root->right = deserialize2(ss, val, root->val, mx);
+
+    return root;
+}
+```
+
+---
+
+#### [Serialize/Deserialize Nary Tree]()
+
+```cpp
+void Serialize(NaryTreeNode* node, vector<char>& serializedTree)
+{
+    if (node == nullptr) {
+        serializedTree.push_back('\0');
+        return;
+    }
+
+    serializedTree.push_back(node->val + '0');
+    for (auto& child : node->children) {
+        Serialize(child, serializedTree);
+    }
+}
+
+NaryTreeNode* Deserialize(vector<char>& serializedTree, int& index)
+{
+    if (index >= serializedTree.size()) return nullptr;
+    if (serializedTree[index] == '\0') { index++; return nullptr; }
+
+    NaryTreeNode* curRoot = new NaryTreeNode({ serializedTree[index++] - '0' });
+    while (true) {
+        auto nextChild = Deserialize(serializedTree, index);
+        if (nextChild == nullptr) break;
+        curRoot->children.push_back(nextChild);
+    }
+
+    return curRoot;
+}
+```
+
+---
+
+#### [Replace Nodes values with greater value]()
+
+In a BST, I want to replace all nodes with value which is the sum of all the nodes which are greater than equal to the current node.
+5
+2 10
+
+Output -->
+15
+17 10
+
+```cpp
+static void updateTree(ITNode* root, int& sum) {
+    if (root != nullptr) {
+        updateTree(root->right, sum);
+        sum += root->val;
+        root->val = sum;
+        updateTree(root->left, sum);
+    }
+}
+```
+
+---
+
+#### [Mirror Binary Tree](https://practice.geeksforgeeks.org/problems/mirror-tree/1)
+
+Given a Binary Tree, convert it into its mirror.
+
+**_Mirror tree with a copy_**
+
+```cpp
+ITNode* mirror(ITNode* node)
+{
+    if (node == nullptr) return nullptr;
+    ITNode* newNode = new ITNode(node->val);
+    newNode->right = mirror(node->left);
+    newNode->left = mirror(node->right);
+
+    return newNode;
+}
+```
+
+**_Inplace mirror_**
+
+```cpp
+void inplaceMirror(ITNode*& node)
+{
+    if (node == nullptr) return;
+    swap(node->left, node->right);
+    inplaceMirror(node->left);
+    inplaceMirror(node->right);
+}
+```
+
+**_Check if a tree is mirror of other_**
+
+```cpp
+bool isMirror(ITNode* originalNode, ITNode* mirrorNode)
+{
+    if (originalNode == nullptr && mirrorNode == nullptr) return true;
+    if (originalNode == nullptr || mirrorNode == nullptr) return false;
+
+    return originalNode->val == mirrorNode->val &&
+        isMirror(originalNode->left, mirrorNode->right) &&
+        isMirror(originalNode->right, mirrorNode->left);
+}
+```
+
+---
+
+#### [Binry Search Tree Iterator]()
+
+**TODO**
+
+```cpp
+class BinarySearchTreeIterator {
+    BinaryTreeNode<int> *root = nullptr;
+
+    class Iterator {
+
+    };
+
+    Iterator begin() {
+        return Iterator(root);
+    }
+
+    Iterator end() {
+        return Iterator(nullptr);
+    }
+};
+```
+
+---
+
+#### [Copy Tree]()
+
+```cpp
+Node *copyTree(Node *root) {
+    if(!root) return root;
+
+    Node *newRoot = new Node(root);
+    newRoot->left = copyTree(root->left);
+    newRoot->right = copyTree(root->right);
+
+    return newRoot;
+}
+
+Node *deleteTree(Node *root) {
+    if(!root) return root;
+
+    root->left = deleteTree(root->left);
+    root->right = deleteTree(root->right);
+
+    delete root;
+    root = nullptr;
+
+    return root;
+}
+```
+
+---
+
+#### [Diameter of Binary tree](https://www.geeksforgeeks.org/diameter-n-ary-tree/)
+
+```cpp
+pair<int, int> diameter(Node *root) {
+    if(!root) return {0, 0}; // for end node, both {diameter=0, height = 0}
+
+    auto left = diameter(root->left);
+    auto right = diameter(root->right);
+
+    // max diameter is max of existing diameter or cur diameter which is sum of left height + right height + root node
+    int curDiameter = left->second + right->second + 1;
+    int mxDiameter = max(max(left->first, right->second), curDiameter);
+
+    // return {mxDiameter, mxHeight including this node}
+    return {mxDiameter, 1 + max(left->second, right->second)};
+}
+```
+
+---
+
+#### [Check if tree is valid]()
+
+Given a list of tree nodes, validate following:
+
+1. List contains all nodes associated with a tree.
+2. This is indeed a tree. (not a graph)
+3. There are no cycles
+
+```cpp
+// input can come in any order
+bool isValidTree(vector<Node *> nodes) {
+    unordered_set<Node *> set;
+    for(auto node : nodes) set.insert(node);
+
+    // check if all tree nodes are provided in the list. If missing node found, return false.
+    // also populate the indegree for each vertex
+    unordered_map<Node *, vector<Node *>> indegreeVertices;
+    for(auto node : nodes) {
+        if(node->left) {
+            if(set.find(node->left) == set.end()) {
+                cout<<"Missing node in list"<<endl;
+                return false;
+            }
+            indegreeVertices[node->left].push_back(node);
+        }
+
+        if(node->right) {
+            if(set.find(node->right) == set.end()) {
+                cout<<"Missing node in list"<<endl;
+                return false;
+            }
+            indegreeVertices[node->right].push_back(node);
+        }
+    }
+
+    // check if there are no more than one root node
+    int rootCount = 0;
+    for(auto node : nodes) {
+        // there must be only one root, i.e. only one vertices which can't be reached(has no incoming edges)
+        if(indegreeVertices.find(node) == indegreeVertices.end()) {
+            rootCount++;
+        }
+
+        if (rootCount > 1) {
+            cout << "Dangling Node" << endl;
+            return false;
+        }
+    }
+
+    // check that any vertex doesn't has more than 1 incoming edge (i.e. doesn't form cycle)
+    for(auto e : indegreeVertices) {
+        if(e.size() > 1) {
+            cout << "Found circle" << endl;
+            return false;
+        }
+    }
+
+    // its a valid tree
+    return true;
+}
+```
+
+---
+
+#### [Rank of an element in Binary Search Tree]()
+
+```cpp
+BstNode* insertInternal(BstNode* cur, int val) {
+    if (cur == nullptr) return new BstNode(val);
+
+    cur->size++;
+    if (val <= cur->val) cur->left = insertInternal(cur->left, val);
+    else cur->right = insertInternal(cur->right, val);
+
+    return cur;
+}
+
+int rank(BstNode* cur, int elem) {
+    if (cur == nullptr) return -1;
+    if (cur->val == elem) return 1 + size(cur->left);
+    if (elem < cur->val) return rank(cur->left, elem);
+    else {
+        int right = rank(cur->right, elem);
+        if (right == -1) return right;
+        return 1 + size(cur->left) + right;
+    }
+}
+```
+
+---
+
+#### [Count paths with given sum in tree](https://leetcode.com/problems/path-sum-iii/submissions/)
+
+Given the root of a binary tree and an integer targetSum, return the number of paths where the sum of the values along the path equals targetSum.
+
+The path does not need to start or end at the root or a leaf, but it must go downwards (i.e., traveling only from parent nodes to child nodes).
+
+```cpp
+int pathSum(TreeNode* root, int targetSum) {
+    unordered_map<int, int> freq;
+    return countPaths(root, targetSum, 0, freq);
+}
+
+int countPaths(TreeNode* root, int sum, int cur, unordered_map<int, int>& freq) {
+    if (!root) return 0;
+
+    cur += root->val;
+    int result = freq[cur - sum];
+    if (cur == sum) result++;
+    freq[cur]++;
+
+    result += countPaths(root->left, sum, cur, freq);
+    result += countPaths(root->right, sum, cur, freq);
+
+    freq[cur]--;
+
+    return result;
+}
+```
+
+---
+
+#### [Least Common Ancestor]()
+
+**_Doesn't handle non existing case_**
+
+```cpp
+BinaryTreeNode<int>* findSimpleLCA(BinaryTreeNode<int>* root, int node1, int node2) {
+    if (!root) return nullptr;
+
+    if (root->val == node1 || root->val == node2) return root;
+
+    auto left = findSimpleLCA(root->left, node1, node2);
+    auto right = findSimpleLCA(root->right, node1, node2);
+
+    if (left && right) return root;
+
+    return left ? left : right;
+}
+```
+
+**_handles the existing case_**
+
+```cpp
+BinaryTreeNode<int>* findLCA(BinaryTreeNode<int>* root, int node1, int node2) {
+    BinaryTreeNode<int>* left = nullptr;
+    BinaryTreeNode<int>* right = nullptr;
+
+    auto* node = findLCA(root, node1, node2, left, right);
+    if (left && right) return node;
+
+    return nullptr;
+}
+
+BinaryTreeNode<int>* findLCA(BinaryTreeNode<int>* root, int node1, int node2, BinaryTreeNode<int>*& node1Node, BinaryTreeNode<int>*& node2Node) {
+    if (root == nullptr) return root;
+
+    bool found = false;
+    if (root->val == node1) {
+        node1Node = root;
+        found = true;
+    }
+    if (root->val == node2) {
+        node2Node = root;
+        found = true;
+    }
+
+    auto* left = findLCA(root->left, node1, node2, node1Node, node2Node);
+    auto* right = findLCA(root->right, node1, node2, node1Node, node2Node);
+
+    if (left && right || found) return root;
+    return left ? left : right;
+}
+```
+
+---
+
+#### [Kth Smallest Element in Binary Search Tree]()
+
+```cpp
+int kthSmallestElement(Node *root, int& k) {
+    if(!root) return INT_MIN;
+
+    int left = kthSmallestElement(root->left, k);
+    if(left != INT_MIN) return left;
+
+    k--;
+    if(k == 0) return root->val;
+
+    return kthSmallestElement(root->right, k);
+}
+```
+
+**_Kth Smallest element using ranking_**
+
+```cpp
+int kthSmallestElement(Node *root, int k) {
+    if(!root) return INT_MIN;
+
+    int sz = 1 + size(root->left);
+    if(sz == k) return root->val;
+
+    if(k < sz) return kthSmallestElement(root->left, k);
+    else return kthSmallestElement(root->right, k-sz);
+}
+```
+
+**_Get kth smallest element using bst iterator_**
+
+```cpp
+int kthSmallestElement(Node *root, int k) {
+    stack<Node *> st;
+
+    while(root || !st.empty()) {
+        while(root) {
+            st.push(root);
+            root = root->left;
+        }
+        root = st.top(); st.pop();
+
+        k--;
+        if(k == 0) return root->val;
+
+        root = root->right;
+    }
+
+    return INT_MAX;
+}
+```
+
+---
+
+#### [Flatten a tree into its preorder format](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
+
+Given the root of a binary tree, flatten the tree into a "linked list":
+
+The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and the left child pointer is always null.
+The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+
+```cpp
+static ITNode* flatten1(ITNode* root) {
+    ITNode* curr = nullptr;
+    flatten1Internal(root, curr);
+
+    return root;
+}
+
+static void flatten1Internal(ITNode* root, ITNode*& curr) {
+    if (!root) return;
+
+    auto left = root->left;
+    auto right = root->right;
+
+    if (curr) {
+        curr->right = root;
+        curr->left = nullptr;
+    }
+    curr = root;
+
+    flatten1Internal(left, curr);
+    flatten1Internal(right, curr);
+}
+```
+
+```cpp
+static ITNode* flatten2(ITNode* root) {
+    if (!root) return nullptr;
+
+    auto left = flatten2(root->left);
+    auto right = flatten2(root->right);
+
+    root->left = nullptr;
+    root->right = left;
+    getRightMostNode(root)->right = right;
+
+    return root;
+}
+```
+
+```cpp
+static ITNode* flatten3(ITNode* root) {
+    if (!root) return root;
+
+    ITNode* left = flatten3(root->left);
+    ITNode* next = root->right;
+
+    root->right = left;
+    root->left = nullptr;
+
+    ITNode* right = flatten3(next);
+    getRightMostNode(root)->right = right;
+
+    return root;
+}
+
+static ITNode* getRightMostNode(ITNode* root) {
+    while (root && root->right) root = root->right;
     return root;
 }
 ```

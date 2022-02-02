@@ -85,6 +85,37 @@ class FlattenList
 
 ---
 
+#### [Flattening a linked list with child pointers](https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/)
+
+```cpp
+Node* flatten(Node* head) {
+    if(!head) return head;
+
+    auto next = flatten(head->next);
+    auto child = flatten(head->child);
+
+    if(child) {
+        auto end = getEndNode(child);
+        end->next = next;
+        if(next) next->prev = end;
+        next = child;
+    }
+
+    head->next = next;
+    if(next) next->prev = head;
+    head->child = nullptr;
+
+    return head;
+}
+
+Node* getEndNode(Node *head) {
+    while(head && head->next) head = head->next;
+    return head;
+}
+```
+
+---
+
 #### [Convert Binary Search tree to sorted doubly linked list](https://www.careercup.com/question?id=4863668900593664)
 
 Given a binary search tree (BST), write a mehtod that will convert this BST into a doubly linked list that is sorted (ascending or descending order) and returns the first element in this list. You may assume you are given following Node class:
@@ -283,6 +314,52 @@ static void cancelOutList(LinkedListNode<int>* node) {
     }
 
     return newHead;
+}
+```
+
+---
+
+#### [Swap Kth Node from start and end in linked list](https://www.careercup.com/question?id=13575664)
+
+Given a singly link list and a number 'K', swap the Kth node from the start with the Kth node from the last. Check all the edge cases.
+
+Sample Input: 1->2->3->4->5->6->7->8 and K = 3
+Sample Output : 1->2->6->4->5->3->7->8
+
+Sample Input: 1->2->3->4->5->6->7->8 and K = 10
+Sample Output: print error "LIST IS OF LESSER SIZE".
+
+```cpp
+void swapKThNodeFromStartEnd(Node *root, int k) {
+    Node *start = root, *root = end;
+    Node *prev1 = nullptr, *end = nullptr;
+
+    for(int i=1;i<k;i++) {
+        prev1 = start;
+        start = start->next;
+
+        if(!start) {
+            cout<<"K is outside list range"<<endl;
+            return root;
+        }
+    }
+
+    Node *tmp = start->next;
+    while(tmp) {
+        tmp = tmp->next;
+        prev2 = end;
+        end = end->next;
+    }
+
+    if(prev1) prev1->next = end;
+    else root = end;
+
+    if(prev2) prev2->next = start;
+    else root = start;
+
+    swap(start->next, end->next);
+
+    return root;
 }
 ```
 

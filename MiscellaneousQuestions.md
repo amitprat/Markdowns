@@ -1119,4 +1119,379 @@ int minimumJumps(Board& board, int s, int d, unordered_map<int,int>& jumps) {
 }
 ```
 
+**_Print path_**
+
+```cpp
+struct Node {
+    int u;
+    int d;
+    vector<int> path;
+
+    Node(int u, int d) : u(u), d(d) { pat.push_back(u); }
+    Node(int u, int d, vector<int>& oldPath) : u(u), d(d), path(oldPath)
+    {
+        path.push_back(u);
+    }
+};
+
+int getMinDiceThrows(vector<int>& moves) {
+    int N = 30;
+    return getMinDiceThrows(moves, 0, N-1);
+}
+
+int getMinDiceThrows(vector<int>& moves, int s, int e) {
+    unordered_set<int> visited;
+    queue<Node> q;
+
+    q.push({s, 0});
+    visited.insert(s);
+
+    while(!q.empty()) {
+        auto node = q.front(); q.pop();
+        if(node.u == e) {
+            cout<<to_string(node.path)<<endl;
+            return node.d;
+        }
+
+        for(int dice=1;dice<=6 && node.u+dice<=e;dice++) {
+            int v = node.u+dice;
+            if(moves[v] != -1) v = moves[v];
+
+            if(visited.find(v) == visited.end()) {
+                q.push({v, node.d+1, node.path});
+            }
+        }
+    }
+
+    return -1;
+}
+```
+
 ---
+
+#### [Special Keyboard (Ctrl-A + Ctrl-C + Ctrl-V)]()
+
+```cpp
+int maxChars(int keysCount) {
+    vector<int> memo(keysCount + 1);
+    for(int i=0;i<=6;i++) memo[i] = i;
+
+    for(int i=7;i<=keysCount;i++) {
+        memo[i] = i;
+
+        for(int j=i-3;j>=1;j--) {
+            int cur = (i-j-1) * memo[j];
+            memo[i] = max(memo[i], cur);
+        }
+    }
+
+    return memo[keysCount];
+}
+```
+
+---
+
+#### [Largest square surrounded by 1s]()
+
+```cpp
+int largestSquareSurroundedBy1s(vector<vector<int>>& arr) {
+    int n = arr.size();
+    if(n == 0) return 0;
+
+    int m = arr[0].size();
+    vector<vector<pair<int,int>>> memo(n, vector<pair<int,int>>(m));
+
+    for(int i=0;i<n;i++) {
+        for(int j=0;j<m;j++) {
+            if(arr[i][j]) {
+                if(i == 0 && j == 0) memo[i][j] = {1,1};
+                else if(i == 0) memo[i][j] = {1, memo[i][j-1].second+1};
+                else if(j == 0) memo[i][j] = {memo[i-1][j].first+1, 1};
+                else memo[i][j] = {memo[i-1][j].first+1,memo[i][j-1].second+1};
+            }
+        }
+    }
+
+    int maxLen = 0;
+    pair<int,int> start;
+    for(int i=n-1;i>=0;i++) {
+        for(int j=m-1;j>=0;j--) {
+            int curLen = min(memo[i][j].first, memo[i][j].second);
+            while(curLen) {
+                bool isSquare = (memo[i-curLen+1][j].second >= curLen) && (memo[i][j-curLen+1].first >= curLen);
+                if(isSquare && curLen > maxLen) {
+                    maxLen = curLen;
+                    start = {i-curLen,j-curLen};
+                    break;
+                }
+                curLen--;
+            }
+        }
+    }
+
+    return maxLen;
+}
+```
+
+---
+
+#### [Move into a Turtle Grid]()
+
+```cpp
+class TurtleGrid {
+    enum class Dir {
+        North, East, South, West
+    };
+
+public:
+    void test() {
+        string str = "FFFRRFLF";
+        Point startPos = {1,1};
+        Dir startDir = Dir::North;
+        auto res = getFinalPos(str, startPos, startDir);
+        cout<<format("Final position of Turtle = {}, Direction={}", res.first, res.second)<<endl;
+    }
+
+    pair<Point,Dir> getFinalPos(string input, Point start, Dir startDir) {
+        for(auto ch : input) {
+            switch(ch) {
+                case 'F':
+                    start = moveForward(start, startDir);
+                    break;
+                case 'R':
+                    startDir = changeDir(startDir, +1);
+                    break;
+                case 'L':
+                    startDir = changeDir(startDir, -1);
+                    break;
+            }
+        }
+
+        return {start, startDir};
+    }
+
+    Point moveForward(Point start, Dir curDir) {
+        switch(curDir) {
+            case Dir::North: return {start.x, start.y-1};
+            case Dir::South: return {start.x, start.y+1};
+            case Dir::East: return {start.x+1, start.y};
+            case Dir::West: return {start.x-1, start.y};
+        }
+    }
+
+    Dir changeDir(Dir curDir, int change) {
+        return (Dir)(((int)(curDir) + 4 + change)/4);
+    }
+}
+```
+
+---
+
+#### [Find Missing Number in a string of increasing numbers]()
+
+```cpp
+int missingNumber(string& str) {
+    int n = str.length();
+    for(int i=1;i<=n;i++) {
+        string cur = str.substr(0, i);
+        int curNum = stoi(cur);
+
+        int missingNum = -1;
+        int j = i;
+
+        for(;j+len(curNum+1)<=n;j+=len(curNum)) {
+            string nextNumStr = str.substr(j, len(curNum+1)); // get next expected num
+            int nextNum = stoi(nextNumStr);
+
+            if(nextNum == curNum+1) curNum = nextNum;
+            else if(nextNum == curNum+2 && missingNum == -1) {
+                missingNum = curNum+1;
+                curNum = nextNum;
+            } else {
+                break;
+            }
+        }
+
+        if(j == n) return (missingNum == -1) ? curNum+1 : missingNum;
+    }
+
+    return -1;
+}
+```
+
+---
+
+#### [Merge K Sorted Arrays]()
+
+```cpp
+using Node = tuple<int, int, int>;
+struct Compare {
+    bool operator()(Node& f, Node& s) {
+        return get<0>(f) > get<0>(s);
+    }
+};
+
+vector<int> mergeKSortedArrays(vector<vector<int>>& arrays) {
+    priority_queue<Node, vector<Node>, Compare> pq;
+
+    int i = 0;
+    for (auto& arr : arrays) {
+        if (arr.size() > 0) pq.push({ arr[0], i, 0 });
+        i++;
+    }
+
+    vector<int> result;
+    while (!pq.empty()) {
+        auto elem = pq.top(); pq.pop();
+        result.push_back(get<0>(elem));
+
+        int arrIndex = get<1>(elem), pos = get<2>(elem);
+        if (pos + 1 < arrays[arrIndex].size()) {
+            pq.push({ arrays[arrIndex][pos + 1], arrIndex, pos + 1 });
+        }
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Implement Power Function]()
+
+```cpp
+int pow(int x, int y) {
+    if(y == 0) return 1;
+
+    int p = pow(x, y/2);
+    if(y&1) p *= x;
+
+    return p;
+}
+```
+
+```cpp
+double pow(double x, int y) {
+    if(y == 0) return 1;
+    if(y < 0) return pow(1.0/x, -y);
+
+    int p = pow(x, y/2);
+    if(y&1) p *= x;
+
+    return p;
+}
+```
+
+---
+
+#### [Total cost of connecting ropes with minimum cost]()
+
+```cpp
+template <class T>
+class Minheap {
+    vector<int> arr;
+    int sz;
+
+public:
+    void insert(int num) {
+        arr.push_back(num);
+        sz++;
+
+        upHeapify(sz-1);
+    }
+
+    int top() {
+        if(arr.empty()) throw exception("Heap is empty!");
+        return arr.front();
+    }
+
+    void pop() {
+        if(arr.empty()) throw exception("Heap is empty!");
+        arr[0] = arr[sz-1];
+        arr.pop_back();
+        sz--;
+
+        downHeapify(0);
+    }
+
+    int size() { return sz; }
+    bool empty() { return arr.empty(); }
+
+private:
+    int left(int n) { return 2*n + 1; }
+    int right(int n) { return 2*n + 2; }
+    int parent(int n) { return (n-1)/2; }
+
+    void upHeapify(int idx) {
+        int p = parent(idx);
+
+        while(idx > 0 && arr[p] > arr[idx]) {
+            swap(arr[p], arr[idx]);
+            idx = p;
+            p = parent(idx);
+        }
+    }
+
+    void downHeapify(int idx) {
+        int sm = idx;
+
+        int l = left(idx);
+        int r = right(idx);
+
+        if(l < sz && arr[l] < arr[sm]) sm = l;
+        if(r < sz && arr[r] < arr[sm]) sm = r;
+
+        if(sm != idx) {
+            swap(arr[sm], arr[idx]);
+            downHeapify(sm);
+        }
+    }
+};
+
+int minimumCost(vector<int>& ropes) {
+    Minheap<int> mh;
+
+    for(auto& rope : ropes) {
+        mh.insert(rope);
+    }
+
+    int totalCost = 0;
+
+    while(mh.size() > 1) {
+        auto cost1 = mh.top(); mh.pop();
+        auto cost2 = mh.top(); mh.pop();
+
+        mh.insert(cost1 + cost2);
+        totalCost += cost1 + cost2;
+    }
+
+    return totalCost;
+}
+```
+
+```cpp
+int minimumCost(vector<int>& ropes) {
+    priority_queue<int, vector<int>, greater<int>> mh;
+
+    for(auto& rope : ropes) {
+        mh.push(rope);
+    }
+
+    int totalCost = 0;
+
+    while(mh.size() > 1) {
+        auto cost1 = mh.top(); mh.pop();
+        auto cost2 = mh.top(); mh.pop();
+
+        mh.push(cost1 + cost2);
+        totalCost += cost1 + cost2;
+    }
+
+    return totalCost;
+}
+```
+
+---
+#### [Kth smallest/largest element in an unordered array]()
+
+***Kth smallest 

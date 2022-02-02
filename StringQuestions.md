@@ -834,7 +834,7 @@ pair<string, int> getPeriod(string s) {
     int n = s.length();
     for (int len = 1; len <= n / 2; len++) {
         if (n % len == 0 && isRepeat(s, len, n)) {
-            return { s.substr(0,len), n / len };
+            return { s.substr(0, len), n / len };
         }
     }
     return { "", -1 };
@@ -1670,6 +1670,343 @@ int shotestCommonSubsequenceDP(string& s1, string& s2) {
 
     return memo[l1][l2];
 }
+```
+
+---
+
+#### [Trim extra whitespace in string and only keep single space](https://www.careercup.com/question?id=5178446623801344)
+
+Given a string with multiple spaces write a function to in-place trim all spaces leaving a single space between words
+e.g.
+\_ \_ _ Hello _ \_ _ World _ \_ _
+Hello _ World \_ \_ \_ \_ \_ \_ \_ \_ \_
+
+```cpp
+static string trimSpaces(string& str) {
+    int i = 0;
+    bool putGap = false;
+    for (int j = 0; j < str.length(); j++) {
+        if (str[j] == '_') { putGap = i > 0; }
+        else {
+            if (putGap) str[i++] = '_';
+            str[i++] = str[j];
+            putGap = false;
+        }
+    }
+
+    str = str.substr(0, i);
+
+    return str;
+}
+```
+
+---
+
+#### [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/)
+
+```cpp
+int longestPalindromeSubseq(string s) {
+    return longestPalindromeSubseqDP(s);
+}
+
+int longestPalindromeSubseqRec(string s, int i, int j) {
+    if(i == j) return 1;
+    if(i+1 == j) return s[i] == s[j]? 2: 1;
+
+    if(s[i] == s[j]) return 2 + longestPalindromeSubseqRec(s, i+1, j-1);
+    return max(longestPalindromeSubseqRec(s, i+1, j), longestPalindromeSubseqRec(s, i, j-1));
+}
+
+int longestPalindromeSubseqDP(string s) {
+    int n = s.length();
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+
+    for(int l=1;l<=n;l++) {
+        for(int i=0;i<n-l+1;i++) {
+            int j = i+l-1;
+
+            if(i == j) dp[i][j] = 1;
+            else if(i+1 == j) dp[i][j] = (s[i] == s[j]) ? 2 : 1;
+            else if(s[i] == s[j]) dp[i][j] = 2+dp[i+1][j-1];
+            else dp[i][j] = max(dp[i+1][j], dp[i][j-1]);
+        }
+    }
+
+    return dp[0][n-1];
+}
+```
+
+---
+
+#### [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring/)
+
+```cpp
+string longestPalindrome(string s) {
+    string longest;
+
+    for(int i=0;i<s.length();i++) {
+        string cur = expand(s, i, i);
+        if(cur.length() > longest.length()) longest = cur;
+    }
+
+    for(int i=0;i<s.length()-1;i++) {
+        string cur = expand(s, i, i+1);
+        if(cur.length() > longest.length()) longest = cur;
+    }
+
+    return longest;
+}
+
+string expand(string& s, int i, int j) {
+    while(i >= 0 && j < s.length() && (s[i] == s[j])) {
+        i--; j++;
+    }
+
+    return s.substr(i+1, j-i-1);
+}
+```
+
+---
+
+#### [Count all palindromic substrings in a string](https://www.geeksforgeeks.org/count-palindrome-sub-strings-string/)
+
+```cpp
+static int countSubstringsDP(string str) {
+    int n = str.length();
+    vector<vector<bool>> dp(n, vector<bool>(n, false));
+
+    int cnt = 0;
+    for (int len = 1; len <= n; len++) {
+        for (int i = 0; i < n - len + 1; i++) {
+            int j = i + len - 1;
+            if (i == j) dp[i][j] = true;
+            else if (i + 1 == j) dp[i][j] = (str[i] == str[j]);
+            else if (dp[i + 1][j - 1] && str[i] == str[j]) dp[i][j] = true;
+
+            if (dp[i][j]) cnt++;
+        }
+    }
+
+    return cnt;
+}
+```
+
+```cpp
+static int countSubstringsIter(string str) {
+    int n = str.length();
+    int cnt = 0;
+
+    for (int i = 0; i < n; i++) {
+        int s = i, e = i;
+        while (s >= 0 && e < n && str[s] == str[e]) {
+            s--; e++; cnt++;
+        }
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        int s = i, e = i + 1;
+        while (s >= 0 && e < n && str[s] == str[e]) {
+            s--; e++; cnt++;
+        }
+    }
+
+    return cnt;
+}
+```
+
+---
+
+#### [Longest substring with same count of characters and numbers]()
+
+```cpp
+string longestString(string& word) {
+    unordered_map<int, int> charPos;
+    pair<int, int> indices = {0, -1};
+
+    int diff = 0;
+    charPos[diff] = -1;
+
+    for(int i=0;i<word.length();i++) {
+        char ch = word[i];
+        is(isalpha(ch)) diff++;
+        if(isdigit(ch)) diff--;
+
+        if(charPos.find(diff) == charPos.end()) charPos[diff] = i;
+        else {
+            int start = charPos[diff]+1;
+            int end = i;
+
+            if(end - start > res.second - res.first) res = {start, end};
+        }
+    }
+
+    if(res.second >= res.first) return word.substr(res.first, res.second-res.first+1);
+    else return string();
+}
+```
+
+---
+
+#### [Longest Substring with K Unique characters]()
+
+```cpp
+string longest1(string str, int k) {
+    vector<int> freq(256, 0);
+    string longest;
+
+    int cnt = 0;
+    int start = 0;
+    int mxLen = 0, mxStart = -1;
+    for (int index = 0; index < str.length(); index++) {
+        char ch = str[index];
+        if (freq[ch] == 0) cnt++;
+        freq[ch]++;
+
+        while (start <= index && cnt > k) {
+            ch = str[start];
+            freq[ch]--;
+            if (freq[ch] == 0) cnt--;
+
+            start++;
+        }
+
+        if (index - start + 1 > mxLen) {
+            mxLen = index - start + 1;
+            mxStart = start;
+        }
+    }
+
+    if (mxStart == -1) return string();
+
+    return str.substr(mxStart, mxLen);
+}
+```
+
+---
+
+#### [Longest substring without repeating/unique characters]()
+
+```cpp
+static string longestUniqueSubsttr(string str) {
+    int* visited = new int[26];
+    memset(visited, -1, sizeof(bool) * 26);
+
+    int mxStart = -1, mxLen = 0;
+    for (int s = 0, e = 0; e < str.length(); e++) {
+        int index = str[e] - 'a';
+        if (visited[index] != -1) {
+            while (s <= visited[index]) {
+                int oldIndex = str[s] - 'a';
+                visited[oldIndex] = false;
+                s++;
+            }
+        }
+        visited[index] = e;
+
+        if (e - s + 1 > mxLen) {
+            mxLen = e - s + 1;
+            mxStart = s;
+        }
+    }
+
+    if (mxStart == -1) return string();
+
+    return str.substr(mxStart, mxLen);
+}
+```
+
+```cpp
+static string longestUniqueSubstr2(string str)
+{
+    string res;
+    vector<int> lastIndex(256, -1);
+    int s = 0;
+    for (int e = 0; e < str.size(); e++) {
+        s = max(s, lastIndex[str[e]] + 1);
+        if (e - s + 1 > res.size()) res = str.substr(s, e - s + 1);
+        lastIndex[str[e]] = e;
+    }
+
+    return res;
+}
+```
+
+---
+
+#### [Mutations of string]()
+
+```sh
+Mutations of string=fab are:
+fab Fab 4ab faB FaB 4aB fa8 Fa8 4a8
+```
+
+```cpp
+void generate(string str, unordered_map<char, vector<char>> m, int n)
+{
+    if (n == 0) { cout << str << " "; return; }
+
+    generate(str, m, n - 1); // keep the same character as of input
+
+    // replace character at this position with alternative characters
+    if (m.find(str[n - 1]) != m.end()) {
+        vector<char> elems = m[str[n - 1]];
+        for (auto e : elems) {
+            str[n - 1] = e;
+            generate(str, m, n - 1);
+        }
+    }
+}
+```
+
+---
+
+#### [Pattern Match]()
+
+```cpp
+class PatternMatch {
+public:
+    static void test() {
+        string pat = "abab";
+        string txt = "redbluebluered";
+        auto res = isMatch(txt, pat);
+    }
+
+    static bool isMatch(string txt, string pat) {
+        if (txt.empty() && pat.empty()) return true;
+        if (txt.empty() || pat.empty()) return false;
+        if (pat.size() == 1) return true;
+
+        unordered_map<char, string> patMap;
+        return isMatch(txt, 0, pat, 0, patMap);
+    }
+
+    static bool isMatch(string txt, int idx1, string pat, int idx2, unordered_map<char, string>& patMap) {
+        if (idx1 == txt.size() && idx2 == pat.size()) return true;
+        if (idx1 == txt.size() || idx2 == pat.size()) return false;
+
+        char ch = pat[idx2];
+        if (patMap.find(ch) != patMap.end()) {
+            auto old = patMap[ch];
+
+            int i = 0;
+            for (; i < old.size(); i++) {
+                if (idx1 + i >= txt.size() || txt[idx1 + i] != old[i]) return false;
+            }
+
+            return isMatch(txt, idx1 + i, pat, idx2 + 1, patMap);
+        }
+        else {
+            for (int i = idx1; i < txt.size(); i++) {
+                string cur = txt.substr(idx1, i - idx1 + 1);
+                patMap[ch] = cur;
+                if (isMatch(txt, i + 1, pat, idx2 + 1, patMap)) return true;
+                patMap.erase(ch);
+            }
+        }
+
+        return false;
+    }
+};
 ```
 
 ---

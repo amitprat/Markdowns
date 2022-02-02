@@ -1149,22 +1149,6 @@ Node* reverseList(Node *head)
 
 ---
 
-#### [Mirror Tree](https://practice.geeksforgeeks.org/problems/mirror-tree/1)
-
-Given a Binary Tree, convert it into its mirror.
-
-```cpp
-void mirror(Node* node) {
-    if(!node) return;
-
-    swap(node->left, node->right);
-    mirror(node->left);
-    mirror(node->right);
-}
-```
-
----
-
 #### [Remove every k'th node ](https://practice.geeksforgeeks.org/problems/remove-every-kth-node/1)
 
 Given a singly linked list, your task is to remove every kth node from the linked list.
@@ -1367,11 +1351,11 @@ pair<int, int> find(vector<int>& arr) {
 
 ---
 
-### [Subset Sum](https://www.geeksforgeeks.org/subset-sum-problem-osum-space/)
+#### [Subset Sum](https://www.geeksforgeeks.org/subset-sum-problem-osum-space/)
 
 Given an array of non-negative integers and a value sum, determine if there is a subset of the given set with sum equal to given sum.
 
-- Using Recursion
+###### Using Recursion
 
 ```cpp
 bool isSubset(vector<int> arr, int n, int s) {
@@ -1382,7 +1366,7 @@ bool isSubset(vector<int> arr, int n, int s) {
 }
 ```
 
-- Using O(sum\*n) space
+###### Using Dynamic Programming. O(Sum\*N)
 
 ```cpp
 bool isSubset(vector<int> arr, int n, int sum) {
@@ -1406,7 +1390,7 @@ bool isSubset(vector<int> arr, int n, int sum) {
 }
 ```
 
-- Using O(sum) space
+###### Using Dynamic Programming. O(Sum)
 
 ```cpp
 bool isSubset(vector<int> arr, int n, int sum) {
@@ -1498,36 +1482,71 @@ void sort012(int a[], int n)
 Given an array of N integers arr[] where each element represents the max number of steps that can be made forward from that element. Find the minimum number of jumps to reach the end of the array (starting from the first element). If an element is 0, then you cannot move through that element.
 Note: Return -1 if you can't reach the end of the array.
 
+**_Get minimum jumps using recursion_**
+
 ```cpp
-int minJumpsRec(int arr[], int index, int n){
-    if(index >= n) return 0; // means, we can reach end so return 0
+int minJumpsRec(vector<int> arr) {
+    return minJumpsRec(arr, 0, arr.size());
+}
+
+int minJumpsRec(vector<int> arr, int index, int n) {
+    if (index >= n - 1) return 0; // means, we can reach end so return 0
 
     // minimize number of jumps to reach end from current index
     int jumps = INT_MAX;
-    for(int i=1;i<=arr[index];i++) {
-        int cur = minJumpsRec(arr, index+i, n);
-        jumps = min(jumps, 1+cur);
+    for (int i = 1; i <= arr[index]; i++) {
+        int cur = minJumpsRec(arr, index + i, n);
+        jumps = min(jumps, 1 + cur);
     }
 
     return jumps;
 }
 ```
 
+**_Get minimum jumps using recursion with memoization_**
+
+```cpp
+int minJumpsRecUsingMemo(vector<int>& nums) {
+    vector<int> memo(nums.size(), INT_MAX);
+
+    minJumpsRecUsingMemo(nums, 0, memo);
+
+    return memo[0];
+}
+
+int minJumpsRecUsingMemo(vector<int>& nums, int index, vector<int>& memo) {
+    if (index >= nums.size()) return INT_MAX;
+    if (index == nums.size() - 1) return 0;
+
+    if (memo[index] != INT_MAX) return memo[index];
+    for (int i = 1; i <= nums[index]; i++) {
+        int tmp = 1 + minJumpsRecUsingMemo(nums, index + i, memo);
+        memo[index] = min(memo[index], tmp);
+    }
+
+    return memo[index];
+}
+```
+
+**_Get minimum jumps using greedy approach_**
+
 ```cpp
 int minJumpsGreedy(int arr[], int n) {
-    int jumps = 0, newMax = 0, curMax = 0;
+    int jumps = 0, curFarthest = 0, curEnd = 0;
 
     for(int i=0;i<n-1;i++) {
-        newMax = max(newMax, i + arr[i]);
-        if(curMax == i) {
+        curFarthest = max(curFarthest, i + arr[i]);
+        if(curEnd == i) {
             jumps++;
-            curMax = newMax;
+            curMax = curFarthest;
         }
     }
 
-    return curMax >= n-1 ? jumps: -1;
+    return curEnd >= n-1 ? jumps: -1;
 }
 ```
+
+**_Get minimum jumps using dynamic programming_**
 
 ```cpp
 int minJumpsDP(int arr[], int n) {
@@ -1545,6 +1564,8 @@ int minJumpsDP(int arr[], int n) {
     return memo[n-1] == INT_MAX ? -1 : memo[n-1];
 }
 ```
+
+**_Get minimum jumps using dynamic programming 2_**
 
 ```cpp
 int minJumpsDP2(int arr[], int n) {
@@ -1803,7 +1824,7 @@ char firstNonRepeatingCharacter(string S)
         }
     }
 
-    return uniqueChars.empty()? '$' : uniqueChars.front();
+    return uniqueChars.empty() ? '$' : uniqueChars.front();
 }
 ```
 

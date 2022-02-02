@@ -70,7 +70,7 @@ long long countRec(int coins[], int n, int amount) {
 
 Given an integer array arr of size N, the task is to divide it into two sets S1 and S2 such that the absolute difference between their sums is minimum and find the minimum difference.
 
-```sh
+```json
 Input: N = 4, arr[] = {1, 6, 11, 5}
 Output: 1
 Explanation:
@@ -78,7 +78,7 @@ Subset1 = {1, 5, 6}, sum of Subset1 = 12
 Subset2 = {11}, sum of Subset2 = 11
 ```
 
-**Dynamic Programming Approach**
+###### Dynamic Programming Approach
 
 ```cpp
 int minDifference(int arr[], int n)  {
@@ -108,7 +108,7 @@ int minDifference(int arr[], int n)  {
 }
 ```
 
-**Recursion Approach**
+###### Recursion Approach 1
 
 ```cpp
 int minDifferenceRec(int arr[], int n)  {
@@ -132,6 +132,8 @@ void minDifference(int arr[], int index, int n, int curSum, int totalSum,int& di
     minDifference(arr, index+1, n, curSum+arr[index], totalSum, diff);
 }
 ```
+
+###### Recursion Approach 2
 
 ```cpp
 int findMinSumDiffRecursion(vector<int>& arr, int index, int n, int curSum, int totalSum)
@@ -648,6 +650,70 @@ int partitionDP(vector<int>& arr, int k)
     }
 
     return table[k][n];
+}
+```
+
+---
+
+#### [Is string interleaved by 2 strings]()
+
+**_Using recursion method_**
+
+```cpp
+bool isInterleaved(char *a, char *b, char *c) {
+    if(!(*a || *b || *c)) return true;
+    if(*c == '\0') return false;
+
+    return ((*a == *c) && isInterleaved(a+1, b, c+1)) ||
+           ((*b == *c) && isInterleaved(a, b+1, c+1));
+}
+```
+
+**_Using recursion method_**
+
+```cpp
+bool isInterleaved(string& a, string& b, string& c) {
+    int n = a.length();
+    int m = b.length();
+
+    if(c.length() != n+m) return false;
+
+    return isInterleaved(a, b, c, n, m);
+}
+bool isInterleaved(string& a, string& b, string& c, int n, int m) {
+    if(n == 0 && m == 0) return true;
+    if(n < 0 || m < 0) return true;
+
+    if(n == 0) return b[m-1] == c[m-1] && isInterleaved(a, b, c, n, m-1);
+    if(m == 0) return a[n-1] == c[m-1] && isInterleaved(a, b, c, n-1, m);
+
+    return ((a[n-1] == c[n+m-1]) && isInterleaved(a, b, c, n-1, m)) ||
+           ((b[m-1] == c[n+m-1]) && isInterleaved(a, b, c, n-1, m));
+}
+```
+
+**_Using dynamic programming_**
+
+```cpp
+bool isInterleaved(string& a, string& b, string& c) {
+    int n = a.length();
+    int m = b.length();
+
+    vector<vector<bool>> table(n+1, vector<int>(m+1));
+
+    for(int i=0;i<=n;i++) {
+        for(int j=0;j<=m;j++) {
+            table[i][j] = true;
+
+            if(i == 0 && j == 0) table[i][j] = true;
+            else if(i == 0) table[i][j] |= table[i][j-1];
+            else if(j == 0) table[i][j] |= table[i-1][j];
+            else if(a[i-1] == c[i+j-1]) table[i][j] = table[i-1][j];
+            else if(b[j-1] == c[i+j-1]) table[i][j] = table[i][j-1];
+        }
+    }
+
+    return table[n][m];
 }
 ```
 

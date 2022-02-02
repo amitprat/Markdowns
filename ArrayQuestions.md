@@ -123,7 +123,7 @@ int merge(int arr[], int l, int m, int r, int tmp[]) {
     while(i <= m && j <= r) {
         if(arr[i] <= arr[j]) tmp[k++] = arr[i++];
         else {
-            inv += m-i+1;
+            inv += m-i+1; // number of elements in left array including the self which is getting compared
             tmp[k++] = arr[j++];
         }
     }
@@ -1586,6 +1586,588 @@ pair<int, int> findShortestSubsequence(vector<int>& arr, vector<int>& sub) {
     }
 
     return result;
+}
+```
+
+---
+
+#### [Split array into 2 equal parts with minimum difference]()
+
+**_Using Recursion_**
+
+```cpp
+bool splitArrays(vector<int>& arr) {
+    int n = arr.size();
+    if(n&1) return false;
+
+    int s = accumulate(arr.begin(), arr.end(), 0);
+
+    int diff = INT_MAX;
+    vector<int> indices;
+    splitArray(arr, 0, n, s, 0, 0, {}, diff, indices);
+
+    vector<int> arr1, arr2;
+    for(int i=0,j=0;i<n;i++) {
+        if(j < n/2 && indices[j] == i) {
+            arr1.push_back(arr[i]);
+            j++;
+        } else {
+            arr2.push_back(arr[i]);
+        }
+    }
+
+    cout << to_string(arr1) << " with sum = " << accumulate(arr1.begin(), arr1.end(), 0) << endl;
+    cout << to_string(arr2) << " with sum = " << accumulate(arr2.begin(), arr2.end(), 0) << endl;
+
+    return true;
+}
+
+void splitArray(vector<int>& arr, int idx, int n, int totalSum,
+                int curSetSize, int curSum, vector<int> curSet, int& diff, vector<int>& indices)
+{
+    if(curSetSize == n/2) {
+        int curDiff = abs(totalSum - 2*curSum);
+        if(curDiff < diff) {
+            diff = curDiff;
+            indices = curSet;
+            return;
+        }
+    }
+
+    if(idx >= n || curSetSize > n/2) return;
+
+    splitArray(arr, idx+1, n, totalSum, curSetSize, curSum, curSet, diff, indices);
+
+    curSet.push_back(idx);
+    splitArray(arr, idx+1, n, totalSum, curSetSize+1, curSum+arr[idx], curSet, diff, indices);
+    curSet.pop_back();
+}
+```
+
+**_Using Dynamic Programming_**
+
+```cpp
+void splitArrayUsingDP(vector<int>& arr) {
+    int totalSum = accumulate(arr.begin(), arr.end(), 0)/2;
+    int sz = arr.size()/2;
+
+    vector<vector<bool>> memo(sz+1, vector<int>(total+1, false));
+    memo[0][0] = true;
+
+    for(int i=0;i<arr.size();i++) {
+        for(int k=sz-1;k>=0;k--) {
+            for(int j=0;j<=totalSum-arr[i];j++) {
+                if(memo[k][j] && arr[i] + j <= totalSum) {
+                    memo[k+1][j+arr[i]] = true;
+                }
+            }
+        }
+    }
+
+    for (int j = total; j >= 1; j--) {
+        if (memo[sz][j]) {
+            cout << "sum : " << j << endl;
+            break;
+        }
+    }
+}
+```
+
+---
+
+#### [Task Assignment]()
+
+There are at most eight servers in a data center. Each server has got a capacity/memory limit. There can be at most 8 tasks that need to be scheduled on those servers. Each task requires certain capacity/memory to run, and each server can handle multiple tasks as long as the capacity limit is not hit. Write a program to see if all of the given tasks can be scheduled or not on the servers?
+
+Ex:
+Servers capacity limits: 8, 16, 8, 32
+Tasks capacity needs: 18, 4, 8, 4, 6, 6, 8, 8
+For this example, the program should say 'true'.
+
+Ex2:
+Server capacity limits: 1, 3
+Task capacity needs: 4
+For this example, program should return false.
+
+Got some idea that this needs to be solved using dynamic programming concept, but could not figure out exact solution.
+
+```cpp
+bool taskAssignment(vector<int>& servers, vector<int>& needs, int pos, unordered_map<int, vector<int>>& taskAssignment) {
+    if(pos >= needs.size()) return true;
+
+    int index = 0;
+    for(auto& server : servers) {
+        if(needs[pos] <= server) {
+            server -= needs[pos];
+            taskAssignment[index].push_back(needs[pos]);
+            if(taskAssignment(servers, needs, pos+1, taskAssignment)) return true;
+            server += needs[pos];
+        }
+        index++;
+    }
+
+    return false;
+}
+```
+
+---
+
+#### [Value greater than N]()
+
+Given an unsorted array of integers, you need to return maximum possible n such that the array consists at least n
+values greater than or equals to n. Array can contain duplicate values.
+Sample input : [1, 2, 3, 4] -- output : 2
+Sample input : [900, 2, 901, 3, 1000] -- output: 3
+
+```cpp
+static int valueGreaterThanN(vector<int>& arr) {
+    int n = arr.size();
+    vector<int> count(n+1, 0);
+
+    for(auto val : arr) {
+        if(val >= n) count[n]++;
+        else if(val > 0) count[val]++;
+    }
+
+    int right = 0;
+    for(int i=n;i>=1;i--) {
+        right += count[i];
+        if(right >= i) return i;
+    }
+
+    return 0;
+}
+```
+
+---
+
+#### [Sort binary array]()
+
+```cpp
+void sort(vector<int>& arr) {
+    for(int i=0,j=0;j<arr.size();j++) {
+        if(arr[j] == 0) swap(arr[i++], arr[j]);
+    }
+}
+```
+
+```cpp
+void sort(vector<int>& arr) {
+    int s=0,e=arr.size()-1;
+    while(s<e) {
+        if(arr[s] == 0) s++;
+        else {
+            if(arr[e] == 0) swap(arr[s++], arr[e]);
+            else e--;
+        }
+    }
+}
+```
+
+---
+
+#### [Generate Coin Combinations upto given sum]()
+
+```cpp
+vector<int> generateCombinationsUptoGivenSum(vector<int>& coins, int n, int sum) {
+    vector<int> result;
+    unordered_set<int> seen;
+    seen.insert(0);
+
+    for(int i=0;i<=sum;i++) {
+        for(int j=0;j<n;j++) {
+            if(s.find(i-coins[j]) != s.end()) {
+                result.push_back(i);
+                s.insert(i);
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Search element in almost sorted arrat]()
+
+An array consist of elements whose difference is positive or negative 1. I have to find the given elements without using linear search.
+Say
+Int arr[]={1,2,3,4,3,4,5,6,7
+To find : 6
+
+The answer is skipping. If you're starting at 1, and you're looking for 6, then you know that the best case scenario is the next five values
+increase by one each. So you skip 5 and check that value. You repeat the same step. It turns out the value at that position is 4.
+The best case scenario is the next two values increase by one each. So you jump two positions and there's your number.
+
+The key is to figure out at each position how far the goal value is from that position's value and jump ahead by as many steps.
+
+```cpp
+int search(vector<int>& arr, int x) {
+    int n = arr.size();
+    int l=0, r = arr[n-1];
+
+    while(l <= r) {
+        if(arr[l] == x) return l;
+        l += (x-arr[l]);
+    }
+
+    return -1;
+}
+```
+
+---
+
+#### [Find insert positions in sorted array]()
+
+```cpp
+int findInsertPosition(vector<int>& arr, int e) {
+    int l = 0, r = arr.size() - 1;
+    if (r == -1) return l; // if array is empty, then insert at 0th position
+
+    while (l < r) {
+        int m = (l + r) / 2;
+        if (e >= arr[m]) l = m + 1; // insert element right before next greater element
+        else r = m;
+    }
+
+    return arr[l] <= e ? (l + 1) : l; // if all array elements are less than e, then insert end+1 position, else lth position
+}
+```
+
+---
+
+#### [Find surpassers of an array]()
+
+Surpassers count is number of larger elements present on right side of array element.
+
+```cpp
+vector<int> findSurpassers(vector<int>& arr) {
+    vector<int> result;
+    int n = arr.size();
+
+    unordered_map<int, int> invCntMap;
+    vector<int> dup = arr; // create array copy as merge sort will modify array
+    vector<int> tmp(n); // tmp array for merging
+
+    mergeSort(dup, 0, n - 1, tmp, invCntMap);
+
+    for (int i = 0; i < n; i++) {
+        result.push_back(n - i - 1 - invCntMap[arr[i]]); // remove elements on left including itself(i+1) + invCnt for element
+    }
+
+    return result;
+}
+
+void mergeSort(vector<int>& arr, int l, int r, vector<int>& tmp, unordered_map<int, int>& invCntMap) {
+    if (l >= r) return;
+
+    int m = (l + r) / 2;
+    mergeSort(arr, l, m, tmp, invCntMap);
+    mergeSort(arr, m + 1, r, tmp, invCntMap);
+
+    merge(arr, l, m, r, tmp, invCntMap);
+}
+
+void merge(vector<int>& arr, int l, int m, int r, vector<int>& tmp, unordered_map<int, int>& invCntMap) {
+    int i = l, j = m + 1, k = l, invCnt = 0;
+
+    while (i <= m || j <= r) {
+        if (i <= m && j <= r) {
+            if (arr[i] <= arr[j]) {
+                invCntMap[arr[i]] += invCnt;
+                tmp[k++] = arr[i++];
+            }
+            else {
+                tmp[k++] = arr[j++];
+                invCnt++;
+            }
+        }
+        else if (i <= m) {
+            invCntMap[arr[i]] += invCnt;
+            tmp[k++] = arr[i++];
+        }
+        else if (j <= r) {
+            tmp[k++] = arr[j++];
+        }
+    }
+
+    for (i = l; i <= r; i++) arr[i] = tmp[i];
+}
+```
+
+---
+
+#### [Get Next Or Prev Number by adding or substracting 1]()
+
+```sh
+Input=[1] , Next=[2] , Prev=[0]
+
+Input=[5] , Next=[6] , Prev=[4]
+
+Input=[3] , Next=[4] , Prev=[2]
+
+Input=[2] , Next=[3] , Prev=[1]
+
+Input=[9, 9] , Next=[1, 0, 0] , Prev=[9, 8]
+
+Input=[1, 0, 0] , Next=[1, 0, 1] , Prev=[9, 9]
+
+Input=[0] , Next=[1] , Prev=[-1]
+
+Input=[9, 9, 9] , Next=[1, 0, 0, 0] , Prev=[9, 9, 8]
+
+Input=[1, 0, 0, 1] , Next=[1, 0, 0, 2] , Prev=[1, 0, 0, 0]
+```
+
+```cpp
+vector<int> next(vector<int> input) {
+    int n = input.size();
+    int carry = 1; // to add one element
+    for (int i = n - 1; i >= 0; i--) {
+        int e = input[i] + carry;
+        input[i] = e % 10;
+        carry = e / 10;
+    }
+    if (carry) input.insert(input.begin(), carry);
+
+    return input;
+}
+
+vector<int> prev(vector<int> input) {
+    int n = input.size();
+    int borrow = 1; // substract 1
+
+    for (int i = n - 1; i >= 0; i--) {
+        int e = (input[i] - borrow);
+        borrow = 0;
+
+        if (e < 0) {
+            e += 10;
+            borrow = 1;
+        }
+        input[i] = e;
+    }
+    if (borrow) input[0] -= 10;
+    if (input[0] == 0) input.erase(input.begin());
+    if (input.empty()) input.push_back(0);
+
+    return input;
+}
+```
+
+---
+
+#### [Maximize Aj-Ai such that j>i]()
+
+One unsorted array is given.Find out the index i and j ,j> i for which a[j] - a[i] is maximum.perform in linear time complexity
+
+```cpp
+pair<int, pair<int, int>> findMaxDiff(vector<int> arr) {
+    pair<int, pair<int, int>> result;
+    int mnElemIndex = -1, mxElemIndex = -1;
+    int mnElem = INT_MAX;
+    int maxValueDiff = 0;
+    for (int i = 0; i < arr.size(); i++) {
+        if (arr[i] < mnElem) {
+            mnElem = arr[i];
+            mnElemIndex = i;
+        }
+        else {
+            if (arr[i] - mnElem > maxValueDiff) {
+                maxValueDiff = arr[i] - mnElem;
+                mxElemIndex = i;
+            }
+        }
+    }
+
+    return { maxValueDiff,{mnElemIndex,mxElemIndex} };
+}
+```
+
+---
+
+#### [Find Minimum Length Subsequence in array with sum greater than given sum]()
+
+```cpp
+vector<int> findMinLengthSubarrayWithSumGreaterOrEqualToGivenSum(vector<int>& arr, int x) {
+    vector<int> result;
+
+    int curSum = 0;
+    pair<int, int> window = {-1,-1};
+    for(int i=0,j=0;j<arr.size();j++) {
+        curSum += arr[j];
+
+        while(i<=j && curSum-arr[i] > x) {
+            curSum -= arr[i++];
+        }
+
+        if(curSum >= x && (window.first == -1 || (j-i < window.second-window.first>))) {
+            window = {i, j};
+        }
+    }
+
+    if(window.first != 0) {
+        for(int i=window.first;i<=window.second;i++) result.push_back(arr[i]);
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Find Minimum length unsorted subarray](https://www.geeksforgeeks.org/minimum-length-unsorted-subarray-sorting-which-makes-the-complete-array-sorted/)
+
+Given an unsorted array arr[0..n-1] of size n, find the minimum length subarray arr[s..e] such that sorting this subarray makes the whole array sorted.
+Examples:
+
+1. If the input array is [10, 12, 20, 30, 25, 40, 32, 31, 35, 50, 60], your program should be able to find that the subarray lies between the indexes 3 and 8.
+2. If the input array is [0, 1, 15, 25, 6, 7, 30, 40, 50], your program should be able to find that the subarray lies between the indexes 2 and 5.
+
+```cpp
+static vector<int> minLengthUnsortedSubArr(vector<int>& v)
+{
+    int s = 0, e = v.size() - 1;
+    while (s < e && v[s] <= v[s + 1]) s++;
+    while (e > s && v[e] >= v[e - 1]) e--;
+    if (s >= e) return {};
+
+    int minElem = v[s], maxElem = v[e];
+    for (int i = s; i <= e; i++) {
+        minElem = min(minElem, v[i]);
+        maxElem = max(maxElem, v[i]);
+    }
+
+    while (s >= 0 && v[s] > minElem) s--;
+    while (e <= v.size() - 1 && v[e] < maxElem) e++;
+
+    vector<int> result;
+    for (int i = s + 1; i < e; i++) result.push_back(v[i]);
+
+    return result;
+}
+```
+
+---
+
+#### [Pancake Sorting]()
+
+```cpp
+void pancakeSort(vector<int>& arr) {
+    for(int r=arr.size()-1;r>=1;r--) {
+        int mxi = maxElementIndex(arr, 0, r);
+        if(mxi != r) {
+            reverse(arr, 0, mxi); // get max element at start pos
+            reverse(arr, 0, r); // move the max element to end
+        }
+    }
+}
+```
+
+---
+
+#### [Prime Extensible Numbers]()
+
+```cpp
+vector<int> primeExtensibles(vector<int>& primes, int n) {
+    int m = primes.size();
+    vector<int> indices(m, 0);
+    vector<int> result(1, 1);
+
+    for(int i=2;i<=n;i++) {
+        int mn = getMin(primes, indices);
+        result.push_back(mn);
+    }
+
+    return result;
+}
+
+int getMin() {
+    int mnValue = INT_MAX;
+    for(int i=0;i<primes.size();i++>) {
+        mnValue = min(mnValue, primes[i] * result[indices[i]]);
+    }
+
+    for(int i=0;i<indices.size();i++) {
+        if(primes[i] * result[indices[i]] == mnValue) indices[i]++;
+    }
+
+    return mnValue;
+}
+```
+
+---
+
+#### [Radix Sort]()
+
+```cpp
+void radixSort(vector<int>& arr) {
+    for(int exp=1;;exp*=10) {
+        if(!countSort(arr, 10, exp)) break;
+    }
+}
+
+bool countSort(vector<int>& arr, int range, int exp) {
+    vector<int> count(range, 0);
+    vector<int> output(arr.size());
+
+    bool processed = false;
+    for(auto e : arr) {
+        count[(e/exp)%10]++;
+        if((e/exp)%10 != 0) processed = true;
+    }
+
+    if(!processed) return processed;
+
+    for(int i=arr.size()-1;i>=0;i--) {
+        int idx = count[(e/exp)%10];
+        output[idx-1] = arr[i];
+        count[(e/exp)%10]--;
+    }
+
+    arr = output;
+}
+```
+
+---
+
+#### [Rearrange elements by their value]()
+
+```cpp
+void rearrangeElements() {
+    int n = 3;
+    vector<int> arr(2*n, 0);
+    unordered_set<int> visited;
+
+    if(canBeArranged(arr, 0, n, visited)) {
+        cout<<to_string(arr)<<endl;
+    } else {
+        cout<<"Can't be arranged"<<endl;
+    }
+}
+
+bool canBeArranged(vector<int>& arr, int index, int n, unordered_set<int>& visited) {
+    if(visited.size() == n) return true;
+    if(index >= 2*n || arr[index] != 0) return false;
+
+    for(int num=1;num<=n;num++) {
+        if(visited.find(num) != visited.end()) continue;
+
+        int nextIndex = index+num+1;
+        if(nextIndex >= 2*n || arr[nextIndex] != 0) continue;
+
+        arr[index] = arr[nextIndex] = num;
+        visited.insert(num);
+
+        if(canBeArranged(arr, index+1, n, visited)) return true;
+
+        arr[index] = arr[nextIndex] = 0;
+        visited.erase(num);
+    }
+
+    return false;
 }
 ```
 
