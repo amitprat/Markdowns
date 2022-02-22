@@ -2015,82 +2015,320 @@ Words we got is denoted using same color.
 ```
 
 ```cpp
-[Incomplete]
-using Board = vector<vector<char>>;
-using CharPositionsMap = unordered_map<char, vector<pair<int,int>>>;
-using Set = unordered_set<int> visited;
-using Point = pair<int,int>;
-vector<string> wordBoggle(Board& board, vector<string>& dictionary) {
-    CharPositionsMap charPositions;
-    for(int i=0;i<board.size();i++) {
-        for(int j=0;j<board[i].size();j++) {
-            charPositions[board[i][j]].push_back({i,j});
+// search for a specific word in 2D matrix
+// We had basic dfs approach to search and an optimized approach
+class WordSearch {
+private:
+    unordered_map<char, vector<Point>> map;
+
+public:
+    static void test() {
+        WordSearch obj;
+        vector<string> board = {
+          {"ABCE"} ,
+          {"SFCS"},
+          {"ADEE"}
+        };
+
+        vector<string> tests = {
+            "ABCCED", "SEE", "ABCB","APPLE","BEE","SEE","HELLO","FCED","","A","Q","SECBFSAD"
+        };
+
+        obj.preProcessBoard(board);
+        for (auto& test : tests) {
+            auto res1 = obj.findWordWithPreprocessing(board, test);
+            auto res2 = obj.findWord(board, test);
+
+            assert(res1 == res2);
+
+            cout << format("Input={}, Text to search={}, Result={}", to_string(board), test, res1) << endl;
         }
     }
 
-    unordered_set<int> visited;
-    int n = board.size();
-    int m = board[0].size();
+    // T - O(M*N*(4^L)) - M*N - size of matrix, L- length of word
+    bool findWord(vector<string>& board, string& word) {
+        if (word.empty()) return true;
 
-    vector<string> result;
-    for(auto& w : dictionary) {
-        if(exists(board, charPositions, w)) {
-            result.push_back(w);
+        for (int i = 0; i < board.size(); i++) {
+            for (int j = 0; j < board[i].size(); j++) {
+                if (board[i][j] == word[0] && dfs(board, word, i, j, 1)) return true;
+            }
         }
+        return false;
     }
 
-    sort(result.begin(), result.end());
+    // T = (L*(2^L))
+    bool findWordWithPreprocessing(vector<string>& board, string& word) {
+        int k = 0;
+        Point p = { -1,-1 };
+        unordered_set<string> set;
 
-    return result;
-}
-
-bool exists(Board& board, CharPositionsMap& charPositions, string& word, Set& visited, int n, int m) {
-    if(board.empty()) return false;
-    if(word.empty()) return true;
-
-    for(pair<int,int> pos : charPositions[word[0]]) {
-        if(exists(board, pos, charPositions, word, 1, visited, n, m));
+        return findWordWithPreprocessing(board, word, k, p, set);
     }
-}
 
-bool exists(Board& board, Point curPos, CharPositionsMap& charPositions, string& word, int index, Set& visited, int n, int m)
-{
-    if(index == word.length()) return true;
+private:
+    bool dfs(vector<string>& board, string& word, int i, int j, int k) {
+        if (k == word.size()) return true;
 
-    vector<Point> neighbours = getNeighbours(charPositions, curPos, word[index], visited, m);
-    for(Point pos : neighbours) {
-        int idx = pos.first * m + pos.second;
-
-        visited.insert(idx);
-        if(exists(board, charPositions, word, index+1, visited, n, m)) {
-            return true;
+        char tmp = board[i][j];
+        board[i][j] = '$';
+        for (auto& neighbour : getNeighbours(board, i, j, word[k])) {
+            if (dfs(board, word, neighbour.x, neighbour.y, k + 1)) {
+                board[i][j] = tmp;
+                return true;
+            }
         }
-        visited.erase(idx);
+        board[i][j] = tmp;
+
+        return false;
     }
 
-    return false;
-}
+    bool findWordWithPreprocessing(vector<string>& board, string& word, int k, Point p, unordered_set<string>& set) {
+        if (k == word.length()) return true;
+        for (auto& pos : map[word[k]]) {
+            if (isNeighbour(board, p, pos) && set.insert(pos.to_string()).second) {
+                if (findWordWithPreprocessing(board, word, k + 1, pos, set)) return true;
+            }
+            set.erase(pos.to_string());
+        }
+        return false;
+    }
 
-vector<Point> getNeighbours(CharPositionsMap& charPositions, Point curPos, char curCh, Set& visited, int m) {
-    vector<Point> positions = charPositions[curCh];
-
-    vector<Point> result;
-    for(auto pos : positions) {
-        for(int i=-1;i<=1;i++) {
-            for(int j=-1;j<=1;j++) {
-                if(i == 0 && j == 0) continue;
-                if(pos.first -i == curPos.first && pos.second-j == curPos.second) {
-                    int idx = (pos.first -i) * m + (pos.second-j);
-                    if(visited.find(idx) != visited.end()) continue;
-
-                    result.push_back(pos);
+    vector<Point> getNeighbours(vector<string>& board, int i, int j, char ch) {
+        vector<Point> result;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if (abs(x) != abs(y)) {
+                    int dx = i + x;
+                    int dy = j + y;
+                    if (isValid(board, dx, dy) && board[dx][dy] == ch) result.push_back({ dx, dy });
                 }
+            }
+        }
+
+        return result;
+    }
+
+    bool isNeighbour(vector<string>& board, Point parent, Point child) {
+        if (parent.x == -1 && parent.y == -1) return true;
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if (abs(x) != abs(y)) {
+                    int dx = x + parent.x;
+                    int dy = y + parent.y;
+                    if (isValid(board, dx, dy) && child.x == dx && child.y == dy) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void preProcessBoard(vector<string>& board) {
+        for (int i = 0; i < board.size(); i++) {
+            for (int j = 0; j < board[i].size(); j++) {
+                map[board[i][j]].push_back({ i,j });
             }
         }
     }
 
-    return result;
-}
+    bool isValid(vector<string>& board, int i, int j) {
+        return i >= 0 && j >= 0 && i < board.size() && j < board[i].size();
+    }
+};
+
+// http://exceptional-code.blogspot.com/2012/02/solving-boggle-game-recursion-prefix.html
+// Search for all possible words in matrix which are present in dictionary
+class WordBoggle {
+public:
+    static void test() {
+        vector<vector<char>> boggle = {
+            { 'G', 'I', 'Z' },
+            { 'U', 'E', 'K' },
+            { 'Q', 'S', 'E' }
+        };
+        unordered_set<string> dictionary = { "GEEKS", "FOR", "QUIZ", "GO" };
+
+        cout << "Following words of dictionary are present\n";
+        WordBoggle obj;
+        auto result = obj.findWords(boggle, dictionary);
+
+        cout << format("Input Matrix={}, Dictionary={}, Result={}", to_string(boggle), to_string(dictionary), to_string(result)) << endl;
+    }
+
+    vector<string> findWords(vector<vector<char>>& matrix, unordered_set<string>& dictionary) {
+        int n = matrix.size();
+        if (n == 0) return {};
+        int m = matrix[0].size();
+
+        vector<string> result;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                string prefix = string(1, matrix[i][j]);
+                constructAllWords(matrix, { i,j }, dictionary, prefix, result);
+            }
+        }
+
+        return result;
+    }
+
+    void constructAllWords(vector<vector<char>>& matrix, Point start, unordered_set<string>& dictionary, string& prefix, vector<string>& result)
+    {
+        if (dictionary.find(prefix) != dictionary.end()) result.push_back(prefix);
+        char oldChar = matrix[start.x][start.y];
+        matrix[start.x][start.y] = '$';
+
+        for (auto& neighbour : getAllNeighbours(matrix, start)) {
+            prefix += matrix[neighbour.x][neighbour.y];
+            constructAllWords(matrix, neighbour, dictionary, prefix, result);
+            prefix.pop_back();
+        }
+
+        matrix[start.x][start.y] = oldChar;
+    }
+
+    vector<Point> getAllNeighbours(vector<vector<char>>& matrix, Point start)
+    {
+        vector<Point> result;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (!(i == 0 && j == 0)) {
+                    auto next = start + Point{ i, j };
+                    if (isValid(matrix, next)) result.push_back(next);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    bool isValid(vector<vector<char>>& matrix, Point start) {
+        if (start.x < 0 || start.y < 0 || start.x >= matrix.size() || start.y >= matrix[0].size()) return false;
+        if (matrix[start.x][start.y] == '$') return false;
+
+        return true;
+    }
+};
+
+// Search for all possible words in matrix which are present in dictionary using Trie
+class WordBoggleUsingTrie {
+    class Trie {
+    public:
+        struct Node {
+            bool end = false;
+            unordered_map<char, Node*> children;
+        };
+        Node* root = nullptr;
+        Trie() { root = new Node(); }
+        void insert(const string& word) {
+            root = insert(root, word, 0);
+        }
+        bool search(const string& word) {
+            return search(root, word, 0);
+        }
+        bool isPrefix(const string& word) {
+            return isPrefix(root, word, 0);
+        }
+
+    private:
+        Node* insert(Node* curNode, const string& word, int index) {
+            if (curNode == nullptr) curNode = new Node();
+            if (index == word.size()) { curNode->end = true; return curNode; }
+
+            curNode->children[word[index]] = insert(curNode->children[word[index]], word, index + 1);
+
+            return curNode;
+        }
+
+        bool search(Node* curNode, const string& word, int index) {
+            if (curNode == nullptr) return false;
+            if (index == word.size()) return curNode->end;
+
+            return search(curNode->children[word[index]], word, index + 1);
+        }
+
+        bool isPrefix(Node* curNode, const string& word, int index) {
+            if (curNode == nullptr) return false;
+            if (index == word.size()) return true;
+
+            return isPrefix(curNode->children[word[index]], word, index + 1);
+        }
+    };
+public:
+    static void test() {
+        vector<vector<char>> boggle = {
+            { 'G', 'I', 'Z' },
+            { 'U', 'E', 'K' },
+            { 'Q', 'S', 'E' }
+        };
+        unordered_set<string> dictionary = { "GEEKS", "FOR", "QUIZ", "GO" };
+
+        cout << "Following words of dictionary are present\n";
+        WordBoggle obj;
+        auto result = obj.findWords(boggle, dictionary);
+
+        cout << format("Input Matrix={}, Dictionary={}, Result={}", to_string(boggle), to_string(dictionary), to_string(result)) << endl;
+    }
+
+    vector<string> findWords(vector<vector<char>>& matrix, unordered_set<string>& dictionary) {
+        int n = matrix.size();
+        if (n == 0) return {};
+        int m = matrix[0].size();
+
+        Trie trie;
+        for (auto& word : dictionary) {
+            trie.insert(word);
+        }
+
+        vector<string> result;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                string prefix = string(1, matrix[i][j]);
+                constructAllWords(matrix, { i,j }, trie.root->children[matrix[i][j]], prefix, result);
+            }
+        }
+
+        return result;
+    }
+
+    void constructAllWords(vector<vector<char>>& matrix, Point start, Trie::Node* node, string& prefix, vector<string>& result)
+    {
+        if (!node->children[matrix[start.x][start.y]]) return;
+        if (node->children[matrix[start.x][start.y]]->end) result.push_back(prefix);
+
+        char oldChar = matrix[start.x][start.y];
+        matrix[start.x][start.y] = '$';
+
+        for (auto& neighbour : getAllNeighbours(matrix, start)) {
+            prefix += matrix[neighbour.x][neighbour.y];
+            constructAllWords(matrix, neighbour, node->children[matrix[neighbour.x][neighbour.y]], prefix, result);
+            prefix.pop_back();
+        }
+
+        matrix[start.x][start.y] = oldChar;
+    }
+
+    vector<Point> getAllNeighbours(vector<vector<char>>& matrix, Point start)
+    {
+        vector<Point> result;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (!(i == 0 && j == 0)) {
+                    auto next = start + Point{ i, j };
+                    if (isValid(matrix, next)) result.push_back(next);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    bool isValid(vector<vector<char>>& matrix, Point start) {
+        if (start.x < 0 || start.y < 0 || start.x >= matrix.size() || start.y >= matrix[0].size()) return false;
+        if (matrix[start.x][start.y] == '$') return false;
+
+        return true;
+    }
+};
 ```
 
 ---

@@ -650,10 +650,61 @@ Result: {7,10}
 ```
 
 ```cpp
-pair<int, int> smallestRange(vector<vector<int>> arrs) {
+pair<int, int> findRangeUsingSTL(vector<vector<int>>& input)
+{
+    using P = pair<int, int>;
+    priority_queue<P, vector<P>, greater<P>> minHeap;
+    pair<int, int> range = { INT_MAX, INT_MIN };
+    vector<int> indices;
+
+    // insert first element of each array
+    for (int index = 0; index < input.size(); index++) {
+        if (input[index].empty()) return range; // if any of array is empty, no point of moving forward
+
+        minHeap.push({ input[index][0], index });
+        indices.push_back(0);
+    }
+
+    while (true) {
+        auto elem = minHeap.top(); minHeap.pop();
+        int arrIdx = elem.second;
+
+        auto newRange = getRange(input, indices);
+
+        if (range.first == INT_MAX || newRange.second - newRange.first < range.second - range.first) {
+            range = newRange;
+        }
+
+        indices[arrIdx]++; // consider next element
+
+        if (indices[arrIdx] >= input[arrIdx].size()) break; // if any of array gets empty, no point of moving forward
+        else {
+            int next = input[arrIdx][indices[arrIdx]];
+            minHeap.push({ next, arrIdx });
+        }
+    }
+
+    return range;
+}
+
+pair<int, int> getRange(vector<vector<int>>& input, vector<int>& indices)
+{
+    int mn = INT_MAX, mx = INT_MIN;
+    for (int j = 0; j < input.size(); j++) {
+        if (input[j][indices[j]] < mn) mn = input[j][indices[j]];
+        if (input[j][indices[j]] > mx) mx = input[j][indices[j]];
+    }
+
+    return { mn, mx };
+}
+```
+
+```cpp
+pair<int, int> findRangeUsingSTLOptimized(vector<vector<int>>& arrs) {
     using  p = pair<int, pair<int, int>>;
     using v = vector<pair<int, pair<int, int>>>;
     priority_queue<p, v, std::greater<p>> pq;
+
     int mn = INT_MAX, mx = INT_MIN;
 
     for (int i = 0; i < arrs.size(); i++) {
@@ -666,8 +717,7 @@ pair<int, int> smallestRange(vector<vector<int>> arrs) {
 
     while (true) {
         auto f = pq.top(); pq.pop();
-        mn = f.first;
-        mx = max(f.first, mx);
+        mn = f.first; // this is the smallest element of range
 
         if (mx - mn < result.second - result.first) {
             result = { mn, mx };
@@ -675,11 +725,14 @@ pair<int, int> smallestRange(vector<vector<int>> arrs) {
 
         int arrIdx = f.second.first;
         int arrPos = f.second.second;
-        if (arrPos < arrs[arrIdx].size() - 1) {
+        if (arrPos + 1 < arrs[arrIdx].size()) {
             arrPos++;
             pq.push({ arrs[arrIdx][arrPos], {arrIdx, arrPos} });
+
+            mx = max(arrs[arrIdx][arrPos], mx); // keep updating mx value always
         }
         else {
+            // if any of the arrays end, exit it.
             break;
         }
     }
@@ -2103,32 +2156,131 @@ int getMin() {
 #### [Radix Sort]()
 
 ```cpp
-void radixSort(vector<int>& arr) {
-    for(int exp=1;;exp*=10) {
-        if(!countSort(arr, 10, exp)) break;
+class RadixSort
+{
+public:
+    static void test()
+    {
+        RadixSort obj;
+
+        {
+            vector<vector<string>> inputs = {
+                {"singh", "amit", "pratap"},
+                {"hello", "world", "cpp"}
+            };
+
+            for (auto& input : inputs) {
+                cout << "Sorting string list: " << to_string(input) << endl;
+
+                obj.radixSort(input);
+                cout << "Sorted string list: " << to_string(input) << endl;
+            }
+        }
+
+        {
+            vector<vector<int>> inputs = {
+                {1,2,3,4,5},
+                {5,4,3,2,1},
+                {10,100,1000,10000},
+                {1000,100,10,1},
+                {},
+                {1},
+                {8},
+                {10,8},
+                {100,50,1},
+                {1000,1}
+            };
+
+            for (auto& input : inputs) {
+                cout << "Sorting string list: " << to_string(input) << endl;
+
+                obj.radixSort(input);
+                cout << "Sorted string list: " << to_string(input) << endl;
+            }
+        }
     }
-}
 
-bool countSort(vector<int>& arr, int range, int exp) {
-    vector<int> count(range, 0);
-    vector<int> output(arr.size());
+    void radixSort(vector<string>& strlist)
+    {
+        int range = 256;
+        int mxLength = 0;
+        for (auto& str : strlist) mxLength = max(mxLength, (int)str.length());
 
-    bool processed = false;
-    for(auto e : arr) {
-        count[(e/exp)%10]++;
-        if((e/exp)%10 != 0) processed = true;
+        while (mxLength >= 1) {
+            countSort(strlist, mxLength - 1, range);
+            mxLength--;
+        }
     }
 
-    if(!processed) return processed;
+    // Radix sort an string array
+    void countSort(vector<string>& v, int pos, int range)
+    {
+        vector<string> output;
+        output.resize(v.size());
 
-    for(int i=arr.size()-1;i>=0;i--) {
-        int idx = count[(e/exp)%10];
-        output[idx-1] = arr[i];
-        count[(e/exp)%10]--;
+        int* count = new int[range];
+        memset(count, 0, sizeof(int) * range); // init count of each element in this range
+
+        for (int i = 0; i < v.size(); i++) {
+            int index = 0;
+            if (v[i].length() > pos) {
+                index = v[i][pos];
+            }
+            count[index]++; // increment count of each element
+        }
+
+        for (int i = 1; i < range; i++) count[i] += count[i - 1]; // get additive count i.e. its position in range
+
+        // place element at corect position
+        for (int i = v.size() - 1; i >= 0; i--) {
+            int index = 0;
+            if (v[i].length() > pos) {
+                index = v[i][pos];
+            }
+
+            int elementCount = count[index];
+            int elementLastIndx = elementCount - 1;
+            output[elementLastIndx] = v[i];
+            count[index]--;
+        }
+
+        // fill the old array back
+        for (int i = 0; i < v.size(); i++) v[i] = output[i];
     }
 
-    arr = output;
-}
+    // Radix sort an integer array
+    void radixSort(vector<int>& arr) {
+        for (int exp = 1;; exp *= 10) {
+            if (!countSort(arr, 10, exp)) break;
+        }
+    }
+
+    bool countSort(vector<int>& arr, int range, int exp) {
+        vector<int> count(range, 0);
+        vector<int> output(arr.size());
+
+        bool processed = false;
+        for (auto e : arr) {
+            count[(e / exp) % 10]++;
+            if ((e / exp) != 0) processed = true;
+        }
+
+        if (!processed) return processed;
+
+        for (int i = 1; i < range; i++) count[i] += count[i - 1];
+
+        for (int i = arr.size() - 1; i >= 0; i--) {
+            int e = arr[i];
+            int idx = count[(e / exp) % 10];
+            output[idx - 1] = arr[i];
+            count[(e / exp) % 10]--;
+        }
+
+        arr = output;
+
+        return processed;
+    }
+};
 ```
 
 ---
@@ -2172,3 +2324,142 @@ bool canBeArranged(vector<int>& arr, int index, int n, unordered_set<int>& visit
 ```
 
 ---
+
+#### [Find duplicate element in array](https://leetcode.com/problems/find-the-duplicate-number/)
+
+```cpp
+class Solution {
+public:
+    int findDuplicate(vector<int>& nums) {
+        return findDuplicateUsingBinarySearch(nums);
+    }
+
+    int findDuplicateByMovingOutOfPlaceElementToEnd(vector<int>& nums) {
+        for(int i=0;i<nums.size();) {
+            if(nums[nums[i]-1] == nums[i]) {
+                // if element is already at correct position, it must be same position
+                if(nums[i] != i+1) {
+                    return nums[i]; // this will detect all duplicates
+                }
+                i++;
+            } else { // if element isn't at correct position, move the current element to its correct position
+                swap(nums[nums[i]-1], nums[i]);
+            }
+        }
+        return INT_MAX;
+        //return nums.back()+1; // this should never hit?
+    }
+
+    // O(nlogn)
+    int findDuplicateUsingSorting(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        for(int i=1;i<nums.size();i++) {
+            if(nums[i] == nums[i-1]) return nums[i];
+        }
+        return INT_MAX;
+    }
+
+    // O(nlogn)
+    int findDuplicateUsingBinarySearch(vector<int>& nums) {
+        int left = 1, right = nums.size() - 1;
+        while(left < right) {
+            int mid = left + (right - left) / 2;
+
+            // count the number of elements smaller/ equal than middle element
+            int c = 0;
+            for(const int& el: nums)
+                if(el <= mid)
+                    ++c;
+
+            if(c > mid)
+                right = mid;
+            else
+                left = mid + 1;
+        }
+        return left;
+    }
+
+    // O(n) - only works if all elements are positive
+    // this doesn't work because number can be repeated any number of times.
+    int findDuplicateUsingIndexMarking(vector<int>& nums) {
+        for(int i=0;i<nums.size();i++) {
+            int index = abs(nums[i])-1;
+            if(nums[index] < 0) return abs(nums[i]);
+            nums[index] *= -1; // mark this index as seen
+        }
+        return INT_MAX;
+    }
+
+    // O(n)
+    // same for this one
+    int findDuplicateUsingFloyedCycleDetection(vector<int>& nums) {
+        int slow = nums[0];
+        int fast = nums[0];
+
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while(slow != fast);
+
+        fast = nums[0];
+        while(slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+
+        return slow;
+    }
+
+    // O(n)
+    int findDuplicateUsingTwoEquations(vector<int>& nums) {
+        long double product = 1.0;
+        long long sum = 0;
+
+        double index = 1.0;
+        for(auto& num : nums) {
+            product *= (double)num;
+            product /= index;
+            sum += num;
+            index++;
+        }
+        // a-b=x, a/b=y
+        // by-b=x => b(y-1)=x => b=x/(y-1)
+        int n = nums.size();
+        long long diff = n*(n+1)/2 - sum;
+
+        int second = diff/(product-1);
+        int first =  diff + second;
+
+        for(auto& num : nums) {
+            if(num == abs(first)) return num;
+            if(num == abs(second)) return num;
+        }
+
+        return INT_MAX;
+    }
+
+    // O(n)
+    int findDuplicateUsingXOR(vector<int>& nums) {
+        int xorValue = 0;
+        for(int i=0;i<nums.size();i++) {
+            xorValue ^= (i+1);
+            xorValue ^= nums[i];
+        }
+
+        int lastSetBit = ~(xorValue&(xorValue-1));
+        int first = 0, second = 0;
+
+        for(auto& num : nums) {
+            if(num & lastSetBit) first ^= num;
+            else second ^= num;
+        }
+
+        for(auto& num : nums) {
+            if(num == first) return num;
+            if(num == second) return num;
+        }
+
+        return INT_MAX;
+    }
+};
+```

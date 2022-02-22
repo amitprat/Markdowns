@@ -1492,6 +1492,723 @@ int minimumCost(vector<int>& ropes) {
 ```
 
 ---
+
 #### [Kth smallest/largest element in an unordered array]()
 
-***Kth smallest 
+**_We have following approaches for finding kth smallest element_**
+
+1. Sort array in ascending order and return arr[k-1], Time: O(n \* log(n))
+2. Use bubble sort to perform K outer iterations. On each iteration, move the smallest element to front. After k iterations, kth smallest element is at correct position i.e. arr[k-1]. We can use selection sort as well. Time: O(k\*n)
+3. Use Maxheap of size K and replace the top element for rest of elements. After all elements are inserted, the top most element is kth smallest. Space: O(k), Time: O(n \* log(k))
+4. Use Minheap of size N and pop k-1 elements. Next element is kth smallest. Space: O(N), Time: O(n*log(n) + k*log(n))
+5. Use quick sort partitioning to partition around pivot and keep partitioning element until the element before partition index == k, then we can return that element. Average Time: O(n) , Worst Time: O(n^2)
+
+- We can use similar approach for finding kth largest as well.
+
+**_Using sorting approach_**
+
+```cpp
+int kthSmallest(vector<int>& arr, int k) {
+    sort(arr.begin(), arr.end());
+    return arr[k-1];
+}
+```
+
+```cpp
+int kthLargest(vector<int>& arr, int k) {
+    sort(arr.begin(), arr.end(), greater<int>());
+    return arr[k-1];
+}
+```
+
+**_Using modified bubble/selection sort approach_**
+
+```cpp
+int kthSmallestUsingBubbleSort(vector<int>& arr, int k) {
+    for(int i=0;i<k;i++) {
+        for(int j=arr.size()-1;j>=i+1;j--) {
+            if(arr[j-1] > arr[j]) swap(arr[j-1], arr[j]);
+        }
+    }
+
+    return arr[k-1];
+}
+```
+
+```cpp
+int kthSmallestUsingSelectionSort(vector<int>& arr, int k) {
+    int smallest;
+    for(int i=0;i<k;i++) {
+        smallest = i;
+        for(int j=i+1;j<arr.size();j++) {
+            if(arr[j] < arr[i]) smallest = j;
+        }
+        if(smallest != i) {
+            swap(arr[i], arr[smallest]);
+        }
+    }
+
+    return arr[k-1];
+}
+```
+
+**_Using Maxheap of size K_**
+
+```cpp
+int kthSmallestUsingMaxheap(vector<int>& arr, int k) {
+    priority_queue<int> pq;
+    for(int i=0;i< arr.size() && i < k;i++) {
+        pq.push(arr[i]);
+    }
+
+    for(int i=k;i < arr.size(); i++) {
+        if(arr[i] < pq.top()) {
+            pq.pop();
+            pq.push(arr[i]);
+        }
+    }
+
+    return pq.top();
+}
+```
+
+**_Using Minheap of size N_**
+
+```cpp
+int kthSmallestUsingMinheap(vector<int>& arr, int k) {
+    priority_queue<int, vector<int>, greater<int>> pq;
+    for(auto e : arr) pq.push(e);
+
+    while(k-- > 1) { pq.pop(); }
+
+    return pq.top();
+}
+```
+
+**_Using quick partitioning_**
+
+```cpp
+int kthSmallestUsingQuickSelect(vector<int>& arr, int k) {
+    return kthSmallestUsingQuickSelect(arr, 0, arr.size()-1, k);
+}
+
+int kthSmallestUsingQuickSelect(vector<int>& arr, int s, int e, int k) {
+    if(s > e) return INT_MIN;
+
+    int p = partition(arr, s, e);
+    int q = p-s+1; // smaller on left
+
+    if(q == k) return arr[p];
+    else if(q < k) return kthSmallestUsingQuickSelect(arr, p+1, e, k-q);
+    else return kthSmallestUsingQuickSelect(arr, s, p-1, k);
+}
+
+int partition(vector<int>& arr, int s, int e) {
+    int pivot = arr[e];
+    int i = s;
+    for(int j=s;j<e;j++) {
+        if(arr[j] <= pivot) {
+            swap(arr[i++], arr[j]);
+        }
+    }
+    swap(arr[i], arr[e]);
+
+    return i;
+}
+```
+
+```cpp
+int kthLargestUsingQuickSelect(vector<int>& arr, int k) {
+    return kthLargestUsingQuickSelect(arr, 0, arr.size()-1, k);
+}
+
+int kthLargestUsingQuickSelect(vector<int>& arr, int s, int e, int k) {
+    if(s > e) return INT_MIN;
+
+    int p = partition(arr, s, e);
+    int q = e-p+1; // larger on right
+
+    if(q == k) return arr[p];
+    else if(q < k) return kthLargestUsingQuickSelect(arr, s, p-1, k-q);
+    else return kthLargestUsingQuickSelect(arr, p+1, e, k);
+}
+
+int partition(vector<int>& arr, int s, int e) {
+    int pivot = arr[e];
+    int i = s;
+    for(int j=s;j<e;j++) {
+        if(arr[j] <= pivot) {
+            swap(arr[i++], arr[j]);
+        }
+    }
+    swap(arr[i], arr[e]);
+
+    return i;
+}
+```
+
+---
+
+#### [Distance between two words in a string]()
+
+**_Distance between 2 words in string without preprocessing_**
+
+```cpp
+int minDistanceBetweenTwoWords(string& input, string& w1, string& w2) {
+    vector<string> parts = split(input,' ');
+
+    int dist = INT_MAX, first = -1, second = -1;
+    for(int i=0;i<parts.size();i++) {
+        string& part = parts[i];
+        if(part == w1) first = i;
+        if(part == w2) second = i;
+
+        if(first != -1 && second != -1) {
+            dist = min(dist, abs(first-second));
+        }
+    }
+
+    return dist;
+}
+```
+
+**_Distance between 2 words in string with preprocessing_**
+
+```cpp
+void process(string& str, unordered_map<string, vector<int>>& posMap) {
+    vector<string> parts = split(str, ' ');
+
+    for(int i=0;i<parts.size();i++) {
+        posMap[parts[i]].push_back(i);
+    }
+}
+
+int minDistanceBetweenTwoWords(string& input, string& w1, string& s2) {
+    unordered_map<string, vector<int>> posMap;
+    process(input, posMap);
+
+    auto& l1 = posMap[w1];
+    auto& l2 = posMap[w2];
+
+    int i=0, j=0;
+    int dist = INT_MAX;
+
+    while(i<l1.size() && j<l2.size()) {
+        int curDist = abs(l1[i]-l2[j]);
+        dist = min(dist, curDist);
+
+        if(l1[i] < l2[j]) i++;
+        else j++;
+    }
+
+    return dist;
+}
+
+vector<string> split(string s, char ch) {
+    vector<string> result;
+    stringstream ss(s);
+
+    string word;
+    while (ss >> word) {
+        result.push_back(word);
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Word Ladder]()
+
+A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words beginWord -> s1 -> s2 -> ... -> sk such that:
+
+Every adjacent pair of words differs by a single letter.
+Every si for 1 <= i <= k is in wordList. Note that beginWord does not need to be in wordList.
+sk == endWord
+Given two words, beginWord and endWord, and a dictionary wordList, return the number of words in the shortest transformation sequence from beginWord to endWord, or 0 if no such sequence exists.
+
+Input: beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]
+Output: 5
+Explanation: One shortest transformation sequence is "hit" -> "hot" -> "dot" -> "dog" -> cog", which is 5 words long.
+
+**_Shortest path between begin and end word_**
+
+```cpp
+vector<string> findShortestPath(string& begin, string& end, unordered_set<string> dict) {
+    unordered_set<string> visited;
+    queue<pair<string, vector<string>>> q;
+    q.push({ begin, {begin} });
+    visited.insert(begin);
+
+    vector<string> res;
+    while (!q.empty()) {
+        int size = q.size();
+        for (int i = 0; i < size; i++) {
+            auto cur = q.front(); q.pop();
+            if (cur.first == end) {
+                res = cur.second; break;
+            }
+
+            auto neighbours = getOneDistantWords(cur.first, dict, visited);
+            for (auto& neighbour : neighbours) {
+                auto tmp = cur.second;
+                tmp.push_back(neighbour);
+                q.push({ neighbour, tmp });
+                visited.insert(neighbour);
+            }
+        }
+    }
+
+    return res;
+}
+
+vector<string> getOneDistantWords(string begin, unordered_set<string>& dict, unordered_set<string>& visited) {
+    vector<string> res;
+    for (int i = 0; i < begin.length(); i++) {
+        char tmp = begin[i];
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+            if (begin[i] != ch) {
+                begin[i] = ch;
+                if (dict.find(begin) != dict.end() && visited.find(begin) == visited.end()) res.push_back(begin);
+            }
+        }
+        begin[i] = tmp;
+    }
+
+    return res;
+}
+```
+
+**_Find ladder length_**
+
+```cpp
+int ladderLength(string& begin, string& end, unordered_set<string> dict) {
+    queue<string> q;
+    q.push(begin);
+    int len = 1;
+
+    while (!q.empty()) {
+        int n = q.size();
+        while (n--) {
+            auto cur = q.front(); q.pop();
+            if (cur == end) return len;
+            dict.erase(cur);
+
+            vector<string> neighbours = getOneDistantWords(cur, dict);
+            for (auto& neighbour : neighbours) {
+                q.push(neighbour);
+            }
+        }
+        len++;
+    }
+
+    return 0;
+}
+
+vector<string> getOneDistantWords(string word, unordered_set<string>& dict) {
+    vector<string> neighbours;
+    for (int i = 0; i < word.length(); i++) {
+        char ch = word[i];
+        for (char t = 'a'; t <= 'z'; t++) {
+            if (t != ch) {
+                word[i] = t;
+                if (dict.find(word) != dict.end()) neighbours.push_back(word);
+            }
+        }
+        word[i] = ch;
+    }
+    return neighbours;
+}
+```
+
+```cpp
+int ladderLength2(string beginWord, string endWord, unordered_set<string> wordDict) {
+    queue<pair<string, int>> queue;
+    queue.push({ beginWord, 1 });
+
+    while (!queue.empty()) {
+        auto front = queue.front(); queue.pop();
+        if (front.first == endWord) {
+            return front.second;
+        }
+
+        string word = front.first;
+        for (int i = 0; i < word.size(); i++) {
+            for (char c = 'a'; c <= 'z'; c++) {
+                char temp = word[i];
+                if (word[i] != c) {
+                    word[i] = c;
+                }
+
+                if (wordDict.contains(word)) {
+                    queue.push({ word, front.second + 1 });
+                    wordDict.erase(word);
+                }
+
+                word[i] = temp;
+            }
+        }
+    }
+
+    return 0;
+}
+```
+
+**_Search using bidirectional bfs search_**
+
+```cpp
+int findLadderBidirection(string begin, string end, unordered_set<string> dict) {
+    unordered_set<string> seen;
+    unordered_set<string> head, tail;
+    head.insert(begin);
+    tail.insert(end);
+    int ladder = 2;
+
+    while (!head.empty() && !tail.empty()) {
+        if (head.size() > tail.size()) swap(head, tail);
+
+        unordered_set<string> tmp;
+        for (auto it = head.begin(); it != head.end(); it++) {
+            vector<string> neighbours = getOneDistantWords(*it, dict);
+            for (auto& neighbour : neighbours) {
+                if (tail.find(neighbour) != tail.end()) {
+                    return ladder;
+                }
+                if (seen.find(neighbour) == seen.end() && dict.find(neighbour) != dict.end()) {
+                    tmp.insert(neighbour);
+                    seen.insert(neighbour);
+                }
+            }
+        }
+        ladder++;
+        swap(head, tmp);
+    }
+
+    return 0;
+}
+```
+
+---
+
+#### [Regex Pattern Matching/ Regular Expression Matching](https://leetcode.com/problems/regular-expression-matching/discuss/5665/My-concise-recursive-and-DP-solutions-with-full-explanation-in-C%2B%2B)
+
+Regular Expression Matching
+Given an input string s and a pattern p, implement regular expression matching with support for '.' and '_' where:
+'.' Matches any single character.
+'_' Matches zero or more of the preceding element.
+The matching should cover the entire input string (not partial).
+
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+
+Input: s = "aa", p = "a*"
+Output: true
+Explanation: '*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes "aa".
+
+**_Recursive approach_**
+
+```cpp
+bool isMatch(string txt, string pat) {
+    return isMatch(txt, pat, txt.size()-1, pat.size()-1);
+}
+bool isMatch(string txt, string pat, int idx1, int idx2) {
+    if(idx2 < 0) return idx1 < 0;
+    if(idx1 < 0) return pat[idx2] == '*' && isMatch(txt, pat, idx1, idx2-2);
+
+    if(txt[idx1] == pat[idx2] || pat[idx2] == '.') return isMatch(txt, pat, idx1-1, idx2-1);
+
+    if(pat[idx2] == '*')
+        return (txt[idx1] == pat[idx2-1] || pat[idx2-1] == '.') && isMatch(txt, pat, idx1-1, idx2) ||
+                isMatch(txt, pat, idx1, idx2-2);
+
+    return false;
+}
+```
+
+**_Dynamic programming approach_**
+
+```cpp
+bool isMatch(string txt, string pat) {
+    int n = txt.size(), m = pat.size();
+    vector<vector<bool>> dp(n+1, vector<bool>(m+1));
+
+    for(int i=0;i<=n;i++) {
+        for(int j=0;j<=m;j++) {
+            if(i == 0 && j == 0) dp[i][j] = true;
+            else if(i == 0) dp[i][j] = (pat[j-1]== '*' && dp[i][j-2]);
+            else if(j == 0) dp[i][j] = false;
+            else {
+                if(txt[i-1] == pat[j-1] || pat[j-1] == '.') dp[i][j] = dp[i-1][j-1];
+                else if(pat[j-1] == '*')
+                    dp[i][j] = ((pat[j-2] == txt[i-1] || pat[j-2] == '.') && dp[i-1][j]) || dp[i][j-2];
+                else dp[i][j] = false;
+            }
+        }
+    }
+
+    return dp[n][m];
+}
+```
+
+---
+
+#### [Wildcard Matching]()
+
+```cpp
+
+```
+
+---
+
+#### [One edit distance away]()
+
+```cpp
+bool oneEditDistance(string& str1, string& str2, char& different) {
+    different = '$';
+    if(str1.length() > str2.length()) return oneEditDistance(str2, str1, different);
+    if(str2.length()-str1.length() > 1) return false;
+
+    bool flag = false;
+    for(int i=0,j=0;j<str2.length();i++,j++) {
+        if(i == str1.length() || str1[i] != str2[j]) {
+            if(flag) return false;
+            flag = true;
+
+            different = str2[j];
+            if(str1.length() != str2.length()) i--;
+        }
+    }
+
+    return flag;
+}
+```
+
+```cpp
+bool oneEditDistance(string& str1, string& str2, char& different) {
+    different = '$';
+    if(str1.length() > str2.length()) return oneEditDistance(str2, str1, different);
+    if(str2.length()-str1.length() > 1) return false;
+
+    bool flag = false;
+    int i=0,j=0;
+    for(;i<str1.length();i++,j++) {
+        if(str1[i] != str2[j]) {
+            if(flag) return false;
+            flag = true;
+
+            different = str2[j];
+            if(str1.length() != str2.length()) i--;
+        }
+    }
+    if(!flag && (i+1 == j)) { flag = true; different = str2[j]; }
+
+    return flag;
+}
+```
+
+```cpp
+bool oneEditDistance(string& str1, string& str2) {
+    int n = str1.length();
+    int m = str2.length();
+
+    if(abs(n-m) > 1) return false;
+    if(n > m) { swap(str1, str2); swap(n, m); }
+
+    for(int i=0;i<n;i++) {
+        if(str1[i] != str2[i]) {
+            if(n == m) return str1.substr(i) == str2.substr(i);
+            else return str1.substr(i) == str2.substr(i+1);
+        }
+    }
+
+    return n != m;
+}
+```
+
+```cpp
+bool isOneEditDistance(string& str1, string& str2) {
+    int n = str1.length();
+    int m = str2.length();
+
+    int diff = 0;
+    for (int i = 0, j = 0; diff <= 1 && (i < n || j < m); i++, j++) {
+        if (i >= n || j >= m) { diff++; continue; }
+
+        if (str1[i] != str2[j]) {
+            diff++;
+
+            if (n < m) i--;
+            else if (n > m) j--;
+        }
+    }
+
+    return diff == 1;
+}
+```
+
+---
+
+#### [Count all employees under each manager]()
+
+```cpp
+unordered_map<string, vector<string>> countEmployees(unordered_map<string, string>& dataSet) {
+    unordered_map<string, vector<string>> partSet;
+    for(auto& e : dataSet) {
+        partSet[e.second].push_back(e.first);
+    }
+
+    unordered_map<string, vector<string>> result;
+    for(auto& e : partSet) {
+        unordered_set<string> visited;
+        auto employees = expand(partSet, e.second, visited);
+        result[e.first] = employees;
+    }
+
+    return result;
+}
+
+vector<string> expand(unordered_map<string, vector<string>>& partSet, vector<string>& employees, unordered_set<string>& visited)
+{
+    vector<string> result;
+
+    for(auto& e : employees) {
+        if(visited.find(e) == visited.end()) {
+            result.push_back(e);
+            visited.insert(e);
+
+            auto nextEmpSet = partSet[e];
+            result.insert(result.end(), expand(partSet, nextEmpSet, visited));
+        }
+    }
+
+    return result;
+}
+```
+
+---
+
+#### [Max value of array after applying operators at different positions]()
+
+```cpp
+maxValueOfExpression({1,2,3,4}, 0, 3, {'+','-','*','/', memo});
+
+double maxValueOfExpression(vector<double>& arr, int s, int e, vector<char>& ops, unordered_map<string, double>& memo) {
+    if(s == e) return arr[s];
+    if(memo[key(s, e)]) return memo[key(s,e)];
+
+    double mxValue = 0.0;
+    for(int k=s;k<e;k++) {
+        double left = maxValueOfExpression(arr, s, k);
+        double right = maxValueOfExpression(arr, k+1, e);
+
+        mxValue = max(mxValue, curMaxValue(left, right, ops));
+    }
+
+    memo[key(s,e)] = mxValue;
+
+    return memo[key(s,e)];
+}
+
+double curMaxValue(double left, double right, vector<char>& ops) {
+    double mxValue = 0.0;
+    for(auto op : ops) {
+        switch(op) {
+            case '+':
+                mxValue = max(mxValue, left+right);
+                break;
+            case '-':
+                mxValue = max(mxValue, left-right);
+                break;
+            case '*':
+                mxValue = max(mxValue, left*right);
+                break;
+            case '/':
+                mxValue = max(mxValue, left/right);
+                break;
+        }
+    }
+
+    return mxValue;
+}
+
+string key(int s, int e) {
+    return "{" + std::to_string(s) + "," + std::to_string(e) + "}";
+}
+```
+
+- Even if we have '(' and ')' operators in above ops array, algorithm will remain same because when combining left and right subarrays, we are doing the same thing.
+
+---
+
+#### [Pattern Match With Given Pattern To Text]()
+
+```sh
+Input:
+{"abba", "redbluebluered"},
+{"aaaa", "asdasdasdasd"},
+{"aabb","xyzabcxyzabc"},
+{"abc", "redbluebluered"},
+{"acbae", "redbluegreenredyellow"},
+{"abcdefghijabcd","abcdefghijabcd"}
+
+Output:
+{a=red, b=blue}
+Does pattern='abba' matches text='redbluebluered', result='true'
+{a=asd}
+Does pattern='aaaa' matches text='asdasdasdasd', result='true'
+Does pattern='aabb' matches text='xyzabcxyzabc', result='false'
+{a=r, b=e, c=dbluebluered}
+Does pattern='abc' matches text='redbluebluered', result='true'
+{a=r, c=e, b=dblueg, e=eenredyellow}
+Does pattern='acbae' matches text='redbluegreenredyellow', result='true'
+{a=a, b=b, c=c, d=d, e=e, f=f, g=g, h=h, i=i, j=j}
+Does pattern='abcdefghijabcd' matches text='abcdefghijabcd', result='true'
+```
+
+```cpp
+bool isMatch(string& txt, string& pat) {
+    int patIdx = 0, txtIdx = 0;
+
+    unordered_map<char, string> map;
+    return isMatch(txt, txtIdx, pat, patIdx, map);
+}
+
+bool isMatch(string& txt, int txtIdx, string& pat, int patIdx, unordered_map<char, string>& map)
+{
+    if(txtIdx == txt.size() && patIdx == pat.size())
+    {
+        cout<<to_string(map)<<endl;
+        return true;
+    }
+
+    if(txtIdx >= txt.size() || patIdx >= pat.size()) return false;
+
+    if(map.find(pat[patIdx]) == map.end())
+    {
+        // if current pattern character isn't seen yet
+        for(int txtEndIdx=txtIdx;txtEndIdx<txt.size();txtEndIdx++) {
+            string curStr = txt.substr(txtIdx, txtEndIdx-txtIdx+1);
+
+            map[pat[patIdx]] = curStr;
+            if(isMatch(txt, txtEndIdx+1, pat, patIdx+1, map)) return true;
+            map.erase(pat[patIdx]);
+        }
+    }
+    else
+    {
+        // If pattern already seen, then match the old matched string to current txt string
+        string oldStr = map[pat[patIdx]];
+        string curStr = txt.substr(txtIdx, oldStr.length());
+
+        if(oldStr != curStr) return false;
+
+        return isMatch(txt, txtIdx+curStr.size(), pat, patIdx+1, map);
+    }
+
+    return false;
+}
+```
+
+---

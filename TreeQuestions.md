@@ -1236,3 +1236,59 @@ static ITNode* getRightMostNode(ITNode* root) {
 ```
 
 ---
+
+#### [Kth Smallest Element in BST/Rank of BST]()
+
+```cpp
+struct Node {
+    int val;
+    Node *left, *right;
+    int sz;
+    Node(int val) : val(val), left(nullptr), right(nullptr), sz(1) {}
+};
+Node *root = nullptr;
+
+void insert(int val) {
+    root = insert(root, val);
+}
+
+Node *insert(Node *node, int val) {
+    if(!node) return new Node(val);
+
+    node->sz++;
+    if(val < node->val) node->left = insert(node->left, val);
+    else node->right = insert(node->right, val);
+
+    return node;
+}
+
+int findKthSmallestElement(int k) {
+    return findKthSmallestElement(root, k);
+}
+
+int findKthSmallestElement(Node *node, int k) {
+    if(!node) return -1;
+
+    int curSize = size(left) + 1;
+    if(curSize == k) return node->val;
+
+    if(k < curSize) return findKthSmallestElement(node->left, k);
+    else return findKthSmallestElement(node->right, k-curSize);
+}
+
+int size(Node *node) { return node ? node->sz : 0; };
+
+int kthSmallestElementUsingInorderCounting(Node *node, int& k) {
+    if(!node) return -1;
+
+    auto left = kthSmallestElementUsingInorderCounting(node->left, k);
+    if(left != -1) return left;
+
+    k--;
+    if(k == 0) return node-val;
+
+    return kthSmallestElementUsingInorderCounting(node->right, k);
+}
+```
+
+---

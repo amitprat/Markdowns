@@ -4,7 +4,8 @@
 class UnionFind {
     int *parent;
     int *height;
-    public:
+
+public:
     UnionFind(int n) {
         parent = new int[n];
         height = new int[n];
@@ -193,70 +194,256 @@ private:
 #### [Priority Queue Implementation]()
 
 ```cpp
-template <class T, class C>
+template<class T>
 class PriorityQueue {
 private:
+    using Comparator = std::function<bool(const T&, const T&)>;
     vector<T> container;
-    C comparator;
-    int capacity;
+    Comparator comparator;
 
 public:
-    PriorityQueue(C comparator, int capacity) : comparator(comparator), capacity(capacity) {}
-    void push(T item) {
-        container.push_back(item);
+    PriorityQueue() {
+        comparator = [](const T& a, const T& b) { return a < b; };
+    }
+    PriorityQueue(Comparator comparator) : comparator(std::move(comparator)) {}
 
+    void add(T item) {
+        container.push_back(item);
         upHeapify(container.size() - 1);
     }
-    T top() {
-        if (container.empty()) throw exception("Empty");
-        return container.front();
-    }
-    T pop() {
-        if (container.empty()) throw exception("Empty");
-        auto item = container[0];
-        container[0] = container[container.size() - 1];
-        container.pop_back();
 
+    T top() {
+        if (container.empty()) return T();
+        return container[0];
+    }
+
+    T pop() {
+        auto res = top();
+        swap(container[0], container[container.size() - 1]);
+        container.pop_back();
         downHeapify(0);
 
-        return item;
+        return res;
     }
-    bool isFull() {
-        return container.size() == capacity;
-    }
-    bool empty() {
-        return container.empty();
-    }
+
+    bool empty() { return container.empty(); }
 
 private:
-    void upHeapify(int idx) {
-        auto p = parent(idx);
-        while (idx > 0 && container[p] > container[idx]) {
-            swap(container[p], container[idx]);
-            idx = p;
-            p = parent(idx);
-        }
-    }
-    void downHeapify(int idx) {
-        int sm = idx;
-
-        int l = left(idx);
-        if (l < container.size() && container[l] < container[idx]) sm = l;
-
-        int r = right(idx);
-        if (r < container.size() && container[r] < container[idx]) sm = r;
-
-        if (sm != idx) {
-            swap(container[idx], container[sm]);
-            downHeapify(sm);
+    void downHeapify(int startIndex) {
+        int mnIndex = startIndex;
+        int leftIndex = left(startIndex);
+        if (leftIndex < container.size() && comparator(container[leftIndex], container[mnIndex])) mnIndex = leftIndex;
+        int rightIndex = right(startIndex);
+        if (rightIndex < container.size() && comparator(container[rightIndex], container[mnIndex])) mnIndex = rightIndex;
+        if (mnIndex != startIndex) {
+            swap(container[mnIndex], container[startIndex]);
+            downHeapify(mnIndex);
         }
     }
 
-    int left(int i) { return 2 * i + 1; }
+    void upHeapify(int startIndex) {
+        int p = parent(startIndex);
+        while (startIndex != 0 && !comparator(container[p], container[startIndex])) {
+            swap(container[p], container[startIndex]);
+            startIndex = p;
+            p = parent(startIndex);
+        }
+    }
 
-    int right(int i) { return 2 * i + 2; }
+    int parent(int index) { return (index - 1) / 2; }
+    int left(int index) { return 2 * index + 1; }
+    int right(int index) { return 2 * index + 2; }
+};
+```
 
-    int parent(int i) { return (i - 1) / 2; }
+---
+
+#### [Circular Queue]()
+
+```cpp
+class CircularQueue {
+    template <class T>
+    class LinkedCircularQueue {
+    public:
+        class Node {
+        public:
+            T val;
+            Node* prev, * next;
+            Node(T val) :val(val), prev(nullptr), next(nullptr) {}
+        };
+    private:
+        Node* head, * tail;
+        int sz = 0;
+    public:
+        LinkedCircularQueue() :head(nullptr), tail(nullptr) {}
+        void push(T item) {
+            if (head == nullptr) {
+                head = tail = new Node(item);
+            }
+            else {
+                tail->next = new Node(item);
+                tail = tail->next;
+                tail->next = head;
+            }
+            sz++;
+        }
+        T pop() {
+            if (head == nullptr) throw exception("Queue is empty");
+            if (head == tail) {
+                auto val = head->val;
+                delete head;
+                head = tail = nullptr;
+                sz--;
+                return val;
+            }
+
+            auto f = head;
+            head = head->next;
+            tail->next = head;
+            auto val = f->val;
+            delete f;
+            sz--;
+
+            return val;
+        }
+        T front() {
+            if (head == nullptr) throw exception("Queue is empty");
+            return head->val;
+        }
+        bool empty() {
+            return head == nullptr;
+        }
+        int size() {
+            return sz;
+        }
+    };
+
+    template <class T>
+    class ArrayCircularQueue {
+    private:
+        T* arr = nullptr;
+        int cap = 0;
+        int start, end;
+    public:
+        ArrayCircularQueue(int cap) :cap(cap) {
+            arr = new T[cap];
+            start = end = 0;
+        }
+
+        void pushBack(T item) {
+            if (isFull()) throw exception("Queue is full");
+
+            arr[end] = item;
+            end = index(end + 1);
+        }
+
+        void pushFront(T item) {
+            if (isFull()) throw exception("Queue is full");
+
+            start = index(start - 1);
+            arr[start] = item;
+        }
+
+        T popFront() {
+            if (empty()) throw exception("Queue is empty");
+
+            auto item = arr[start];
+            start = index(start + 1);
+            if (empty()) reset();
+
+            return item;
+        }
+
+        T popBack() {
+            if (empty()) throw exception("Queue is empty");
+
+            end = index(end - 1);
+            auto item = arr[end];
+            if (empty()) reset();
+
+            return item;
+        }
+        T front() {
+            if (empty()) throw exception("Queue is empty");
+            return arr[start];
+        }
+        T back() {
+            if (empty()) throw exception("Queue is empty");
+            return arr[end];
+        }
+        bool empty() {
+            return start == end;
+        }
+        int size() {
+            return (end + cap - start) % cap;
+        }
+        bool isFull() {
+            return start == index(end + 1);
+        }
+        int index(int cur) {
+            return (cur + cap) % cap;
+        }
+        void reset() {
+            start = end = 0;
+        }
+    };
+};
+```
+
+---
+
+#### [LRU Cache, Least Recently Used Cache]()
+
+```cpp
+class LRUCache {
+    int capacity;
+    unordered_map<string, string> backend;
+
+    list<pair<string, string>> dll;
+    unordered_map<string, list<pair<string, string>>::iterator> map;
+
+public:
+    LRUCache(int capacity) : capacity(capacity) {}
+
+    void put(string key, string val) {
+        backend.insert({ key, val });
+    }
+
+    string get(string key) {
+        string val;
+        if (map.find(key) != map.end()) {
+            // key exists in cache
+            auto iter = map[key];
+            val = iter->second;
+
+            dll.push_back({ key, iter->second });
+            map[key] = dll.begin();
+            dll.erase(iter);
+
+            cout << "Key exists in cache, reading from cache: ";
+        }
+        else {
+            // key isn't in cache
+            if (backend.find(key) == backend.end()) {
+                throw exception("Key doesn't exist in cache");
+            }
+
+            cout << "Key doesn't exist in cache, reading from backend, ";
+            if (map.size() == capacity) {
+                // cache is full
+                cout << "cache is full, evicting the last element, ";
+                map.erase(dll.back().first);
+                dll.pop_back();
+            }
+
+            cout << "inserting new element in front, ";
+            dll.push_front({ key, backend[key] });
+            map[key] = dll.begin();
+            val = backend[key];
+        }
+
+        return val;
+    }
 };
 ```
 

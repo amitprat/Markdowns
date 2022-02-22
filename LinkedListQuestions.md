@@ -364,3 +364,261 @@ void swapKThNodeFromStartEnd(Node *root, int k) {
 ```
 
 ---
+
+#### [Remove Duplicate Nodes from Sorted LinkedList]()
+
+**_Remove All copies of duplicates if duplicates present_**
+
+```cpp
+Node *removeDups(Node *root) {
+    Node *newNode = new Node(INT_MIN);
+    newNode->next = root;
+
+    Node *tmp = newNode;
+    while(tmp && tmp->next) {
+        if(tmp->next->next && tmp->next->val == tmp->next->next->val) {
+            auto curVal = tmp->next->val;
+            while(tmp->next && tmp->next->val == curVal) {
+                auto next = tmp->next->next;
+                delete tmp->next;
+                tmp->next = next;
+            }
+        } else {
+            tmp = tmp->next;
+        }
+    }
+
+    return newNode->next;
+}
+```
+
+**_Remove duplicates if present. Only keep one copy._**
+
+```cpp
+Node *removeDups(Node *root) {
+    Node *tmp = root;
+
+    while(tmp && tmp->next) {
+        if(tmp->val == tmp->next->val) {
+            auto next = tmp->next->next;
+            delete tmp->next;
+            tmp->next = next;
+        } else {
+            tmp = tmp->next;
+        }
+    }
+
+    return root;
+}
+```
+
+---
+
+#### [Remove Duplicate Nodes from Unsorted LinkedList]()
+
+**_Remove All copies of duplicates if duplicates present_**
+
+```cpp
+Node *removeAllFromUnsortedList(Node *root) {
+    Node *newNode = new Node(INT_MIN);
+    newNode->next = root;
+
+    Node *tmp = newNode;
+    while(tmp->next && tmp->next->next) {
+        bool found = false;
+        auto cur = tmp->next->val;
+
+        auto runner = tmp->next;
+        while(runner && runner->next) {
+            if(runner->next->val == cur) {
+                found = true;
+                auto next = runner->next->next;
+                delete runner->next;
+                runner->next = next;
+            } else {
+                runner = runner->next;
+            }
+        }
+
+        if(found) {
+            auto next = tmp->next->next;
+            delete tmp->next;
+            tmp->next = next;
+        } else {
+            tmp = tmp->next;
+        }
+    }
+
+    return newNode->next;
+}
+```
+
+**_Remove duplicates if present. Only keep one copy._**
+
+```cpp
+Node *removeDupsFromUnsortedList(Node *root) {
+    Node *tmp = root;
+    while(tmp && tmp->next) {
+        int candidateVal = tmp->val;
+
+        auto* runner = tmp;
+        while(runner->next) {
+            if(runner->next->val == candidateVal) {
+                auto next = runner->next->next;
+                delete runner->next;
+                runner->next = next;
+            } else {
+                runner = runner->next;
+            }
+        }
+
+        tmp = tmp->next;
+    }
+
+    return root;
+}
+```
+
+**_Remove Duplicated from list using extra space(set). Keep single copy._**
+
+```cpp
+Node *removeDupsFromUnsortedListUsingSet(Node *root) {
+    if(!root || !root->next) return root;
+
+    unordered_set<int> set;
+    set.insert(root->val);
+    Node *tmp = root;
+
+    while(tmp->next) {
+        if(set.find(tmp->next->val) == set.end()) {
+            set.insert(tmp->next->val);
+            tmp = tmp->next;
+        } else {
+            auto next = tmp->next->next;
+            delete tmp->next;
+            tmp->next = next;
+        }
+    }
+
+    return root;
+}
+```
+
+---
+
+#### [Partition a Linked List]()
+
+```cpp
+void partitionList(Node *head, Node&first, Node &second) {
+    if(!head) return;
+
+    int val = head->val; // it could be custom value
+
+    partitionList(head, first, second, val);
+}
+
+void partitionList(Node *head, Node&first, Node &second, int val) {
+    first = new Node(INT_MIN), second = new Node(INT_MIN);
+    Node *firstHead = first, *secondHead = second;
+
+    Node *tmp = node;
+
+    while(tmp) {
+        if(tmp->val <= val) {
+            first->next = tmp;
+            first = first->next;
+        } else {
+            second->next = tmp;
+            second = second->next;
+        }
+
+        tmp = tmp->next;
+    }
+
+    first->next = second->next = nullptr;
+    first = firstHead->next, second = secondHead->next;
+
+    delete firstHead;
+    delete secondHead;
+}
+```
+
+---
+
+#### [Check if linked list is palindromic]()
+
+```cpp
+bool isPalin(Node *root) {
+    Node *rev = reverse(root);
+
+    while(root && rev && root->val == rev->val) {
+        root = root->next;
+        rev = rev->next;
+    }
+
+    return !root && !rev;
+}
+```
+
+```cpp
+// 1->2->3(s)->4->null(f)
+// 1->2(s)->3(f)->null
+bool isPalin(Node *root) {
+    if(!root) return true;
+
+    stack<Node*> st;
+    st.push(root);
+
+    Node *slow = root, *fast = root;
+    while(fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+
+        if(fast) st.push(slow);
+    }
+
+    while(slow) {
+        if(st.empty() || slow->val != st.top().val) return false;
+        slow = slow->next;
+        st.pop();
+    }
+
+    return !slow && st.empty();
+}
+```
+
+---
+
+#### [Copy LinkedList With Random Pointers]()
+
+```cpp
+Node *copyList(Node *root) {
+    unordered_map<Node *, Node *> map;
+    Node *cur = root;
+    Node *newCur = new Node(root->val);
+    Node *newRoot = newCur;
+
+    cur = cur->next;
+    while(cur) {
+        newCur->next = new Node(cur->val);
+        newCur = newCur->next;
+
+        map[cur] = newCur;
+
+        cur = cur->next;
+    }
+
+    cur  = root;
+    newCur = newRoot;
+
+    while(cur) {
+        newCur->random = map[cur->random];
+        cur = cur->next;
+        newCur = newCur->next;
+    }
+
+    return newRoot;
+}
+```
+
+---

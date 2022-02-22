@@ -385,10 +385,10 @@ struct Node {
 };
 
 class KStack {
-	Node** nodes = nullptr;
-	vector<int> indices;
-	int curIndex;
-	int cap;
+    Node** nodes = nullptr;
+    vector<int> indices;
+    int curIndex;
+    int cap;
 };
 
 KStack(int k, int cap) {
@@ -604,6 +604,198 @@ public:
 
     int size() {
         return elements.size;
+    }
+};
+```
+
+---
+
+#### [Evaluate Infix Expression]()
+
+```cpp
+class Calculator {
+public:
+    int calculate(string infix) {
+        string token;
+        int start = 0;
+        stack<int> val_stack;
+        stack<string> ops_stack;
+
+        while (!(token = next(infix, start)).empty()) {
+            if (isOperator(token[0])) {
+                evaluate(token, ops_stack, val_stack);
+            }
+            else {
+                val_stack.push(stoi(token));
+            }
+        }
+
+        while (!ops_stack.empty()) {
+            val_stack.push(evaluate(ops_stack, val_stack));
+        }
+
+        return val_stack.top();
+    }
+
+    string next(string infix, int& index) {
+        while (index < infix.length() && infix[index] == ' ') index++;
+        if (index >= infix.length()) return "";
+
+        string next;
+        if (isOperator(infix[index])) {
+            next.push_back(infix[index++]);
+        }
+        else {
+            while (index < infix.length() && !isOperator(infix[index])) {
+                next.push_back(infix[index++]);
+            }
+        }
+        return next;
+    }
+
+    bool isOperator(char cur) {
+        return cur == '+' || cur == '-' || cur == '*' || cur == '/' || cur == '(' || cur == ')';
+    }
+
+    bool isNum(char ch) {
+        return ch >= '0' && ch <= '9';
+    }
+
+    int prec(string cur) {
+        if (cur == "+" || cur == "-") return 1;
+        if (cur == "*" || cur == "/") return 2;
+        return 0;
+    }
+    void evaluate(string op, stack<string>& ops_stack, stack<int>& val_stack)
+    {
+        if (op == "(") ops_stack.push(op);
+        else if (op == ")") {
+            while (!ops_stack.empty() && ops_stack.top() != "(") {
+                val_stack.push(evaluate(ops_stack, val_stack));
+            }
+            ops_stack.pop();
+        }
+        else {
+            while (!ops_stack.empty() && prec(ops_stack.top()) >= prec(op)) {
+                val_stack.push(evaluate(ops_stack, val_stack));
+            }
+            ops_stack.push(op);
+        }
+    }
+
+    int evaluate(stack<string>& ops_stack, stack<int>& val_stack) {
+        auto curToken = ops_stack.top();
+        ops_stack.pop();
+
+        int second = val_stack.top(); val_stack.pop();
+        int first = val_stack.top(); val_stack.pop();
+
+        switch (curToken[0]) {
+        case '+':
+            return first + second;
+            break;
+        case '-':
+            return first - second;
+            break;
+        case '*':
+            return first * second;
+            break;
+        case '/':
+            return first / second;
+            break;
+        }
+    }
+};
+```
+
+```
+class Calculator {
+public:
+    int evaluateInfixExpression(string& infix) {
+        stack<int> valStack;
+        stack<char> operStack;
+
+        string curStr;
+        for (char ch : infix) {
+            if (ch == ' ') continue;
+
+            if (isOperator(ch)) {
+                if (!curStr.empty()) {
+                    valStack.push(stoi(curStr));
+                    curStr.clear();
+                }
+
+                processOperator(operStack, valStack, ch);
+            }
+            else {
+                curStr += ch;
+            }
+        }
+        if (!curStr.empty()) valStack.push(stoi(curStr));
+
+        while (!operStack.empty()) {
+            valStack.push(evaluateTop(operStack, valStack));
+        }
+
+        assert(valStack.size() == 1);
+
+        return valStack.top();
+    }
+
+private:
+    void processOperator(stack<char>& operStack, stack<int>& valStack, char ch) {
+        if (ch == '(') operStack.push(ch);
+        else if (ch == ')') {
+            while (!operStack.empty() && operStack.top() != '(') {
+                valStack.push(evaluateTop(operStack, valStack));
+            }
+            if (operStack.empty() || operStack.top() != '(') throw exception("Invalid expression");
+            operStack.pop();
+        }
+        else {
+            while (!operStack.empty() && prec(operStack.top()) >= prec(ch)) {
+                valStack.push(evaluateTop(operStack, valStack));
+            }
+            operStack.push(ch);
+        }
+    }
+
+    int prec(char ch) {
+        switch (ch) {
+        case '*':
+        case '/':
+            return 4;
+        case '+':
+        case '-':
+            return 3;
+        }
+
+        return -1;
+    }
+
+    int evaluateTop(stack<char>& operStack, stack<int>& valStack) {
+        char curOp = operStack.top(); operStack.pop();
+        auto second = valStack.top(); valStack.pop();
+        auto first = valStack.top(); valStack.pop();
+
+        switch (curOp) {
+        case '*':
+            return first * second;
+            break;
+        case '/':
+            return first / second;
+            break;
+        case '+':
+            return first + second;
+            break;
+        case '-':
+            return first - second;
+            break;
+        }
+    }
+
+    bool isOperator(char cur) {
+        return cur == '+' || cur == '-' || cur == '*' || cur == '/' || cur == '(' || cur == ')';
     }
 };
 ```

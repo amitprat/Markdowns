@@ -567,3 +567,39 @@ void rotate(vector<vector<int>>& matrix) {
 ```
 
 ---
+
+#### [Find Kth smallest element in sorted matrix]()
+
+```cpp
+struct Node {
+    int val;
+    int x, y;
+    Node(int val, int x, int y):val(val), x(x), y(y) {}
+};
+```
+
+```cpp
+// Time = O(m*n*log(rows))
+int findKthSmallestElementInSortedMatrixUsingMinheap(vector<vector<int>>& matrix, int k) {
+    auto comparator = [](const auto& f, const auto& s) {return f.val > s.val; };
+    priority_queue<Node, vector<Node>, decltype(comparator)> pq;
+    int rows = matrix.size();
+    if(rows == 0) return INT_MAX;
+
+    int cols = matrix[0].size();
+    for(int i=0;i<rows;i++) {
+        pq.push({matrix[i][0], i, 0});
+    }
+
+    while(k-- > 1) {
+        auto node = pq.top(); pq.pop();
+        if(matrix[node.x].size() >= cols-1) continue;
+
+        pq.push({matrix[node.x][node.y+1], x, y+1});
+    }
+
+    return pq.empty() ? INT_MAX : pq.top().val;
+}
+```
+
+---

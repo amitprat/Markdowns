@@ -767,6 +767,50 @@ void generateAllSubstrings(string str)
 }
 ```
 
+**_Generate all powerset of size k with 0 or 1_**
+
+```cpp
+vector<string> getPowerSetUsingRecursion(int len)
+{
+    vector<string> res;
+    recurse(len, string(), res);
+
+    return res;
+}
+
+void recurse(int n, string cur, vector<string>& res)
+{
+    if (n == 0) {
+        res.push_back(cur);
+        return;
+    }
+
+    recurse(n - 1, cur + "0", res);
+    recurse(n - 1, cur + "1", res);
+}
+
+vector<string> getPowerSetUsingBitset(int len)
+{
+    vector<string> res;
+    binaryPowerSet(len, res);
+
+    return res;
+}
+
+void binaryPowerSet(int len, vector<string>& res)
+{
+    int p = pow(2, len);
+    for (int i = 0; i < p; i++) {
+        string cur;
+        for (int j = 0; j < len; j++) {
+            if (i & (1 << j)) cur += "1";
+            else cur += "0";
+        }
+        res.push_back(cur);
+    }
+}
+```
+
 ---
 
 #### [Generate all permutatios of given string]()
@@ -2007,6 +2051,83 @@ public:
         return false;
     }
 };
+```
+
+---
+
+#### [Palindromic Permutation, Check if given string is permutation of palindromic string]()
+
+```cpp
+bool isPalindromicPermutation(string& s) {
+    int odd = 0;
+    int cnt[256] = {0};
+    for(auto ch : s) {
+        cnt[ch]++;
+        if(cnt[ch] & 1) odd++;
+        else odd-;
+    }
+
+    return odd <= 1;
+}
+```
+
+```cpp
+bool isPalindromicPermutation(string& s) {
+    bitset<256> bitset;
+
+    int odd = 0;
+    for(auto ch : s) {
+        bitset.flip((int)ch);
+        if(bitset.isset((int)ch)) odd++;
+        else odd--;
+    }
+
+    return odd;
+}
+```
+
+---
+
+#### [Ordered Permutations of 2 strings]()
+
+Given 2 strings. Print all possible ordered permutations of characters of 2 string.
+
+```cpp
+void possiblePermutations(string first, int i, string second, int j, string cur, vector<string>& res)
+{
+    if (i == first.size() && j == second.size()) {
+        res.push_back(cur);
+        return;
+    }
+    if (i > first.size() || j > second.size()) return;
+
+    if (i < first.size()) possiblePermutations(first, i + 1, second, j, cur + first[i], res);
+    if (j < second.size()) possiblePermutations(first, i, second, j + 1, cur + second[j], res);
+}
+```
+
+```cpp
+vector<string> possiblePermutations(string first, int i, string second, int j)
+{
+    if (i >= first.length() && j >= second.length()) return { "" };
+    vector<string> curRes;
+
+    if (i < first.length()) {
+        auto firstResult = possiblePermutations(first, i + 1, second, j);
+        for (auto& str : firstResult) {
+            curRes.push_back(first[i] + str);
+        }
+    }
+
+    if (j < second.length()) {
+        auto secondResult = possiblePermutations(first, i, second, j + 1);
+        for (auto& str : secondResult) {
+            curRes.push_back(second[j] + str);
+        }
+    }
+
+    return curRes;
+}
 ```
 
 ---
